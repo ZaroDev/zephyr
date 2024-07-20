@@ -1,0 +1,9 @@
+[submodule "Engine/Vendor/GLFW"]
+	path = Engine/Vendor/GLFW
+	url = https://github.com/ZaroDev/glfw.git
+[submodule "Editor/Vendor/ImGui"]
+	path = Editor/Vendor/ImGui
+	url = https://github.com/ZaroDev/imgui.git
+[submodule "Editor/Vendor/ImGuizmo"]
+	path = Editor/Vendor/ImGuizmo
+	url = https://github.com/CedricGuillemet/ImGuizmo.git

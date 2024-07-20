@@ -1,0 +1,30 @@
+# Directories
+.vs/
+Binaries/
+Docs/html
+Docs/latex
+Docs/rtf
+
+Editor/Logs
+packages/
+.idea/
+
+# Files
+*.vcxproj
+*.vcxproj.user
+*.vcxproj.filters
+*.sln
+*.log
+Makefile
+*.licenseheader
+*.html
+*.latex
+packages.config
+
+# Exclude
+*.exe
+*.ini
+!Vendor/Binaries
+!Assets/Meshes/DamagedHelmet
+!Assets/Meshes/Sponza
+Assets/Meshes
