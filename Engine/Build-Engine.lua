@@ -22,12 +22,12 @@ filter "system:windows"
 systemversion "latest"
 
 filter "configurations:Debug"
-defines {"DEBUG"}
+defines {"DEBUG", "ENABLE_ASSERTS"}
 runtime "Debug"
 symbols "On"
 
 filter "configurations:Release"
-defines {"RELEASE"}
+defines {"RELEASE", "ENABLE_ASSERTS"}
 runtime "Release"
 optimize "On"
 symbols "On"

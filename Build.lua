@@ -8,6 +8,8 @@ startproject "Editor"
 filter "system:windows"
 buildoptions {"/EHsc", "/Zc:preprocessor", "/Zc:__cplusplus"}
 
+defines{ "_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS", "_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING" }
+
 outputdir = "%{cfg.system}-%{cfg.architecture}/%{cfg.buildcfg}"
 
 include "Dependencies.lua"
