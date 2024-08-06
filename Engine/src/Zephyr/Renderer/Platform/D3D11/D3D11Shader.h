@@ -21,17 +21,23 @@ namespace Zephyr::D3D11
 	{
 	public:
 		D3D11Shader(const Path& filePath);
-		void Bind() override{}
-		void UnBind() override{}
+		void Bind() override;
+		void UnBind() override;
 
-
+		ComPtr<ID3D11InputLayout> Layout() const { return m_VertexLayout; }
+		ComPtr<ID3D11VertexShader> Vertex() const { return m_VertexShader; }
+		ComPtr<ID3D11PixelShader> Pixel() const { return m_PixelShader; }
+		
 	private:
+		void CreateInputLayout();
+
 		bool CompileShader(const Path& filePath, std::string_view profile, ComPtr<ID3DBlob>& shaderBlob) const;
 
 		ComPtr<ID3D11VertexShader> CreateVertexShader(const Path& filePath, ComPtr<ID3DBlob>& vertexShaderBlob);
 		ComPtr<ID3D11PixelShader> CreatePixelShader(const Path& filePath, ComPtr<ID3DBlob>& pixelShaderBlob);
 
 	private:
+		ComPtr<ID3D11InputLayout> m_VertexLayout;
 		ComPtr<ID3DBlob> m_PixelShaderBlob;
 		ComPtr<ID3DBlob> m_VertexShaderBlob;
 		ComPtr<ID3D11VertexShader> m_VertexShader;

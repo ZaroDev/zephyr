@@ -39,12 +39,16 @@ namespace Zephyr
 
 		NODISCARD static Application& Get() { return *s_Instance; }
 		
-		NODISCARD const Window& GetWindow() const { return *m_Window; }
-		NODISCARD const Renderer& GetRenderer() const { return *m_Renderer;  }
+		NODISCARD Window& GetWindow() const { return *m_Window; }
+		NODISCARD Renderer& GetRenderer() const { return *m_Renderer;  }
 
 		NODISCARD const ApplicationSpecification& Specification() const { return m_Specification; }
+	
 	private:
+		void LoadConfig();
+		void SaveConfig();
 
+	private:
 		ApplicationSpecification m_Specification;
 		bool m_Running = false;
 

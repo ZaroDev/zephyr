@@ -34,7 +34,7 @@ namespace Zephyr
 
 
 		static Ref<Shader> Create(const std::filesystem::path& fileName);
-	private:
+	protected:
 		std::string m_Name;
 	};
 
@@ -53,6 +53,8 @@ namespace Zephyr
 		Ref<Shader> Get(const std::string& name);
 
 		bool Exists(const std::string& name);
+
+		static ShaderLibrary& Get();
 
 	private:
 		std::unordered_map<std::string, Ref<Shader>> m_Library;

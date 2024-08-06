@@ -3,6 +3,8 @@
 #include "Renderer.h"
 #include <Zephyr/Renderer/Platform/D3D11/D3D11Shader.h>
 
+#include <Zephyr/Core/Application.h>
+
 
 namespace Zephyr
 {
@@ -65,5 +67,9 @@ namespace Zephyr
     bool ShaderLibrary::Exists(const std::string& name)
     {
         return m_Library.contains(name);
+    }
+    ShaderLibrary& ShaderLibrary::Get()
+    {
+        return Application::Get().GetRenderer().Shaders();
     }
 }

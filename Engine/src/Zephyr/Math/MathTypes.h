@@ -84,4 +84,7 @@ namespace Zephyr
 
 	//! Color structure
 	using Color = glm::vec4;
+
+	using Color3 = V3;
+	using Color4 = V4;
 }

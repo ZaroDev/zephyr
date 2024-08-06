@@ -17,6 +17,8 @@ namespace Zephyr
 		void Render();
 
 		RenderHardwareInterface& HardwareInterface() const { return  *m_GraphicsInterface; }
+		ShaderLibrary& Shaders() { return m_Library; }
+
 
 		static GraphicsAPI API() { return s_API; }
 

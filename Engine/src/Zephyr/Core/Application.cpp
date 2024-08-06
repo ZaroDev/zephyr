@@ -15,6 +15,11 @@ namespace Zephyr
 		m_Running = true;
 		m_Specification = specs;
 
+		if (FileSystem::Exists(m_Specification.WorkingDir))
+		{
+			FileSystem::WorkingDirectory(m_Specification.WorkingDir);
+		}
+
 		const auto windowData = WindowData
 		{
 			.Width = 1280,
@@ -41,8 +46,6 @@ namespace Zephyr
 			CORE_ASSERT(false);
 			return;
 		}
-
-		
 	}
 	void Application::Run()
 	{
@@ -61,6 +64,12 @@ namespace Zephyr
 	void Application::OnResize(i32 width, i32 height)
 	{
 		m_Renderer->OnResize(width, height);
+	}
+	void Application::LoadConfig()
+	{
+	}
+	void Application::SaveConfig()
+	{
 	}
 }
 

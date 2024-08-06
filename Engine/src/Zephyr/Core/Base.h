@@ -92,4 +92,10 @@ namespace Zephyr
 	{
 		return std::make_shared<T>(std::forward<Args>(args)...);
 	}
+
+	template<typename C, typename P>
+	constexpr Ref<C> Cast(Ref<P> ref)
+	{
+		return std::dynamic_pointer_cast<C>(ref);
+	}
 }

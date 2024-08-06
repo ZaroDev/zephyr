@@ -7,13 +7,58 @@
 
 namespace Zephyr::D3D11
 {
+	
+
+
 	D3D11Shader::D3D11Shader(const Path& filePath)
 	{
+		m_Name = filePath.string();
 		Path file = c_ShaderPath;
 		file /= filePath;
 
 		m_VertexShader = CreateVertexShader(FileSystem::ReplaceExtension(file, "vs.hlsl"), m_VertexShaderBlob);
 		m_PixelShader = CreatePixelShader(FileSystem::ReplaceExtension(file, "ps.hlsl"), m_PixelShaderBlob);
+
+		CreateInputLayout();
+	}
+	void D3D11Shader::Bind()
+	{
+	}
+	void D3D11Shader::UnBind()
+	{
+	}
+	void D3D11Shader::CreateInputLayout()
+	{
+		constexpr D3D11_INPUT_ELEMENT_DESC vertexInputLayoutInfo[] =
+		{
+			{
+				"POSITION",
+				0,
+				DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,
+				0,
+				offsetof(VertexPositionColor, Position),
+				D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA,
+				0
+			},
+			{
+				"COLOR",
+				0,
+				DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,
+				0,
+				offsetof(VertexPositionColor, Color),
+				D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA,
+				0
+			},
+		};
+
+		D3D11Renderer& core = *dynamic_cast<D3D11Renderer*>(&Application::Get().GetRenderer().HardwareInterface());
+
+		if (FAILED(core.Device().CreateInputLayout(vertexInputLayoutInfo, _countof(vertexInputLayoutInfo), m_VertexShaderBlob->GetBufferPointer(), m_VertexShaderBlob->GetBufferSize(),
+			&m_VertexLayout)))
+		{
+			CORE_ERROR("D3D11: Failed to create vertex input layout!");
+
+		}
 	}
 	bool D3D11Shader::CompileShader(const Path& filePath, std::string_view profile, ComPtr<ID3DBlob>& shaderBlob) const
 	{

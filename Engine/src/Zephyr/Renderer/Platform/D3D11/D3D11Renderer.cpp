@@ -7,6 +7,7 @@
 
 namespace Zephyr::D3D11
 {
+	
 	bool D3D11Renderer::Init()
 	{
 		if (FAILED(CreateDXGIFactory1(IID_PPV_ARGS(&m_DxgiFactory))))
@@ -15,11 +16,18 @@ namespace Zephyr::D3D11
 			return false;
 		}
 		constexpr D3D_FEATURE_LEVEL deviceFeatureLevel = D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_11_0;
+
+		UINT deviceFlags = D3D11_CREATE_DEVICE_FLAG::D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+
+#ifndef DIST
+		deviceFlags |= D3D11_CREATE_DEVICE_FLAG::D3D11_CREATE_DEVICE_DEBUG;
+#endif
+
 		if (FAILED(D3D11CreateDevice(
 			nullptr,
 			D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_HARDWARE,
 			nullptr,
-			0,
+			deviceFlags,
 			&deviceFeatureLevel,
 			1,
 			D3D11_SDK_VERSION,
@@ -31,6 +39,15 @@ namespace Zephyr::D3D11
 			CORE_ERROR("D3D11: Failed to create device and device context!");
 			return false;
 		}
+
+#ifndef DIST
+		if (FAILED(m_Device.As(&m_Debug)))
+		{
+			CORE_ERROR("D3D11: Failed to get the debug layer from the device");
+			return false;
+		}
+#endif
+
 		const Window& window = Application::Get().GetWindow();
 
 		DXGI_SWAP_CHAIN_DESC1 swapChainDescriptor = {};
@@ -67,6 +84,8 @@ namespace Zephyr::D3D11
 			return false;
 		}
 
+		CreateVertexBuffer();
+
 		CORE_INFO("D3D11: Renderer initialized!");
 
 		return true;
@@ -74,6 +93,37 @@ namespace Zephyr::D3D11
 	void D3D11Renderer::Shutdown()
 	{
 		CORE_INFO("D3D11: Renderer closed!");
+
+		m_DeviceContext.Reset();
+
+#ifndef DIST
+		m_Debug->ReportLiveDeviceObjects(D3D11_RLDO_FLAGS::D3D11_RLDO_DETAIL);
+		m_Debug.Reset();
+#endif
+	
+		m_Device.Reset();
+	}
+	void D3D11Renderer::CreateVertexBuffer()
+	{
+		constexpr VertexPositionColor vertices[] =
+		{
+			{ V3{  0.0f,  0.5f, 0.0f }, Color3{ 0.25f, 0.39f, 0.19f } },
+			{ V3{  0.5f, -0.5f, 0.0f }, Color3{ 0.44f, 0.75f, 0.35f } },
+			{ V3{ -0.5f, -0.5f, 0.0f }, Color3{ 0.38f, 0.55f, 0.20f } },
+		};
+
+		D3D11_BUFFER_DESC bufferInfo = {};
+		bufferInfo.ByteWidth = sizeof(vertices);
+		bufferInfo.Usage = D3D11_USAGE::D3D11_USAGE_IMMUTABLE;
+		bufferInfo.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER;
+
+		D3D11_SUBRESOURCE_DATA resourceData = {};
+		resourceData.pSysMem = vertices;
+
+		if (FAILED(m_Device->CreateBuffer(&bufferInfo, &resourceData, &m_TriangleVertexBuffer)))
+		{
+			CORE_ERROR("D3D11: Failed to create triangle vertex buffer");
+		}
 	}
 	bool D3D11Renderer::CreateSwapChainResources()
 	{
@@ -113,7 +163,7 @@ namespace Zephyr::D3D11
 	void D3D11Renderer::Render()
 	{
 		const Window& window = Application::Get().GetWindow();
-		
+
 		D3D11_VIEWPORT viewport = {};
 		viewport.TopLeftX = 0;
 		viewport.TopLeftY = 0;
@@ -125,8 +175,27 @@ namespace Zephyr::D3D11
 		constexpr f32 clearColor[] = { 0.1f, 0.1f, 0.1f, 1.0f };
 
 		m_DeviceContext->ClearRenderTargetView(m_RenderTarget.Get(), clearColor);
+
 		m_DeviceContext->RSSetViewports(1, &viewport);
+		Ref<D3D11Shader> shader = Cast<D3D11Shader>(ShaderLibrary::Get().Get("main"));
+
+		m_DeviceContext->IASetInputLayout(shader->Layout().Get());
+
+		UINT vertexStride = 6 * sizeof(f32);
+		UINT vertexOffset = 0;
+
+		m_DeviceContext->IASetVertexBuffers(0, 1, m_TriangleVertexBuffer.GetAddressOf(), &vertexStride, &vertexOffset);
+
+		m_DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+
+		m_DeviceContext->VSSetShader(shader->Vertex().Get(), nullptr, 0);
+		m_DeviceContext->PSSetShader(shader->Pixel().Get(), nullptr, 0);
+
 		m_DeviceContext->OMSetRenderTargets(1, m_RenderTarget.GetAddressOf(), nullptr);
+
+		m_DeviceContext->Draw(3, 0);
+
 		m_SwapChain->Present(1, 0);
 	}
 }
