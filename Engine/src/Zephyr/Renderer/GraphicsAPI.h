@@ -10,5 +10,5 @@ namespace Zephyr
 		MAX
 	};
 
-	std::string_view GetGraphicsName(GraphicsAPI api);
+	StrView GetGraphicsName(GraphicsAPI api);
 }

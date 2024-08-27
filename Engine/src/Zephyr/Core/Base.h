@@ -2,6 +2,7 @@
 #include "PlatformDetection.h"
 #include <memory>
 #include <filesystem>
+#include <string>
 
 
 #ifdef DEBUG
@@ -77,6 +78,8 @@
 namespace Zephyr
 {
 	typedef std::filesystem::path Path;
+	typedef std::string String;
+	typedef std::string_view StrView;
 
 	template<typename T>
 	using Scope = std::unique_ptr<T>;
@@ -94,8 +97,14 @@ namespace Zephyr
 	}
 
 	template<typename C, typename P>
-	constexpr Ref<C> Cast(Ref<P> ref)
+	constexpr Ref<C> DynCast(Ref<P> ref)
 	{
 		return std::dynamic_pointer_cast<C>(ref);
+	}
+
+	template<typename C, typename P>
+	constexpr Ref<C> Cast(Ref<P> ref)
+	{
+		return std::static_pointer_cast<C>(ref);
 	}
 }

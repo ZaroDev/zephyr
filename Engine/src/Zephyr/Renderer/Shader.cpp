@@ -18,7 +18,7 @@ namespace Zephyr
 
     Ref<Shader> Shader::Create(const std::filesystem::path& path)
     {
-        switch (Renderer::API())
+        switch (Renderer::GetAPI())
         {
         case Zephyr::GraphicsAPI::OPENGL: CORE_ASSERT(false, "GraphicsAPI::OPENGL is currently not supported"); return nullptr;
         case Zephyr::GraphicsAPI::DX11: return CreateRef<D3D11::D3D11Shader>(path);
@@ -68,8 +68,5 @@ namespace Zephyr
     {
         return m_Library.contains(name);
     }
-    ShaderLibrary& ShaderLibrary::Get()
-    {
-        return Application::Get().GetRenderer().Shaders();
-    }
+    
 }

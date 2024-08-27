@@ -3,6 +3,8 @@
 #include <string>
 #include <string_view>
 #include <memory>
+#include <map>
+#include <unordered_map>
 
 #include <Core/Assert.h>
 #include <Core/PlatformDetection.h>

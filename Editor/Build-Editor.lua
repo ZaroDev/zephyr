@@ -13,7 +13,7 @@ includedirs {"src", -- Include Core
              "%{IncludeDir.assimp}", "%{IncludeDir.ImGuizmo}"
             }
 
-links {"Engine", "ImGui"}
+links {"Engine"}
 
 targetdir("%{wks.location}/Binaries/" .. outputdir .. "/%{prj.name}")
 objdir("%{wks.location}/Binaries/Intermediates/" .. outputdir .. "/%{prj.name}")

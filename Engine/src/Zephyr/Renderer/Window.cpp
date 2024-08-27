@@ -10,20 +10,24 @@
 
 #include <Zephyr/Core/Application.h>
 
-namespace Zephyr
+namespace Zephyr::Window
 {
 	static void glfwErrorCallback(int code, const char* error)
 	{
 		CORE_ERROR("GLFW error {0}: {1}", code, error);
 	}
 
-	Window::Window(const WindowData& data)
+	namespace 
 	{
-		m_Data = data;
+		WindowData g_WindowData;
+		GLFWwindow* g_Window = nullptr;
 	}
-	bool Window::Init()
+
+	
+	bool Initialize(const WindowData& data)
 	{
-		CORE_ASSERT(!m_InternalWindow, "Window is already initialized");
+		g_WindowData = data;
+		CORE_ASSERT(!g_Window, "Window is already initialized");
 	
 		if (!glfwInit())
 		{
@@ -34,23 +38,23 @@ namespace Zephyr
 		glfwSetErrorCallback(glfwErrorCallback);
 
 		glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_FALSE);
-		if (m_Data.API != GraphicsAPI::OPENGL)
+		if (g_WindowData.API != GraphicsAPI::OPENGL)
 		{
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		}
 
-		const std::string title = std::format("{0} <{1}>", m_Data.Title, GetGraphicsName(m_Data.API));
+		const String title = std::format("{0} <{1}>", g_WindowData.Title, GetGraphicsName(g_WindowData.API));
 
-		m_InternalWindow = glfwCreateWindow(m_Data.Width, m_Data.Height, title.c_str(), nullptr, nullptr);
-		CORE_ASSERT(m_InternalWindow, "Failed to create GLFW window!");
+		g_Window = glfwCreateWindow(g_WindowData.Width, g_WindowData.Height, title.c_str(), nullptr, nullptr);
+		CORE_ASSERT(g_Window, "Failed to create GLFW window!");
 
-		glfwSetWindowUserPointer(m_InternalWindow, &m_Data);
-		glfwSetWindowCloseCallback(m_InternalWindow, [](GLFWwindow* window)
+		glfwSetWindowUserPointer(g_Window, &g_WindowData);
+		glfwSetWindowCloseCallback(g_Window, [](GLFWwindow* window)
 			{
 				Application::Get().RequestClose();
 			});
 
-		glfwSetFramebufferSizeCallback(m_InternalWindow, [](GLFWwindow* window, i32 width, i32 height)
+		glfwSetFramebufferSizeCallback(g_Window, [](GLFWwindow* window, i32 width, i32 height)
 			{
 				WindowData* data = reinterpret_cast<WindowData*>(glfwGetWindowUserPointer(window));
 				data->Width = width;
@@ -59,31 +63,46 @@ namespace Zephyr
 				Application::Get().OnResize(width, height);
 			});
 
-		CORE_INFO("Created window {0}:", m_Data.Title.c_str());
-		CORE_INFO(" - Size: {0}x{1}p", m_Data.Width, m_Data.Height);
-		CORE_INFO(" - Fullscreen: {0}", m_Data.Fullscreen);
-		CORE_INFO(" - Vsync: {0}", m_Data.Vsync);
+		CORE_INFO("Created window {0}:", g_WindowData.Title.c_str());
+		CORE_INFO(" - Size: {0}x{1}p", g_WindowData.Width, g_WindowData.Height);
+		CORE_INFO(" - Fullscreen: {0}", g_WindowData.Fullscreen);
+		CORE_INFO(" - Vsync: {0}", g_WindowData.Vsync);
 		return true;
 	}
-	void Window::Update()
+
+
+
+	void Update()
 	{
 		glfwPollEvents();
 	}
-	void Window::Shutdown()
+	void Shutdown()
 	{
 		CORE_INFO("Closing window!");
-		glfwDestroyWindow(m_InternalWindow);
+		glfwDestroyWindow(g_Window);
 		glfwTerminate();
 
-		m_InternalWindow = nullptr;
+		g_Window = nullptr;
 	}
-	NODISCARD void* Window::OSWindow() const
+
+	GLFWwindow* GetGLFWWindow()
+	{
+		return g_Window;
+	}
+
+
+	NODISCARD void* GetOSWindowPointer() 
 	{
 #ifdef PLATFORM_WINDOWS
-		return (void*)glfwGetWin32Window(m_InternalWindow);
+		return (void*)glfwGetWin32Window(g_Window);
 #else
 #error "Window implementation not found!"
 		return nullptr;
 #endif
+	}
+
+	const WindowData& GetWindowData()
+	{
+		return g_WindowData;
 	}
 }

@@ -1,41 +1,115 @@
 #include <pch.h>
 #include "Renderer.h"
 
-namespace Zephyr
+#include <imgui.h>
+
+#include <Zephyr/Renderer/Platform/D3D11/D3D11RHI.h>
+namespace Zephyr::Renderer
 {
-	GraphicsAPI Renderer::s_API = GraphicsAPI::MAX;
-
-	Renderer::Renderer(GraphicsAPI api)
+	namespace
 	{
-		s_API = api;
-		m_GraphicsInterface = RenderHardwareInterface::Create(s_API);
+		GraphicsAPI g_API = GraphicsAPI::MAX;
+		RenderHardwareInterface g_GraphicsInterface{};
+		ShaderLibrary g_Library;
+		RenderDevice g_Device;
+
+		bool SetPlatformInterface(GraphicsAPI api)
+		{
+			switch (api)
+			{
+			case GraphicsAPI::OPENGL: CORE_ASSERT(false, "GraphicsAPI::OPENGL is not implemented!"); return false;
+			case GraphicsAPI::DX11: D3D11::GetPlatformInterface(g_GraphicsInterface); return true;
+			}
+
+			CORE_ASSERT(false);
+
+			return false;
+		}
 	}
-	Renderer::~Renderer()
-	{
-	}
 
 
-	bool Renderer::Init()
+	bool Initialize(GraphicsAPI api)
 	{
+		g_API = api;
+
 		bool ret = true;
-		ret &= m_GraphicsInterface->Init();
-		ret &= m_Library.LoadEngineShaders();
+		ret &= SetPlatformInterface(api);
+		ret &= g_GraphicsInterface.Core.Init();
+		ret &= g_Library.LoadEngineShaders();
+
+		ret &= InitImGui();
+		ret &= g_GraphicsInterface.ImGui.Init();
+
 
 		return ret;
 	}
 
-	void Renderer::Shutdown()
+	void Shutdown()
 	{
 		CORE_INFO("Closing renderer!");
-		m_GraphicsInterface->Shutdown();
+		g_GraphicsInterface.ImGui.Shutdown();
+		ShutdownImGui();
+		g_GraphicsInterface.Core.Shutdown();
 	}
-	void Renderer::OnResize(i32 width, i32 height)
+	void OnResize(i32 width, i32 height)
 	{
 		CORE_INFO("Resize event: {0}x{1}p", width, height);
-		m_GraphicsInterface->OnResize(width, height);
+		g_GraphicsInterface.Core.OnResize(width, height);
 	}
-	void Renderer::Render()
+	void BeginFrame()
 	{
-		m_GraphicsInterface->Render();
+		g_GraphicsInterface.Core.BeginFrame();
+	}
+	void EndFrame()
+	{
+		g_GraphicsInterface.Core.EndFrame();
+	}
+	void ImGuiNewFrame()
+	{
+		g_GraphicsInterface.ImGui.NewFrame();
+		ImGui::NewFrame();
+	}
+	void ImGuiEndFrame()
+	{
+		ImGui::Render();
+		g_GraphicsInterface.ImGui.EndFrame();
+	}
+
+	RenderHardwareInterface& GetHardwareInterface()
+	{
+		return g_GraphicsInterface;
+	}
+
+	ShaderLibrary& GetShaderLibrary()
+	{
+		return g_Library;
+	}
+
+	GraphicsAPI GetAPI()
+	{
+		return g_API;
+	}
+
+	RenderDevice GetRenderDevice()
+	{
+		return g_Device;
+	}
+
+	bool InitImGui()
+	{
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+
+		ImGuiIO& io = ImGui::GetIO();
+		io.ConfigFlags |= ImGuiConfigFlags_IsSRGB;
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+		ImGui::StyleColorsDark();
+
+		return true;
+	}
+	void ShutdownImGui()
+	{
+		ImGui::DestroyContext();
 	}
 }

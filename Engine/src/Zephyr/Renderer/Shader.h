@@ -1,5 +1,6 @@
 #pragma once
 #include "GraphicsAPI.h"
+#include <unordered_map>
 
 namespace Zephyr
 {
@@ -33,7 +34,7 @@ namespace Zephyr
 		const std::string& Name() const { return m_Name; }
 
 
-		static Ref<Shader> Create(const std::filesystem::path& fileName);
+		static Ref<Shader> Create(const Path& fileName);
 	protected:
 		std::string m_Name;
 	};
@@ -43,18 +44,17 @@ namespace Zephyr
 	public:
 		bool LoadEngineShaders();
 
-		void Add(const std::string& name, const Ref<Shader>& shader);
+		void Add(const String& name, const Ref<Shader>& shader);
 		void Add(const Ref<Shader>& shader);
 
-		Ref<Shader> Load(const std::filesystem::path& fileName);
-		Ref<Shader> Load(const std::string& name, const std::filesystem::path& fileName);
+		Ref<Shader> Load(const Path& fileName);
+		Ref<Shader> Load(const std::string& name, const Path& fileName);
 
 
-		Ref<Shader> Get(const std::string& name);
+		Ref<Shader> Get(const String& name);
 
-		bool Exists(const std::string& name);
+		bool Exists(const String& name);
 
-		static ShaderLibrary& Get();
 
 	private:
 		std::unordered_map<std::string, Ref<Shader>> m_Library;

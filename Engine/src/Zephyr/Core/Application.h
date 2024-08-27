@@ -20,8 +20,9 @@ namespace Zephyr
 	{
 		ApplicationCommandLineArgs Args = {};
 		GraphicsAPI API = {};
-		std::string Name = {};
+		String Name = {};
 		Path WorkingDir = {};
+		Window::WindowData WindowData = {};
 	};
 
 
@@ -38,12 +39,14 @@ namespace Zephyr
 		void OnResize(i32 width, i32 height);
 
 		NODISCARD static Application& Get() { return *s_Instance; }
-		
-		NODISCARD Window& GetWindow() const { return *m_Window; }
-		NODISCARD Renderer& GetRenderer() const { return *m_Renderer;  }
-
 		NODISCARD const ApplicationSpecification& Specification() const { return m_Specification; }
-	
+
+	protected:
+		virtual void OnInit() = 0;
+		virtual void OnUpdate() = 0;
+		virtual void OnImGuiUpdate() = 0;
+		virtual void OnShutdown() = 0;
+
 	private:
 		void LoadConfig();
 		void SaveConfig();
@@ -52,8 +55,7 @@ namespace Zephyr
 		ApplicationSpecification m_Specification;
 		bool m_Running = false;
 
-		Scope<Renderer> m_Renderer;
-		Scope<Window> m_Window;
+
 
 	private:
 		static Application* s_Instance;

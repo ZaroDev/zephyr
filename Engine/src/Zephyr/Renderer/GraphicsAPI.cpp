@@ -3,7 +3,7 @@
 
 namespace Zephyr
 {
-	std::string_view GetGraphicsName(GraphicsAPI api)
+	StrView GetGraphicsName(GraphicsAPI api)
 	{
 		switch (api)
 		{

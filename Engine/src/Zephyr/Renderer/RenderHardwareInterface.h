@@ -3,17 +3,24 @@
 #include <Zephyr/Renderer/Window.h>
 namespace Zephyr
 {
-	class RenderHardwareInterface
+	struct RenderHardwareInterface final
 	{
-	public:
-		RenderHardwareInterface() = default;
-		virtual ~RenderHardwareInterface() = default;
-		virtual bool Init() = 0;
-		virtual void Shutdown() = 0;
-		virtual void OnResize(i32 width, i32 height) = 0;
-		virtual void Render() = 0;
+		struct
+		{
+			bool (*Init)(void);
+			void (*Shutdown)();
+			void (*OnResize)(i32 width, i32 height);
+			void (*BeginFrame)();
+			void (*EndFrame)();
+		} Core;
 
-
-		static Scope<RenderHardwareInterface> Create(GraphicsAPI api);
+		struct
+		{
+			bool (*Init)();
+			void (*NewFrame)();
+			void (*EndFrame)();
+			void (*Shutdown)();
+		} ImGui;
+		
 	};
 }

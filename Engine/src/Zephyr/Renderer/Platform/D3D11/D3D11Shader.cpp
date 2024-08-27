@@ -7,9 +7,6 @@
 
 namespace Zephyr::D3D11
 {
-	
-
-
 	D3D11Shader::D3D11Shader(const Path& filePath)
 	{
 		m_Name = filePath.string();
@@ -36,7 +33,7 @@ namespace Zephyr::D3D11
 				0,
 				DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,
 				0,
-				offsetof(VertexPositionColor, Position),
+				offsetof(Core::VertexPositionColor, Position),
 				D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA,
 				0
 			},
@@ -45,15 +42,15 @@ namespace Zephyr::D3D11
 				0,
 				DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,
 				0,
-				offsetof(VertexPositionColor, Color),
+				offsetof(Core::VertexPositionColor, Color),
 				D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA,
 				0
 			},
 		};
 
-		D3D11Renderer& core = *dynamic_cast<D3D11Renderer*>(&Application::Get().GetRenderer().HardwareInterface());
+		
 
-		if (FAILED(core.Device().CreateInputLayout(vertexInputLayoutInfo, _countof(vertexInputLayoutInfo), m_VertexShaderBlob->GetBufferPointer(), m_VertexShaderBlob->GetBufferSize(),
+		if (FAILED(Core::Device().CreateInputLayout(vertexInputLayoutInfo, _countof(vertexInputLayoutInfo), m_VertexShaderBlob->GetBufferPointer(), m_VertexShaderBlob->GetBufferSize(),
 			&m_VertexLayout)))
 		{
 			CORE_ERROR("D3D11: Failed to create vertex input layout!");
@@ -90,10 +87,8 @@ namespace Zephyr::D3D11
 			return nullptr;
 		}
 
-		D3D11Renderer& core = *dynamic_cast<D3D11Renderer*>(&Application::Get().GetRenderer().HardwareInterface());
-
 		ComPtr<ID3D11VertexShader> vertexShader;
-		if (FAILED(core.Device().CreateVertexShader(vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), nullptr, &vertexShader)))
+		if (FAILED(Core::Device().CreateVertexShader(vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), nullptr, &vertexShader)))
 		{
 			CORE_ERROR("D3D11: Failed to compile vertex shader");
 			return nullptr;
@@ -108,10 +103,8 @@ namespace Zephyr::D3D11
 			return nullptr;
 		}
 
-		D3D11Renderer& core = *dynamic_cast<D3D11Renderer*>(&Application::Get().GetRenderer().HardwareInterface());
-
 		ComPtr<ID3D11PixelShader> pixelShader;
-		if (FAILED(core.Device().CreatePixelShader(pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize(), nullptr, &pixelShader)))
+		if (FAILED(Core::Device().CreatePixelShader(pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize(), nullptr, &pixelShader)))
 		{
 			CORE_ERROR("D3D11: Failed to compile vertex shader");
 			return nullptr;

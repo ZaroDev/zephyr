@@ -3,32 +3,23 @@
 
 struct GLFWwindow;
 
-namespace Zephyr
+namespace Zephyr::Window
 {
 	struct WindowData
 	{
 		i32 Width = 1280;
 		i32 Height = 720;
-		std::string Title = "Zephyr";
+		String Title = "Zephyr";
 		bool Fullscreen = false;
 		bool Vsync = false;
 		GraphicsAPI API;
 	};
 
-	class Window final
-	{
-	public:
-		Window(const WindowData& data);
-		~Window() = default;
+	bool Initialize(const WindowData& data);
+	void Update();
+	void Shutdown();
+	NODISCARD GLFWwindow* GetGLFWWindow();
+	NODISCARD void* GetOSWindowPointer();
+	NODISCARD const WindowData& GetWindowData();
 
-		bool Init();
-		void Update();
-		void Shutdown();
-
-		NODISCARD const WindowData& Data() const { return m_Data; }
-		NODISCARD void* OSWindow() const;
-	private:
-		WindowData m_Data;
-		GLFWwindow* m_InternalWindow = nullptr;
-	};
 }

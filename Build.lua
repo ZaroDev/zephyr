@@ -21,11 +21,10 @@ group ""
 group "Engine/Dependencies"
 include "Engine/Vendor/GLFW"
 include "Engine/Vendor/glad"
+include "Engine/Vendor/ImGui"
 group ""
 
-group "Editor/Dependencies"
-include "Editor/Vendor/ImGui"
-group ""
+
 
 group "Editor"
 include "Editor/Build-Editor.lua"

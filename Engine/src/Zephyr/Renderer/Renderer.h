@@ -2,29 +2,33 @@
 #include <Zephyr/Renderer/GraphicsAPI.h>
 #include <Zephyr/Renderer/RenderHardwareInterface.h>
 #include <Zephyr/Renderer/Shader.h>
-namespace Zephyr
+
+namespace Zephyr::Renderer
 {
-	class Renderer final
+	struct RenderDevice
 	{
-	public:
-		Renderer(GraphicsAPI api);
-		~Renderer();
-
-		bool Init();
-		void Shutdown();
-
-		void OnResize(i32 width, i32 height);
-		void Render();
-
-		RenderHardwareInterface& HardwareInterface() const { return  *m_GraphicsInterface; }
-		ShaderLibrary& Shaders() { return m_Library; }
-
-
-		static GraphicsAPI API() { return s_API; }
-
-	private:
-		static GraphicsAPI s_API;
-		Scope<RenderHardwareInterface> m_GraphicsInterface;
-		ShaderLibrary m_Library;
+		String Name;
+		String Vendor;
 	};
+
+	bool Initialize(GraphicsAPI api);
+	void Shutdown();
+
+	void OnResize(i32 width, i32 height);
+	void BeginFrame();
+	void EndFrame();
+
+	void ImGuiNewFrame();
+	void ImGuiEndFrame();
+
+	RenderHardwareInterface& GetHardwareInterface();
+	ShaderLibrary& GetShaderLibrary();
+	GraphicsAPI GetAPI();
+	RenderDevice GetRenderDevice();
+
+	bool InitImGui();
+	void ShutdownImGui();
+
+
+
 }
