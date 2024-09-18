@@ -22,7 +22,10 @@ namespace Editor
 
 		for (auto& panel : m_Panels)
 		{
-			panel->OnImGui();
+			if (panel->IsActive())
+			{
+				panel->OnImGui();
+			}
 		}
 	}
 	void Application::OnShutdown()
@@ -62,7 +65,7 @@ namespace Editor
 		// We cannot preserve the docking relationship between an active window and an inactive docking, otherwise 
 		// any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::Begin("DockSpace Demo", &dockspaceOpen, window_flags);
+		ImGui::Begin("DockSpace", &dockspaceOpen, window_flags);
 		ImGui::PopStyleVar();
 
 		if (opt_fullscreen)
@@ -75,7 +78,7 @@ namespace Editor
 		style.WindowMinSize.x = 370.0f;
 		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		{
-			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+			ImGuiID dockspace_id = ImGui::GetID("DockSpace");
 			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 		}
 
@@ -93,7 +96,7 @@ namespace Editor
 				{
 					if(panel->GetCategory() == PanelCategory::WINDOW)
 					{
-						if(ImGui::MenuItem(panel->GetName().data()), nullptr, panel->IsActive())
+						if(ImGui::MenuItem(panel->GetName().data(), nullptr, panel->IsActive()))
 						{
 							panel->SwitchActive();
 						}
@@ -108,7 +111,7 @@ namespace Editor
 				{
 					if (panel->GetCategory() == PanelCategory::INFO)
 					{
-						if (ImGui::MenuItem(panel->GetName().data()), nullptr, panel->IsActive())
+						if (ImGui::MenuItem(panel->GetName().data(), nullptr, panel->IsActive()))
 						{
 							panel->SwitchActive();
 						}

@@ -189,11 +189,8 @@ namespace Zephyr::D3D11::Core
 	}
 	bool InitImGui()
 	{
-	
-
 		ImGui_ImplGlfw_InitForOther(Window::GetGLFWWindow(), true);
 		ImGui_ImplDX11_Init(g_Device.Get(), g_DeviceContext.Get());
-
 
 		return true;
 	}
