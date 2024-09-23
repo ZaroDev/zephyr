@@ -4,12 +4,13 @@
 
 namespace Editor
 {
-	class InfoPanel final : public Panel
+	class ProjectPanel final : public Panel
 	{
 	public:
-		InfoPanel() : Panel("Info", PanelCategory::INFO){}
+		ProjectPanel() : Panel("Project", PanelCategory::WINDOW) {}
 
 		void OnUpdate() override;
 		void OnImGui() override;
+
 	};
 }
