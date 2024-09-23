@@ -8,6 +8,7 @@ namespace Editor
 	{
 		m_Panels.emplace_back(Zephyr::CreateScope<InfoPanel>());
 		m_Panels.emplace_back(Zephyr::CreateScope<ProjectPanel>());
+		m_Panels.emplace_back(Zephyr::CreateScope<ConsolePanel>());
 	}
 	void Application::OnUpdate()
 	{

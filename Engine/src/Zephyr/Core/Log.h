@@ -14,17 +14,45 @@
 
 namespace Zephyr
 {
+	enum LogLevel {
+		TRACE,
+		INFO,
+		WARN,
+		ERR,
+		CRITICAL,
+		LAST
+	};
+
+	typedef std::function<void(LogLevel, Zephyr::String)> LogCallback;
+
 	class Log
 	{
 	public:
 		static void Init();
+		static void SetLogCallback(LogCallback callback)
+		{
+			s_Callback = callback;
+		}
 
-		static Ref<spdlog::logger>& GetCoreLogger() { return s_CoreLogger; }
-		static Ref<spdlog::logger>& GetClientLogger() { return s_ClientLogger; }
+		
+		static void AddLog(LogLevel level)
+		{
+
+			s_Callback(level, );
+		}
+
+	
+		static void AddCoreLog(LogLevel level)
+		{
+			const std::vector<spdlog::sink_ptr>& sinks = s_CoreLogger.get()->sinks();
+
+			s_Callback(level, Zephyr::String(sinks[0].get()->get_last()));
+		}
 
 	private:
 		static Ref<spdlog::logger> s_CoreLogger;
 		static Ref<spdlog::logger> s_ClientLogger;
+		static LogCallback s_Callback;
 	};
 }
 
@@ -47,15 +75,15 @@ inline OStream& operator<<(OStream& os, glm::qua<T, Q> quaternion)
 }
 
 // Core log macros
-#define CORE_TRACE(...)    ::Zephyr::Log::GetCoreLogger()->trace(__VA_ARGS__)
-#define CORE_INFO(...)     ::Zephyr::Log::GetCoreLogger()->info(__VA_ARGS__)
-#define CORE_WARN(...)     ::Zephyr::Log::GetCoreLogger()->warn(__VA_ARGS__)
-#define CORE_ERROR(...)    ::Zephyr::Log::GetCoreLogger()->error(__VA_ARGS__)
-#define CORE_CRITICAL(...) ::Zephyr::Log::GetCoreLogger()->critical(__VA_ARGS__)
+#define CORE_TRACE(...)    ::Zephyr::Log::AddCoreLog(LogLevel::TRACE, __VA_ARGS__)
+#define CORE_INFO(...)     ::Zephyr::Log::AddCoreLog(LogLevel::INFO,__VA_ARGS__)
+#define CORE_WARN(...)     ::Zephyr::Log::AddCoreLog(LogLevel::WARN,__VA_ARGS__)
+#define CORE_ERROR(...)    ::Zephyr::Log::AddCoreLog(LogLevel::ERROR,__VA_ARGS__)
+#define CORE_CRITICAL(...) ::Zephyr::Log::AddCoreLog(LogLevel::CRITICAL,__VA_ARGS__)
 
 // Client log macros
-#define TRACE(...)         ::Zephyr::Log::GetClientLogger()->trace(__VA_ARGS__)
-#define INFO(...)          ::Zephyr::Log::GetClientLogger()->info(__VA_ARGS__)
-#define WARN(...)          ::Zephyr::Log::GetClientLogger()->warn(__VA_ARGS__)
-#define ERROR(...)         ::Zephyr::Log::GetClientLogger()->error(__VA_ARGS__)
-#define CRITICAL(...)      ::Zephyr::Log::GetClientLogger()->critical(__VA_ARGS__)
+#define TRACE(...)         ::Zephyr::Log::AddLog(LogLevel::TRACE, __VA_ARGS__)
+#define INFO(...)          ::Zephyr::Log::AddLog(LogLevel::INFO,__VA_ARGS__)
+#define WARN(...)          ::Zephyr::Log::AddLog(LogLevel::WARN,__VA_ARGS__)
+#define ERROR(...)         ::Zephyr::Log::AddLog(LogLevel::ERROR,__VA_ARGS__)
+#define CRITICAL(...)      ::Zephyr::Log::AddLog(LogLevel::CRITICAL,__VA_ARGS__)
