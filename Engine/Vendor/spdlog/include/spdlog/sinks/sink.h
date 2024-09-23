@@ -9,7 +9,8 @@
 namespace spdlog {
 
 namespace sinks {
-class SPDLOG_API sink {
+class SPDLOG_API sink
+{
 public:
     virtual ~sink() = default;
     virtual void log(const details::log_msg &msg) = 0;
@@ -20,15 +21,16 @@ public:
     void set_level(level::level_enum log_level);
     level::level_enum level() const;
     bool should_log(level::level_enum msg_level) const;
-
+    const char* get_last() const;
 protected:
     // sink log level - default is all
     level_t level_{level::trace};
+    std::string last_log_formatted;
 };
 
-}  // namespace sinks
-}  // namespace spdlog
+} // namespace sinks
+} // namespace spdlog
 
 #ifdef SPDLOG_HEADER_ONLY
-    #include "sink-inl.h"
+#    include "sink-inl.h"
 #endif

@@ -32,6 +32,7 @@ namespace Zephyr
 {
     Ref<spdlog::logger> Log::s_CoreLogger;
     Ref<spdlog::logger> Log::s_ClientLogger;
+    LogCallback Log::s_Callback;
 
     void Log::Init()
     {

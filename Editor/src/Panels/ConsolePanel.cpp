@@ -1,4 +1,5 @@
 #include "ConsolePanel.h"
+#include <Zephyr/Core/Log.h>
 
 namespace Editor
 {
@@ -8,11 +9,16 @@ namespace Editor
 		AutoScroll = true;
 		Clear();
 
-		LevelColors[LogLevel::TRACE] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-		LevelColors[LogLevel::INFO] = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
-		LevelColors[LogLevel::WARN] = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
-		LevelColors[LogLevel::ERR] = ImVec4(0.5f, 0.0f, 0.0f, 1.0f);
-		LevelColors[LogLevel::CRITICAL] = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+		LevelColors[Zephyr::LogLevel::TRACE] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+		LevelColors[Zephyr::LogLevel::INFO] = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+		LevelColors[Zephyr::LogLevel::WARN] = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
+		LevelColors[Zephyr::LogLevel::ERR] = ImVec4(0.5f, 0.0f, 0.0f, 1.0f);
+		LevelColors[Zephyr::LogLevel::CRITICAL] = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+
+		Zephyr::Log::SetLogCallback([&](Zephyr::LogLevel level, Zephyr::String string) {
+
+			AddLog(level, string.c_str());
+		});
 	}
 	void ConsolePanel::OnUpdate()
 	{
@@ -115,5 +121,22 @@ namespace Editor
 		LineOffsets.push_back(0);
 
 		infoCount = warnCount = errorCount = 0;
+	}
+
+	void ConsolePanel::AddLog(Zephyr::LogLevel level, const char* fmt, ...) IM_FMTARGS(2)
+	{
+		int old_size = Buf.size();
+		va_list args;
+		va_start(args, fmt);
+		Buf.appendfv(fmt, args);
+		va_end(args);
+		for (int new_size = Buf.size(); old_size < new_size; old_size++)
+			if (Buf[old_size] == '\n') {
+				LineOffsets.push_back(old_size + 1);
+				LogLevels.push_back(level);
+			}
+		if (level == Zephyr::LogLevel::INFO || level == Zephyr::LogLevel::TRACE) infoCount++;
+		if (level == Zephyr::LogLevel::WARN) warnCount++;
+		if (level == Zephyr::LogLevel::ERR || level == Zephyr::LogLevel::CRITICAL) errorCount++;
 	}
 }
