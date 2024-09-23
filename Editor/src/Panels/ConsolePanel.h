@@ -2,6 +2,7 @@
 
 #include "Panel.h"
 #include "imgui.h"
+#include <Zephyr/Core/BasicTypes.h>
 #include <Zephyr/Core/Log.h>
 
 namespace Editor
@@ -20,15 +21,15 @@ namespace Editor
 	private:
 
 
-		ImGuiTextBuffer     Buf;
-		ImGuiTextFilter     Filter;
-		ImVector<int>       LineOffsets; // Index to lines offset. We maintain this with AddLog() calls.
-		ImVector<Zephyr::LogLevel>  LogLevels;
-		bool                AutoScroll;  // Keep scrolling if already at the bottom.
+		ImGuiTextBuffer     m_Buf;
+		ImGuiTextFilter     m_Filter;
+		ImVector<u32>       m_LineOffsets; // Index to lines offset. We maintain this with AddLog() calls.
+		ImVector<Zephyr::LogLevel>  m_LogLevels;
+		bool                m_AutoScroll;  // Keep scrolling if already at the bottom.
 
-		ImVec4 LevelColors[Zephyr::LogLevel::LAST];
-		int infoCount;
-		int warnCount;
-		int errorCount;
+		ImVec4 m_LevelColors[Zephyr::LogLevel::LAST];
+		u32 m_InfoCount;
+		u32 m_WarnCount;
+		u32 m_ErrorCount;
 	};
 }

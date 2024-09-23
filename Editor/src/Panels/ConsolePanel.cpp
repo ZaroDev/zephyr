@@ -1,19 +1,18 @@
 #include "ConsolePanel.h"
-#include <Zephyr/Core/Log.h>
 
 namespace Editor
 {
 	ConsolePanel::ConsolePanel()
 		: Panel("Console", PanelCategory::WINDOW)
 	{
-		AutoScroll = true;
+		m_AutoScroll = true;
 		Clear();
 
-		LevelColors[Zephyr::LogLevel::TRACE] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-		LevelColors[Zephyr::LogLevel::INFO] = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
-		LevelColors[Zephyr::LogLevel::WARN] = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
-		LevelColors[Zephyr::LogLevel::ERR] = ImVec4(0.5f, 0.0f, 0.0f, 1.0f);
-		LevelColors[Zephyr::LogLevel::CRITICAL] = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+		m_LevelColors[Zephyr::LogLevel::TRACE] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+		m_LevelColors[Zephyr::LogLevel::INFO] = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+		m_LevelColors[Zephyr::LogLevel::WARN] = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
+		m_LevelColors[Zephyr::LogLevel::ERR] = ImVec4(0.5f, 0.0f, 0.0f, 1.0f);
+		m_LevelColors[Zephyr::LogLevel::CRITICAL] = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
 
 		Zephyr::Log::SetLogCallback([&](Zephyr::LogLevel level, Zephyr::String string) {
 
@@ -29,7 +28,7 @@ namespace Editor
 		// Options menu
 		if (ImGui::BeginPopup("Options"))
 		{
-			ImGui::Checkbox("Auto-scroll", &AutoScroll);
+			ImGui::Checkbox("Auto-scroll", &m_AutoScroll);
 			ImGui::EndPopup();
 		}
 
@@ -41,7 +40,7 @@ namespace Editor
 		ImGui::SameLine();
 		bool copy = ImGui::Button("Copy");
 		ImGui::SameLine();
-		Filter.Draw("Filter", -100.0f);
+		m_Filter.Draw("Filter", -100.0f);
 
 		ImGui::Separator();
 		ImGui::BeginChild("scrolling", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
@@ -51,23 +50,23 @@ namespace Editor
 		if (copy)
 			ImGui::LogToClipboard();
 
-		if (Buf.size() > 0) {
+		if (m_Buf.size() > 0) {
 
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-			const char* buf = Buf.begin();
-			const char* buf_end = Buf.end();
-			if (Filter.IsActive())
+			const char* buf = m_Buf.begin();
+			const char* buf_end = m_Buf.end();
+			if (m_Filter.IsActive())
 			{
 				// In this example we don't use the clipper when Filter is enabled.
 				// This is because we don't have random access to the result of our filter.
 				// A real application processing logs with ten of thousands of entries may want to store the result of
 				// search/filter.. especially if the filtering function is not trivial (e.g. reg-exp).
-				for (int line_no = 0; line_no < LineOffsets.Size; line_no++)
+				for (int line_no = 0; line_no < m_LineOffsets.Size; line_no++)
 				{
-					const char* line_start = buf + LineOffsets[line_no];
-					const char* line_end = (line_no + 1 < LineOffsets.Size) ? (buf + LineOffsets[line_no + 1] - 1) : buf_end;
-					if (Filter.PassFilter(line_start, line_end)) {
-						ImGui::PushStyleColor(ImGuiCol_Text, LevelColors[LogLevels[line_no]]);
+					const char* line_start = buf + m_LineOffsets[line_no];
+					const char* line_end = (line_no + 1 < m_LineOffsets.Size) ? (buf + m_LineOffsets[line_no + 1] - 1) : buf_end;
+					if (m_Filter.PassFilter(line_start, line_end)) {
+						ImGui::PushStyleColor(ImGuiCol_Text, m_LevelColors[m_LogLevels[line_no]]);
 						ImGui::TextUnformatted(line_start, line_end);
 						ImGui::PopStyleColor();
 					}
@@ -89,14 +88,14 @@ namespace Editor
 				// anymore, which is why we don't use the clipper. Storing or skimming through the search result would make
 				// it possible (and would be recommended if you want to search through tens of thousands of entries).
 				ImGuiListClipper clipper;
-				clipper.Begin(LineOffsets.Size - 1);
+				clipper.Begin(m_LineOffsets.Size - 1);
 				while (clipper.Step())
 				{
 					for (int line_no = clipper.DisplayStart; line_no < clipper.DisplayEnd; line_no++)
 					{
-						const char* line_start = buf + LineOffsets[line_no];
-						const char* line_end = (line_no + 1 < LineOffsets.Size) ? (buf + LineOffsets[line_no + 1] - 1) : buf_end;
-						ImGui::PushStyleColor(ImGuiCol_Text, LevelColors[LogLevels[line_no]]);
+						const char* line_start = buf + m_LineOffsets[line_no];
+						const char* line_end = (line_no + 1 < m_LineOffsets.Size) ? (buf + m_LineOffsets[line_no + 1] - 1) : buf_end;
+						ImGui::PushStyleColor(ImGuiCol_Text, m_LevelColors[m_LogLevels[line_no]]);
 						ImGui::TextUnformatted(line_start, line_end);
 						ImGui::PopStyleColor();
 					}
@@ -105,7 +104,7 @@ namespace Editor
 			}
 			ImGui::PopStyleVar();
 
-			if (AutoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
+			if (m_AutoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
 				ImGui::SetScrollHereY(1.0f);
 		}
 
@@ -115,28 +114,28 @@ namespace Editor
 	}
 	void ConsolePanel::Clear()
 	{
-		Buf.clear();
-		LogLevels.clear();
-		LineOffsets.clear();
-		LineOffsets.push_back(0);
+		m_Buf.clear();
+		m_LogLevels.clear();
+		m_LineOffsets.clear();
+		m_LineOffsets.push_back(0);
 
-		infoCount = warnCount = errorCount = 0;
+		m_InfoCount = m_WarnCount = m_ErrorCount = 0;
 	}
 
 	void ConsolePanel::AddLog(Zephyr::LogLevel level, const char* fmt, ...) IM_FMTARGS(2)
 	{
-		int old_size = Buf.size();
+		int old_size = m_Buf.size();
 		va_list args;
 		va_start(args, fmt);
-		Buf.appendfv(fmt, args);
+		m_Buf.appendfv(fmt, args);
 		va_end(args);
-		for (int new_size = Buf.size(); old_size < new_size; old_size++)
-			if (Buf[old_size] == '\n') {
-				LineOffsets.push_back(old_size + 1);
-				LogLevels.push_back(level);
+		for (int new_size = m_Buf.size(); old_size < new_size; old_size++)
+			if (m_Buf[old_size] == '\n') {
+				m_LineOffsets.push_back(old_size + 1);
+				m_LogLevels.push_back(level);
 			}
-		if (level == Zephyr::LogLevel::INFO || level == Zephyr::LogLevel::TRACE) infoCount++;
-		if (level == Zephyr::LogLevel::WARN) warnCount++;
-		if (level == Zephyr::LogLevel::ERR || level == Zephyr::LogLevel::CRITICAL) errorCount++;
+		if (level == Zephyr::LogLevel::INFO || level == Zephyr::LogLevel::TRACE) m_InfoCount++;
+		if (level == Zephyr::LogLevel::WARN) m_WarnCount++;
+		if (level == Zephyr::LogLevel::ERR || level == Zephyr::LogLevel::CRITICAL) m_ErrorCount++;
 	}
 }
