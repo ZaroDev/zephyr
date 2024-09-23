@@ -48,7 +48,7 @@ namespace Zephyr
 	}
 	void Application::OnResize(i32 width, i32 height)
 	{
-		
+		Renderer::OnResize(width, height);
 	}
 	void Application::LoadConfig()
 	{
