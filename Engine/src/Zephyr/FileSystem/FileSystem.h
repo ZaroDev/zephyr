@@ -91,7 +91,7 @@ namespace Zephyr
 
 		bool RemoveAll(const Path& path);
 
-		Path ReplaceExtension(const Path& path, std::string_view extension);
+		Path ReplaceExtension(const Path& path, StrView extension);
 
 		Path GetFileName(const Path& path);
 

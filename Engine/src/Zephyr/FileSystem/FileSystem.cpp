@@ -7,8 +7,6 @@ namespace Zephyr
 {
 	namespace FileSystem
 	{
-
-
 		bool Exists(const Path& path)
 		{
 			return std::filesystem::exists(path);
@@ -69,7 +67,7 @@ namespace Zephyr
 			CORE_ASSERT(Exists(path), "Path doesn't exist");
 			return std::filesystem::remove_all(path);
 		}
-		Path ReplaceExtension(const Path& path, std::string_view extension)
+		Path ReplaceExtension(const Path& path, StrView extension)
 		{
 			Path ret = path;
 			ret.replace_extension(extension);
