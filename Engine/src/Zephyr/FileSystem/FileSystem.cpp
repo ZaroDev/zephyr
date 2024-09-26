@@ -85,12 +85,10 @@ namespace Zephyr
 	File::File(const Path& filePath, OpenMode mode)
 	{
 		m_Stream.open(filePath, mode);
-		m_IsOpen = true;
 	}
 	File::~File()
 	{
 		m_Stream.close();
-		m_IsOpen = false;
 	}
 	bool File::GetLine(String& string)
 	{

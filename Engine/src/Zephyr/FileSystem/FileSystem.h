@@ -24,15 +24,8 @@ namespace Zephyr
 		bool GetLine(String& string);
 		void Read(Buffer& buffer);
 		void Write(const Buffer& buffer);
-		bool IsOpen() const { return m_IsOpen; }
 		bool IsEndOfFile() const;
 		size Size();
-
-
-		operator bool() const
-		{
-			return m_IsOpen;
-		}
 
 		File& operator<<(const String& string)
 		{
@@ -59,7 +52,6 @@ namespace Zephyr
 
 	private:
 		FileStream m_Stream;
-		bool m_IsOpen;
 	};
 
 	namespace FileSystem

@@ -7,8 +7,7 @@ namespace Zephyr
 	class BlobStreamReader
 	{
 	public:
-		DISABLE_COPY(BlobStreamReader);
-		DISABLE_MOVE(BlobStreamReader);
+		DISABLE_MOVE_AND_COPY(BlobStreamReader);
 
 		explicit BlobStreamReader(const u8* buffer)
 			: m_Buffer(buffer), m_Position(buffer)
@@ -25,20 +24,20 @@ namespace Zephyr
 			return value;
 		}
 
-		void Read(u8* buffer, size_t length)
+		void Read(u8* buffer, size length)
 		{
 			memcpy(buffer, m_Position, length);
 			m_Position += length;
 		}
 
-		void Skip(size_t offset)
+		void Skip(size offset)
 		{
 			m_Position += offset;
 		}
 
 		NODISCARD constexpr const u8* const BufferStart() const { return m_Buffer; }
 		NODISCARD constexpr const u8* const Position() const { return m_Position; }
-		NODISCARD constexpr const size_t Offset() const { return m_Position - m_Buffer; }
+		NODISCARD constexpr const size Offset() const { return m_Position - m_Buffer; }
 
 	private:
 		const u8* m_Buffer;
@@ -48,10 +47,9 @@ namespace Zephyr
 	class BlobStreamWriter
 	{
 	public:
-		DISABLE_COPY(BlobStreamWriter);
-		DISABLE_MOVE(BlobStreamWriter);
+		DISABLE_MOVE_AND_COPY(BlobStreamWriter);
 
-		explicit BlobStreamWriter(u8* buffer, size_t bufferSize)
+		explicit BlobStreamWriter(u8* buffer, size bufferSize)
 			: m_Buffer(buffer), m_Position(buffer), m_BufferSize(bufferSize)
 		{
 			CORE_ASSERT(buffer && bufferSize);
@@ -67,21 +65,21 @@ namespace Zephyr
 			m_Position += sizeof(T);
 		}
 
-		void Write(const char* buffer, size_t length)
+		void Write(const char* buffer, size length)
 		{
 			CORE_ASSERT(&m_Position[length] <= &m_Buffer[m_BufferSize]);
 			memcpy(m_Position, buffer, length);
 			m_Position += length;
 		}
 
-		void Write(const u8* buffer, size_t length)
+		void Write(const u8* buffer, size length)
 		{
 			CORE_ASSERT(&m_Position[length] <= &m_Buffer[m_BufferSize]);
 			memcpy(m_Position, buffer, length);
 			m_Position += length;
 		}
 
-		void Skip(size_t offset)
+		void Skip(size offset)
 		{
 			m_Position += offset;
 		}
@@ -89,7 +87,7 @@ namespace Zephyr
 		NODISCARD constexpr const u8* const BufferStart() const { return m_Buffer; }
 		NODISCARD constexpr const u8* const BufferEnd() const { return &m_Buffer[m_BufferSize]; }
 		NODISCARD constexpr const u8* const Position() const { return m_Position; }
-		NODISCARD constexpr const size_t Offset() const { return m_Position - m_Buffer; }
+		NODISCARD constexpr const size Offset() const { return m_Position - m_Buffer; }
 
 	private:
 		u8* const m_Buffer;
