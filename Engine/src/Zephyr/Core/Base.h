@@ -3,6 +3,7 @@
 #include <memory>
 #include <filesystem>
 #include <string>
+#include <fstream>
 
 
 #ifdef DEBUG
@@ -80,6 +81,7 @@ namespace Zephyr
 	typedef std::filesystem::path Path;
 	typedef std::string String;
 	typedef std::string_view StrView;
+	typedef std::fstream FileStream;
 
 	template<typename T>
 	using Scope = std::unique_ptr<T>;

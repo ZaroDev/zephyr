@@ -1,4 +1,6 @@
 #include "ConsolePanel.h"
+#include <Zephyr/FileSystem/FileSystem.h>
+#include <Zephyr/FileSystem/FileDialogs.h>
 
 namespace Editor
 {
@@ -17,7 +19,7 @@ namespace Editor
 		Zephyr::Log::SetLogCallback([&](Zephyr::LogLevel level, Zephyr::String string) {
 
 			AddLog(level, string.c_str());
-		});
+			});
 	}
 	void ConsolePanel::OnUpdate()
 	{
@@ -36,21 +38,36 @@ namespace Editor
 		if (ImGui::Button("Options"))
 			ImGui::OpenPopup("Options");
 		ImGui::SameLine();
-		bool clear = ImGui::Button("Clear");
+		if (ImGui::Button("Clear"))
+		{
+			Clear();
+		}
 		ImGui::SameLine();
-		bool copy = ImGui::Button("Copy");
+		if (ImGui::Button("Copy"))
+		{
+			ImGui::LogToClipboard();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Save log"))
+		{
+			auto savePath = Zephyr::FileDialogs::SaveFile("Log file (*.log)\0.log\0");
+			savePath.replace_extension(".log");
+			Zephyr::Buffer buffer(m_Buf.c_str(), m_Buf.size());
+
+			Zephyr::File file(savePath, Zephyr::File::OpenMode::OUTPUT);
+			file.Write(buffer);
+		}
+
 		ImGui::SameLine();
 		m_Filter.Draw("Filter", -100.0f);
 
 		ImGui::Separator();
 		ImGui::BeginChild("scrolling", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
 
-		if (clear)
-			Clear();
-		if (copy)
-			ImGui::LogToClipboard();
 
-		if (m_Buf.size() > 0) {
+
+		if (m_Buf.size() > 0)
+		{
 
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
 			const char* buf = m_Buf.begin();
@@ -130,12 +147,15 @@ namespace Editor
 		m_Buf.appendfv(fmt, args);
 		va_end(args);
 		for (int new_size = m_Buf.size(); old_size < new_size; old_size++)
-			if (m_Buf[old_size] == '\n') {
+		{
+			if (m_Buf[old_size] == '\n') 
+			{
 				m_LineOffsets.push_back(old_size + 1);
 				m_LogLevels.push_back(level);
 			}
+		}
 		if (level == Zephyr::LogLevel::INFO || level == Zephyr::LogLevel::TRACE) m_InfoCount++;
-		if (level == Zephyr::LogLevel::WARN) m_WarnCount++;
-		if (level == Zephyr::LogLevel::ERR || level == Zephyr::LogLevel::CRITICAL) m_ErrorCount++;
+		else if (level == Zephyr::LogLevel::WARN) m_WarnCount++;
+		else if (level == Zephyr::LogLevel::ERR || level == Zephyr::LogLevel::CRITICAL) m_ErrorCount++;
 	}
 }

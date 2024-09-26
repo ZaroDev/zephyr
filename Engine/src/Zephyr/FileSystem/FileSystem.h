@@ -1,37 +1,100 @@
 #pragma once
+#include "Buffer.h"
 
-namespace Zephyr::FileSystem
+namespace Zephyr
 {
+	class File final 
+	{
+	public:
+		enum OpenMode
+		{
+			INPUT = BIT(0),
+			OUTPUT = BIT(1),
+			ATE = BIT(2),
+			APP = BIT(3),
+			TRUNC = BIT(4),
+			BINARY = BIT(5),
+		};
 
-	bool Exists(const Path& path);
-	
-	size FileSize(const Path& path);
-	
-	Path WorkingDirectory();
-	
-	void WorkingDirectory(const Path& path);
-	
-	bool IsEmpty(const Path& path);
-	
-	bool IsEquivalent(const Path& path1, const Path& path2);
-	
-	bool CreateFolder(const Path& path);
-	
-	bool CreateFolders(const Path& path);
-	
-	void CreateDirectorySymlink(const Path& to, const Path& symlink);
-	
-	void CreateHardlink(const Path& to, const Path& hardlink);
+		explicit File(const Path& filePath, OpenMode mode);
+		~File();
 
-	void CreateSymlink(const Path& to, const Path& symlink);
+		DEFAULT_MOVE_AND_COPY(File);
 
-	bool Remove(const Path& path);
+		bool GetLine(String& string);
+		void Read(Buffer& buffer);
+		void Write(const Buffer& buffer);
+		bool IsOpen() const { return m_IsOpen; }
+		bool IsEndOfFile() const;
+		size Size();
 
-	bool RemoveAll(const Path& path);
 
-	Path ReplaceExtension(const Path& path, std::string_view extension);
+		operator bool() const
+		{
+			return m_IsOpen;
+		}
 
-	Path GetFileName(const Path& path);
+		File& operator<<(const String& string)
+		{
+			m_Stream << string;
+			return *this;
+		}
 
-	bool IsDirectory(const Path& path);
+		File& operator<<(StrView string)
+		{
+			m_Stream << string;
+			return *this;
+		}
+
+		File& operator<<(char ch)
+		{
+			m_Stream << ch;
+			return *this;
+		}
+		
+		void operator>>(String& string)
+		{
+			m_Stream >> string;
+		}
+
+	private:
+		FileStream m_Stream;
+		bool m_IsOpen;
+	};
+
+	namespace FileSystem
+	{
+
+		bool Exists(const Path& path);
+
+		size FileSize(const Path& path);
+
+		Path WorkingDirectory();
+
+		void WorkingDirectory(const Path& path);
+
+		bool IsEmpty(const Path& path);
+
+		bool IsEquivalent(const Path& path1, const Path& path2);
+
+		bool CreateFolder(const Path& path);
+
+		bool CreateFolders(const Path& path);
+
+		void CreateDirectorySymlink(const Path& to, const Path& symlink);
+
+		void CreateHardlink(const Path& to, const Path& hardlink);
+
+		void CreateSymlink(const Path& to, const Path& symlink);
+
+		bool Remove(const Path& path);
+
+		bool RemoveAll(const Path& path);
+
+		Path ReplaceExtension(const Path& path, std::string_view extension);
+
+		Path GetFileName(const Path& path);
+
+		bool IsDirectory(const Path& path);
+	}
 }
