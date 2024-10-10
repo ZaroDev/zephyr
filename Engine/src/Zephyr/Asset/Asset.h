@@ -11,7 +11,7 @@ namespace Zephyr
 		NONE = 0,
 		SCENE,
 		TEXTURE2D,
-		MESH
+		MODEL
 	};
 
 	std::string_view AssetTypeToString(AssetType type);

@@ -3,6 +3,7 @@
 #include <Zephyr/Renderer/Window.h>
 namespace Zephyr
 {
+	class Model;
 	struct RenderHardwareInterface final
 	{
 		struct

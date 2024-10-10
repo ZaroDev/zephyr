@@ -23,6 +23,7 @@ namespace Zephyr
 
 		bool GetLine(String& string);
 		void Read(Buffer& buffer);
+		StringStream ReadStream() const;
 		void Write(const Buffer& buffer);
 		bool IsEndOfFile() const;
 		size Size();
@@ -49,6 +50,8 @@ namespace Zephyr
 		{
 			m_Stream >> string;
 		}
+
+		
 
 	private:
 		FileStream m_Stream;
@@ -88,5 +91,7 @@ namespace Zephyr
 		Path GetFileName(const Path& path);
 
 		bool IsDirectory(const Path& path);
+
+		String ReadFileContents(const Path& path);
 	}
 }

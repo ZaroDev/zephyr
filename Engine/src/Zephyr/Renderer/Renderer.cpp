@@ -4,6 +4,8 @@
 #include <imgui.h>
 
 #include <Zephyr/Renderer/Platform/D3D11/D3D11RHI.h>
+#include <Zephyr/Renderer/Platform/OpenGL/OpenGLRHI.h>
+
 namespace Zephyr::Renderer
 {
 	namespace
@@ -17,7 +19,7 @@ namespace Zephyr::Renderer
 		{
 			switch (api)
 			{
-			case GraphicsAPI::OPENGL: CORE_ASSERT(false, "GraphicsAPI::OPENGL is not implemented!"); return false;
+			case GraphicsAPI::OPENGL: OpenGL::GetPlatformInterface(g_GraphicsInterface); return true;
 			case GraphicsAPI::DX11: D3D11::GetPlatformInterface(g_GraphicsInterface); return true;
 			}
 

@@ -11,7 +11,7 @@ namespace Zephyr
 		case AssetType::NONE: return "AssetType::NONE";
 		case AssetType::SCENE: return "AssetType::SCENE";
 		case AssetType::TEXTURE2D: return "AssetType::TEXTURE2D";
-		case AssetType::MESH: return "AssetType::MESH";
+		case AssetType::MODEL: return "AssetType::MESH";
 		}
 
 		return "AssetType::<Invalid>";
@@ -21,7 +21,7 @@ namespace Zephyr
 	{
 		if (assetType == "AssetType::SCENE") return AssetType::SCENE;
 		if (assetType == "AssetType::TEXTURE2D") return AssetType::TEXTURE2D;
-		if (assetType == "AssetType::MESH") return AssetType::MESH;
+		if (assetType == "AssetType::MESH") return AssetType::MODEL;
 
 
 		return AssetType::NONE;

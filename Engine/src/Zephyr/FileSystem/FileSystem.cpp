@@ -81,6 +81,12 @@ namespace Zephyr
 		{
 			return std::filesystem::is_directory(path);
 		}
+		String ReadFileContents(const Path& path)
+		{
+			File file(path, File::INPUT);
+			StringStream stream = file.ReadStream();
+			return stream.str();
+		}
 	}
 	File::File(const Path& filePath, OpenMode mode)
 	{
@@ -97,6 +103,12 @@ namespace Zephyr
 	void File::Read(Buffer& buffer)
 	{
 		m_Stream.read((char*)buffer.Data, buffer.Size);
+	}
+	StringStream File::ReadStream() const
+	{
+		StringStream stream;
+		stream << m_Stream.rdbuf();
+		return stream;
 	}
 	void File::Write(const Buffer& buffer)
 	{

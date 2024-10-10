@@ -75,6 +75,10 @@ namespace Zephyr::Window
 	void Update()
 	{
 		glfwPollEvents();
+		if (g_WindowData.API == GraphicsAPI::OPENGL)
+		{
+			glfwSwapBuffers(g_Window);
+		}
 	}
 	void Shutdown()
 	{

@@ -2,6 +2,7 @@
 
 #include "D3D11Common.h"
 #include <Zephyr/Renderer/RenderHardwareInterface.h>
+#include <Zephyr/Renderer/Model.h>
 
 #ifdef PLATFORM_WINDOWS
 #include "D3D11Texture.h"
@@ -22,13 +23,11 @@ namespace Zephyr::D3D11::Core
 	void EndFrame();
 	void CreateTexture(D3D11Texture2D& texture, Buffer buffer = Buffer());
 
-
+	void CreateVertexBuffer();
 	bool InitImGui();
 	void ImGuiNewFrame();
 	void ImGuiEndFrame();
 	void ShutdownImGui();
-
-	void CreateVertexBuffer();
 
 	bool CreateSwapChainResources();
 	void DestroySwapChainResources();

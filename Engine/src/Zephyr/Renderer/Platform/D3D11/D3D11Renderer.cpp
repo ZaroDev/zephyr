@@ -21,6 +21,7 @@ namespace Zephyr::D3D11::Core
 		ComPtr<IDXGISwapChain1> g_SwapChain = nullptr;
 		ComPtr<ID3D11RenderTargetView> g_RenderTarget = nullptr;
 
+		std::vector<ComPtr<ID3D11Buffer>> g_Models{};
 		ComPtr<ID3D11Buffer> g_TriangleVertexBuffer = nullptr;
 
 #ifndef DIST
@@ -287,6 +288,9 @@ namespace Zephyr::D3D11::Core
 		viewport.MinDepth = 0.0f;
 		viewport.MaxDepth = 1.0f;
 
+		constexpr f32 clearColor[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+		g_DeviceContext->OMSetRenderTargets(1, g_RenderTarget.GetAddressOf(), nullptr);
+		g_DeviceContext->ClearRenderTargetView(g_RenderTarget.Get(), clearColor);
 
 
 		g_DeviceContext->RSSetViewports(1, &viewport);
@@ -304,9 +308,7 @@ namespace Zephyr::D3D11::Core
 		g_DeviceContext->VSSetShader(shader->Vertex().Get(), nullptr, 0);
 		g_DeviceContext->PSSetShader(shader->Pixel().Get(), nullptr, 0);
 
-		constexpr f32 clearColor[] = { 0.1f, 0.1f, 0.1f, 1.0f };
-		g_DeviceContext->OMSetRenderTargets(1, g_RenderTarget.GetAddressOf(), nullptr);
-		g_DeviceContext->ClearRenderTargetView(g_RenderTarget.Get(), clearColor);
+		
 
 		g_DeviceContext->Draw(3, 0);
 	}

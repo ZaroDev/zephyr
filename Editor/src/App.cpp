@@ -137,8 +137,8 @@ namespace Zephyr
 #ifdef PLATFORM_WINDOWS
 		spec.API = GraphicsAPI::DX11;
 #else
-		spec.API = GraphicsAPI::OPENGL;
 #endif
+		spec.API = GraphicsAPI::OPENGL;
 		spec.Name = "Zephyr Editor";
 
 		return new Editor::Application(spec);

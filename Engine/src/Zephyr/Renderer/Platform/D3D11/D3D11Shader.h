@@ -6,12 +6,12 @@
 
 namespace Zephyr::D3D11
 {
-	constexpr std::string_view c_ProfileVersion[ShaderType::MAX] =
+	constexpr StrView c_ProfileVersion[ShaderType::MAX] =
 	{
 		"vs_5_0",
 		"ps_5_0",
 	};
-	constexpr std::string_view c_EntryPoint = "Main";
+	constexpr StrView c_EntryPoint = "Main";
 
 	static_assert(_countof(c_ProfileVersion) == ShaderType::MAX);
 

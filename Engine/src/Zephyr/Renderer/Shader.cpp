@@ -2,6 +2,7 @@
 #include "Shader.h"
 #include "Renderer.h"
 #include <Zephyr/Renderer/Platform/D3D11/D3D11Shader.h>
+#include <Zephyr/Renderer/Platform/OpenGL/OpenGLShader.h>
 
 #include <Zephyr/Core/Application.h>
 
@@ -20,7 +21,7 @@ namespace Zephyr
     {
         switch (Renderer::GetAPI())
         {
-        case Zephyr::GraphicsAPI::OPENGL: CORE_ASSERT(false, "GraphicsAPI::OPENGL is currently not supported"); return nullptr;
+        case Zephyr::GraphicsAPI::OPENGL: return CreateRef<OpenGL::OpenGLShader>(path);
         case Zephyr::GraphicsAPI::DX11: return CreateRef<D3D11::D3D11Shader>(path);
         }
 
