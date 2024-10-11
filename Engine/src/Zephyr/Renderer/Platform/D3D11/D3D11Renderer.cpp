@@ -9,17 +9,25 @@
 
 #include <Zephyr/Renderer/Window.h>
 
+#include <locale>
+#include <codecvt>
+ 
+
+
 #ifdef PLATFORM_WINDOWS
+
+#include <dxgi1_4.h>
 
 namespace Zephyr::D3D11::Core
 {
 	namespace
 	{
 		ComPtr<ID3D11Device> g_Device = nullptr;
-		ComPtr<IDXGIFactory2> g_DxgiFactory = nullptr;
+		ComPtr<IDXGIFactory4> g_DxgiFactory = nullptr;
 		ComPtr<ID3D11DeviceContext> g_DeviceContext = nullptr;
 		ComPtr<IDXGISwapChain1> g_SwapChain = nullptr;
 		ComPtr<ID3D11RenderTargetView> g_RenderTarget = nullptr;
+		IDXGIAdapter3* g_Adapter = nullptr;
 
 		std::vector<ComPtr<ID3D11Buffer>> g_Models{};
 		ComPtr<ID3D11Buffer> g_TriangleVertexBuffer = nullptr;
@@ -43,6 +51,11 @@ namespace Zephyr::D3D11::Core
 #ifndef DIST
 		deviceFlags |= D3D11_CREATE_DEVICE_FLAG::D3D11_CREATE_DEVICE_DEBUG;
 #endif
+		
+		g_DxgiFactory->EnumAdapters(0, reinterpret_cast<IDXGIAdapter**>(&g_Adapter));
+
+		
+		
 
 		if (FAILED(D3D11CreateDevice(
 			nullptr,
@@ -69,7 +82,7 @@ namespace Zephyr::D3D11::Core
 		}
 #endif
 
-		
+
 		const auto& windowData = Window::GetWindowData();
 		DXGI_SWAP_CHAIN_DESC1 swapChainDescriptor = {};
 		swapChainDescriptor.Width = windowData.Width;
@@ -121,26 +134,26 @@ namespace Zephyr::D3D11::Core
 		g_DebugLayer->ReportLiveDeviceObjects(D3D11_RLDO_FLAGS::D3D11_RLDO_DETAIL);
 		g_DebugLayer.Reset();
 #endif
-	
+
 		g_Device.Reset();
 	}
 	void CreateTexture(D3D11Texture2D& texture, Buffer buffer)
 	{
 		/*D3D11_TEXTURE2D_DESC desc{};
 		ZeroMemory(&desc, sizeof(desc));
-		
+
 		desc.Width = texture.GetWidth();
 		desc.Height = texture.GetHeight();
 		desc.MipLevels = 1;
 		desc.ArraySize = 1;
-	
+
 		switch (texture.GetSpecification().Format)
 		{
 		case ImageFormat::R8: desc.Format = DXGI_FORMAT_R8_UNORM; break;
 		case ImageFormat::RGB8: desc.Format = DXGI_FORMAT_R8G8B8A8_UINT; break;
 		case ImageFormat::RGBA8: desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; break;
 		case ImageFormat::RGBA32F: desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT; break;
-		}	
+		}
 
 		desc.SampleDesc.Count = 1;
 		desc.SampleDesc.Quality = 0;
@@ -263,6 +276,24 @@ namespace Zephyr::D3D11::Core
 		return *g_DeviceContext.Get();
 	}
 
+	NODISCARD RenderDevice GetRenderDevice()
+	{
+		DXGI_ADAPTER_DESC desc;
+		g_Adapter->GetDesc(&desc);
+
+		DXGI_QUERY_VIDEO_MEMORY_INFO videoMemoryInfo;
+		g_Adapter->QueryVideoMemoryInfo(0, DXGI_MEMORY_SEGMENT_GROUP_LOCAL, &videoMemoryInfo);
+
+		RenderDevice device;
+		std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+		device.Name = converter.to_bytes(desc.Description);
+		device.Vendor = std::to_string(desc.VendorId);
+		device.AvailableVRAM = videoMemoryInfo.Budget / 1024 / 1024;
+		device.UsedVRAM = videoMemoryInfo.CurrentUsage / 1024 / 1024;
+		device.TotalVRAM = desc.DedicatedVideoMemory / 1024 / 1024;
+		return device;
+	}
+
 	void OnResize(i32 width, i32 height)
 	{
 		g_DeviceContext->Flush();
@@ -276,7 +307,7 @@ namespace Zephyr::D3D11::Core
 
 		CreateSwapChainResources();
 	}
-	
+
 	void BeginFrame()
 	{
 		const auto& windowData = Window::GetWindowData();
@@ -308,7 +339,7 @@ namespace Zephyr::D3D11::Core
 		g_DeviceContext->VSSetShader(shader->Vertex().Get(), nullptr, 0);
 		g_DeviceContext->PSSetShader(shader->Pixel().Get(), nullptr, 0);
 
-		
+
 
 		g_DeviceContext->Draw(3, 0);
 	}

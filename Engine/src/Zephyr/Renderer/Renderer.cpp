@@ -14,6 +14,7 @@ namespace Zephyr::Renderer
 		RenderHardwareInterface g_GraphicsInterface{};
 		ShaderLibrary g_Library;
 		RenderDevice g_Device;
+		RenderingPath g_RenderingPath;
 
 		bool SetPlatformInterface(GraphicsAPI api)
 		{
@@ -30,13 +31,15 @@ namespace Zephyr::Renderer
 	}
 
 
-	bool Initialize(GraphicsAPI api)
+	bool Initialize(GraphicsAPI api, RenderingPath renderPath)
 	{
 		g_API = api;
+		g_RenderingPath = renderPath;
 
 		bool ret = true;
 		ret &= SetPlatformInterface(api);
 		ret &= g_GraphicsInterface.Core.Init();
+
 		ret &= g_Library.LoadEngineShaders();
 
 		ret &= InitImGui();
@@ -94,7 +97,12 @@ namespace Zephyr::Renderer
 
 	RenderDevice GetRenderDevice()
 	{
-		return g_Device;
+		return g_GraphicsInterface.Core.GetRenderDevice();
+	}
+
+	NODISCARD RenderingPath GetRenderPath()
+	{
+		return g_RenderingPath;
 	}
 
 	bool InitImGui()

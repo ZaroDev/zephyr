@@ -11,5 +11,9 @@ namespace Editor
 
 		void OnUpdate() override;
 		void OnImGui() override;
+
+	private:
+		std::vector<float> m_vramUsage;
+
 	};
 }

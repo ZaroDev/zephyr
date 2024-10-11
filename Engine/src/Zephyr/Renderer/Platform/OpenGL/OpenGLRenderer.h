@@ -19,4 +19,7 @@ namespace Zephyr::OpenGL::Core
 	void ShutdownImGui();
 
 	void CreateVertexBuffer();
+
+
+	NODISCARD RenderDevice GetRenderDevice();
 }

@@ -124,6 +124,10 @@ namespace Editor
 
 			ImGui::EndMainMenuBar();
 		}
+		if (ImGui::BeginMenu("About"))
+		{
+			ImGui::EndMenu();
+		}
 	}
 }
 
@@ -135,10 +139,11 @@ namespace Zephyr
 		spec.Args = args;
 
 #ifdef PLATFORM_WINDOWS
-		spec.API = GraphicsAPI::DX11;
+		spec.WindowData.API = GraphicsAPI::DX11;
 #else
+		spec.WindowData.API = GraphicsAPI::OPENGL;
 #endif
-		spec.API = GraphicsAPI::OPENGL;
+		
 		spec.Name = "Zephyr Editor";
 
 		return new Editor::Application(spec);

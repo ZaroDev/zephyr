@@ -19,7 +19,6 @@ namespace Zephyr
 	struct ApplicationSpecification
 	{
 		ApplicationCommandLineArgs Args = {};
-		GraphicsAPI API = {};
 		String Name = {};
 		Path WorkingDir = {};
 		Window::WindowData WindowData = {};

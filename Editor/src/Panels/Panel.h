@@ -6,8 +6,8 @@ namespace Editor
 {
 	enum PanelCategory : std::uint8_t
 	{
-		WINDOW = 0x00,
-		INFO = 0x01,
+		WINDOW = BIT(0),
+		INFO = BIT(1),
 	};
 
 	class Panel

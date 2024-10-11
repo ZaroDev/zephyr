@@ -21,7 +21,7 @@ namespace Zephyr
 		}
 
 		Window::Initialize(m_Specification.WindowData);
-		Renderer::Initialize(m_Specification.API);
+		Renderer::Initialize(m_Specification.WindowData.API);
 	}
 	void Application::Run()
 	{

@@ -6,9 +6,9 @@
 #include <map>
 #include <unordered_map>
 
-#include <Core/Assert.h>
-#include <Core/PlatformDetection.h>
-#include <Core/Base.h>
-#include <Core/BasicTypes.h>
-#include <Math/MathTypes.h>
-#include <FileSystem/FileSystem.h>
+#include <Zephyr/Core/Assert.h>
+#include <Zephyr/Core/PlatformDetection.h>
+#include <Zephyr/Core/Base.h>
+#include <Zephyr/Core/BasicTypes.h>
+#include <Zephyr/Math/MathTypes.h>
+#include <Zephyr/FileSystem/FileSystem.h>
