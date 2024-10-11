@@ -139,7 +139,7 @@ namespace Zephyr::D3D11::Core
 	}
 	void CreateTexture(D3D11Texture2D& texture, Buffer buffer)
 	{
-		/*D3D11_TEXTURE2D_DESC desc{};
+		D3D11_TEXTURE2D_DESC desc{};
 		ZeroMemory(&desc, sizeof(desc));
 
 		desc.Width = texture.GetWidth();
@@ -173,7 +173,7 @@ namespace Zephyr::D3D11::Core
 			return;
 		}
 
-		if (FAILED(g_Device->CreateShaderResourceView(imageTexture.Get(), nullptr, &texture.m_Texture)))
+		if (FAILED(g_Device->CreateShaderResourceView(imageTexture.Get(), nullptr, &texture.Texture)))
 		{
 			CORE_ERROR("D3D11: Failed to create shader resource view");
 			return;
@@ -199,7 +199,7 @@ namespace Zephyr::D3D11::Core
 		if (FAILED(g_Device->CreateSamplerState(&samplerDesc, &texture.m_SamplerState)))
 		{
 			CORE_ERROR("D3D11: Failed to crate sampler state");
-		}*/
+		}
 	}
 	bool InitImGui()
 	{

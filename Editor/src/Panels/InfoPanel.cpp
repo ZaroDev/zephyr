@@ -35,9 +35,6 @@ namespace Editor
 				ImGui::PlotLines("##vram", &m_vramUsage[0], (int)m_vramUsage.size(), 0, "VRAM Usage", 0.0f, 1000.0f, ImVec2(200, 100));
 
 				ImGui::Text("Total VRAM: %i (MB)", device.TotalVRAM);
-
-
-				
 			}
 			
 			ImGui::End();

@@ -14,19 +14,16 @@ namespace Zephyr::D3D11
 		m_Specification = spec;
 		m_Width = spec.Width;
 		m_Height = spec.Height;
-
-
-
 		Core::CreateTexture(*this, buffer);
 	}
 	D3D11Texture2D::~D3D11Texture2D()
 	{
-		m_Texture.Reset();
+		Texture.Reset();
 		m_SamplerState.Reset();
 	}
 	void D3D11Texture2D::Bind(u32 slot) const
 	{
-		Core::DeviceContext().PSSetShaderResources(slot, 1, m_Texture.GetAddressOf());
+		Core::DeviceContext().PSSetShaderResources(slot, 1, Texture.GetAddressOf());
 		Core::DeviceContext().PSSetSamplers(slot, 1, m_SamplerState.GetAddressOf());
 	}
 }

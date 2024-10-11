@@ -3,6 +3,8 @@
 
 #include "Panels/Panel.h"
 
+#include <Zephyr/Asset/TextureImporter.h>
+
 
 namespace Editor
 {
@@ -23,5 +25,7 @@ namespace Editor
 
 	private:
 		std::vector<Zephyr::Scope<Panel>> m_Panels;
+
+		std::vector<Zephyr::Ref<Zephyr::Texture2D>> m_Textures;
 	};
 }

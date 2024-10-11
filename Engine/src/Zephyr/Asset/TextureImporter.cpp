@@ -4,6 +4,8 @@
 #include <Zephyr/Project/Project.h>
 #include <Zephyr/FileSystem/Buffer.h>
 
+#include <Zephyr/Core/Application.h>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
@@ -16,8 +18,16 @@ namespace Zephyr
     Ref<Texture2D> TextureImporter::LoadTexture2D(const Path& path)
     {
         i32 width, height, channels;
-        stbi_set_flip_vertically_on_load(1);
 
+        if(Application::Get().Specification().WindowData.API != GraphicsAPI::OPENGL)
+        {
+            stbi_set_flip_vertically_on_load(0);
+        }
+        else
+        {
+            stbi_set_flip_vertically_on_load(1);
+        }
+        
         Buffer data;
         {
             data.Data = stbi_load(path.string().c_str(), &width, &height, &channels, 4);

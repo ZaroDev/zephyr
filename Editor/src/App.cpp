@@ -29,6 +29,8 @@ namespace Editor
 				panel->OnImGui();
 			}
 		}
+
+		
 	}
 	void Application::OnShutdown()
 	{
@@ -121,13 +123,19 @@ namespace Editor
 				}
 				ImGui::EndMenu();
 			}
+			if (ImGui::BeginMenu("About"))
+			{
+				if (ImGui::MenuItem("Load dummy texture"))
+				{
+					m_Textures.emplace_back(Zephyr::TextureImporter::LoadTexture2D("Assets/test.png"));
+				}
 
+
+				ImGui::EndMenu();
+			}
 			ImGui::EndMainMenuBar();
 		}
-		if (ImGui::BeginMenu("About"))
-		{
-			ImGui::EndMenu();
-		}
+		
 	}
 }
 
@@ -141,9 +149,9 @@ namespace Zephyr
 #ifdef PLATFORM_WINDOWS
 		spec.WindowData.API = GraphicsAPI::DX11;
 #else
-		spec.WindowData.API = GraphicsAPI::OPENGL;
-#endif
 		
+#endif
+		spec.WindowData.API = GraphicsAPI::OPENGL;
 		spec.Name = "Zephyr Editor";
 
 		return new Editor::Application(spec);
