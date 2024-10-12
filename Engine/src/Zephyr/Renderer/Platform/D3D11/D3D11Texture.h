@@ -22,7 +22,7 @@ namespace Zephyr::D3D11
 
 		virtual void Bind(u32 slot = 0) const override;
 
-		virtual bool IsLoaded() const override { return Texture; }
+		virtual bool IsLoaded() const override { return m_Texture; }
 
 		virtual bool operator==(const Texture& other) const override 
 		{
@@ -30,9 +30,6 @@ namespace Zephyr::D3D11
 		}
 
 
-	public:
-		ComPtr<ID3D11SamplerState> m_SamplerState = nullptr;
-		ComPtr<ID3D11ShaderResourceView> Texture = nullptr;
 
 	private:
 		TextureSpecification m_Specification;
@@ -41,7 +38,8 @@ namespace Zephyr::D3D11
 		u32 m_Width, m_Height;
 		u32 m_RendererID;
 
-		
+		ComPtr<ID3D11SamplerState> m_SamplerState = nullptr;
+		ComPtr<ID3D11ShaderResourceView> m_Texture = nullptr;
 	};
 }
 

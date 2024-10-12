@@ -11,15 +11,18 @@ pchsource "src/pch.cpp"
 files {"src/**.h", "src/**.hpp", "src/**.c", "src/**.cpp", "src/**.cc"}
 
 includedirs {"src", "src/Zephyr", "%{IncludeDir.GLFW}", "%{IncludeDir.spdlog}",
-             "%{IncludeDir.glad}", "%{IncludeDir.glm}", "%{IncludeDir.ImGui}"}
+             "%{IncludeDir.glad}", "%{IncludeDir.glm}", "%{IncludeDir.ImGui}", "%{IncludeDir.assimp}", 
+            "%{IncludeDir.meshoptimizer}"}
 
-links {"GLFW", "glad", "ImGui"}
+links {"GLFW", "glad", "ImGui", "%{Library.assimp}", "%{Library.meshoptimizer}"}
 
 targetdir("../Binaries/" .. outputdir .. "/%{prj.name}")
 objdir("../Binaries/Intermediates/" .. outputdir .. "/%{prj.name}")
 
 filter "system:windows"
 systemversion "latest"
+postbuildcommands {("{COPY} \"%{LibraryDir.assimp}/assimp.dll\" \"%{wks.location}Assets\"")}
+
 
 filter "configurations:Debug"
 defines {"DEBUG", "ENABLE_ASSERTS"}

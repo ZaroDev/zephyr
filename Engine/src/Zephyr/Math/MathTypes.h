@@ -24,10 +24,14 @@ SOFTWARE.
 
 #pragma once
 #include <Zephyr/Core/BasicTypes.h>
-
+#ifdef PLATFORM_WINDOWS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_FORCE_XYZW_ONLY
+#endif
 #include <glm/glm.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 namespace Zephyr
 {

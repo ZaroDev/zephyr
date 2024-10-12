@@ -4,6 +4,7 @@
 #include <d3dcompiler.h>
 
 #include <Zephyr/Core/Application.h>
+#include <Zephyr/Renderer/Model.h>
 
 namespace Zephyr::D3D11
 {
@@ -33,19 +34,28 @@ namespace Zephyr::D3D11
 				0,
 				DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,
 				0,
-				offsetof(Core::VertexPositionColor, Position),
+				offsetof(Vertex, Position),
 				D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA,
 				0
 			},
 			{
-				"COLOR",
+				"NORMAL",
 				0,
 				DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,
 				0,
-				offsetof(Core::VertexPositionColor, Color),
+				offsetof(Vertex, Normal),
 				D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA,
 				0
 			},
+			{
+				"TEXCOORD",
+				0,
+				DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT,
+				0,
+				offsetof(Vertex, TexCoord),
+				D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA,
+				0
+			}
 		};
 
 		

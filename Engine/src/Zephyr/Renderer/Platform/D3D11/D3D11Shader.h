@@ -24,9 +24,9 @@ namespace Zephyr::D3D11
 		void Bind() override;
 		void UnBind() override;
 
-		ComPtr<ID3D11InputLayout> Layout() const { return m_VertexLayout; }
-		ComPtr<ID3D11VertexShader> Vertex() const { return m_VertexShader; }
-		ComPtr<ID3D11PixelShader> Pixel() const { return m_PixelShader; }
+		ComPtr<ID3D11InputLayout> GetLayout() const { return m_VertexLayout; }
+		ComPtr<ID3D11VertexShader> GetVertex() const { return m_VertexShader; }
+		ComPtr<ID3D11PixelShader> GetPixel() const { return m_PixelShader; }
 		
 	private:
 		void CreateInputLayout();

@@ -27,7 +27,7 @@ namespace Zephyr::OpenGL::Core
 	{
 		glViewport(0, 0, width, height);
 	}
-	void BeginFrame()
+	void BeginFrame(Camera& camera)
 	{
 		glClear(GL_COLOR_BUFFER_BIT);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);

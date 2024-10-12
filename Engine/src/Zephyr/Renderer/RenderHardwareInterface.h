@@ -2,6 +2,7 @@
 #include <Zephyr/Math/MathTypes.h>
 #include <Zephyr/Renderer/Window.h>
 #include <Zephyr/Renderer/RenderDevice.h>
+#include <Zephyr/Renderer/Camera.h>
 
 namespace Zephyr
 {
@@ -14,7 +15,7 @@ namespace Zephyr
 			RenderDevice (*GetRenderDevice)(void);
 			void (*Shutdown)();
 			void (*OnResize)(i32 width, i32 height);
-			void (*BeginFrame)();
+			void (*BeginFrame)(Camera& camera);
 			void (*EndFrame)();
 		} Core;
 

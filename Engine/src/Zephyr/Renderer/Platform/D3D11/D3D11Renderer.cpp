@@ -11,12 +11,15 @@
 
 #include <locale>
 #include <codecvt>
- 
+#include <system_error>
 
 
 #ifdef PLATFORM_WINDOWS
 
-#include <dxgi1_4.h>
+#include <dxgi1_6.h>
+
+#include "D3D11Model.h"
+#include <Zephyr/Asset/ModelImporter.h>
 
 namespace Zephyr::D3D11::Core
 {
@@ -27,14 +30,91 @@ namespace Zephyr::D3D11::Core
 		ComPtr<ID3D11DeviceContext> g_DeviceContext = nullptr;
 		ComPtr<IDXGISwapChain1> g_SwapChain = nullptr;
 		ComPtr<ID3D11RenderTargetView> g_RenderTarget = nullptr;
-		IDXGIAdapter3* g_Adapter = nullptr;
+		ComPtr<IDXGIAdapter1> g_Adapter = nullptr;
 
 		std::vector<ComPtr<ID3D11Buffer>> g_Models{};
 		ComPtr<ID3D11Buffer> g_TriangleVertexBuffer = nullptr;
 
+		// TODO: Move to a geometry pass
+		ComPtr<ID3D11Buffer> g_ConstantBuffer = nullptr;
+		ComPtr<ID3D11RasterizerState> g_RastState;
+
 #ifndef DIST
 		ComPtr<ID3D11Debug> g_DebugLayer = nullptr;
 #endif
+		Ref<Model> g_Model;
+
+		// TODO : Move to a framebuffer
+		ComPtr<ID3D11DepthStencilView> g_DepthBuffer = nullptr;
+
+
+		void GetHardwareAdapter(IDXGIAdapter1** ppAdapter)
+		{
+			*ppAdapter = nullptr;
+
+			ComPtr<IDXGIAdapter1> adapter;
+
+			ComPtr<IDXGIFactory6> factory6;
+			HRESULT hr = g_DxgiFactory.As(&factory6);
+			if (SUCCEEDED(hr))
+			{
+				for (UINT adapterIndex = 0;
+					SUCCEEDED(factory6->EnumAdapterByGpuPreference(
+						adapterIndex,
+						DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
+						IID_PPV_ARGS(adapter.ReleaseAndGetAddressOf())));
+						adapterIndex++)
+				{
+					DXGI_ADAPTER_DESC1 desc;
+					adapter->GetDesc1(&desc);
+
+					if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
+					{
+						// Don't select the Basic Render Driver adapter.
+						continue;
+					}
+
+#ifdef _DEBUG
+					CORE_INFO("Direct3D Adapter ({0}): VID:{1}, PID:{2}X\n", adapterIndex, desc.VendorId, desc.DeviceId);
+#endif
+
+					break;
+				}
+			}
+
+			if (!adapter)
+			{
+				for (UINT adapterIndex = 0;
+					SUCCEEDED(g_DxgiFactory->EnumAdapters1(
+						adapterIndex,
+						adapter.ReleaseAndGetAddressOf()));
+						adapterIndex++)
+				{
+					DXGI_ADAPTER_DESC1 desc;
+					adapter->GetDesc1(&desc);
+
+					if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
+					{
+						// Don't select the Basic Render Driver adapter.
+						continue;
+					}
+
+#ifdef _DEBUG
+					CORE_INFO("Direct3D Adapter ({0}): VID:{1}, PID:{2}X\n", adapterIndex, desc.VendorId, desc.DeviceId);
+#endif
+
+					break;
+				}
+			}
+
+			*ppAdapter = adapter.Detach();
+		}
+	}
+
+	extern "C"
+	{
+		__declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+		__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 	}
 
 	bool Init()
@@ -52,8 +132,7 @@ namespace Zephyr::D3D11::Core
 		deviceFlags |= D3D11_CREATE_DEVICE_FLAG::D3D11_CREATE_DEVICE_DEBUG;
 #endif
 		
-		g_DxgiFactory->EnumAdapters(0, reinterpret_cast<IDXGIAdapter**>(&g_Adapter));
-
+		GetHardwareAdapter(g_Adapter.GetAddressOf());
 		
 		
 
@@ -82,6 +161,7 @@ namespace Zephyr::D3D11::Core
 		}
 #endif
 
+		g_Adapter->GetParent(IID_PPV_ARGS(&g_DxgiFactory));
 
 		const auto& windowData = Window::GetWindowData();
 		DXGI_SWAP_CHAIN_DESC1 swapChainDescriptor = {};
@@ -92,23 +172,24 @@ namespace Zephyr::D3D11::Core
 		swapChainDescriptor.SampleDesc.Quality = 0;
 		swapChainDescriptor.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 		swapChainDescriptor.BufferCount = 2;
-		swapChainDescriptor.SwapEffect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_FLIP_DISCARD;
+		swapChainDescriptor.SwapEffect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_DISCARD;
 		swapChainDescriptor.Scaling = DXGI_SCALING::DXGI_SCALING_STRETCH;
 		swapChainDescriptor.Flags = {};
 
 		DXGI_SWAP_CHAIN_FULLSCREEN_DESC swapChainFullscreenDescriptor = {};
 		swapChainFullscreenDescriptor.Windowed = !windowData.Fullscreen;
-
-		if (FAILED(g_DxgiFactory->CreateSwapChainForHwnd(
+		HRESULT hr = g_DxgiFactory->CreateSwapChainForHwnd(
 			g_Device.Get(),
 			static_cast<HWND>(Window::GetOSWindowPointer()),
 			&swapChainDescriptor,
 			&swapChainFullscreenDescriptor,
 			nullptr,
-			&g_SwapChain
-		)))
+			&g_SwapChain);
+		if (FAILED(hr))
 		{
-			CORE_ERROR("DXGI: Failed to create swap chain!");
+			CORE_ERROR("DXGI: Failed to create swap chain! {0}", std::system_category().message(hr));
+			CORE_ERROR("DXGI: Remove reason {0}", std::system_category().message(g_Device->GetDeviceRemovedReason()));
+
 			return false;
 		}
 
@@ -119,6 +200,19 @@ namespace Zephyr::D3D11::Core
 		}
 
 		CreateVertexBuffer();
+
+		// Create a new rasterizer state
+		D3D11_RASTERIZER_DESC desc = {};
+		desc.FillMode = D3D11_FILL_SOLID;
+		desc.CullMode = D3D11_CULL_BACK; // Enable back-facing culling
+		desc.FrontCounterClockwise = true;
+		desc.DepthBias = 0;
+		desc.SlopeScaledDepthBias = 0.0f;
+		desc.MultisampleEnable = true;
+		desc.AntialiasedLineEnable = false;
+		g_Device->CreateRasterizerState(&desc, &g_RastState);
+
+
 
 		CORE_INFO("D3D11: Renderer initialized!");
 
@@ -137,70 +231,7 @@ namespace Zephyr::D3D11::Core
 
 		g_Device.Reset();
 	}
-	void CreateTexture(D3D11Texture2D& texture, Buffer buffer)
-	{
-		D3D11_TEXTURE2D_DESC desc{};
-		ZeroMemory(&desc, sizeof(desc));
-
-		desc.Width = texture.GetWidth();
-		desc.Height = texture.GetHeight();
-		desc.MipLevels = 1;
-		desc.ArraySize = 1;
-
-		switch (texture.GetSpecification().Format)
-		{
-		case ImageFormat::R8: desc.Format = DXGI_FORMAT_R8_UNORM; break;
-		case ImageFormat::RGB8: desc.Format = DXGI_FORMAT_R8G8B8A8_UINT; break;
-		case ImageFormat::RGBA8: desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; break;
-		case ImageFormat::RGBA32F: desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT; break;
-		}
-
-		desc.SampleDesc.Count = 1;
-		desc.SampleDesc.Quality = 0;
-		desc.Usage = D3D11_USAGE::D3D11_USAGE_IMMUTABLE;
-		desc.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_SHADER_RESOURCE;
-
-		D3D11_SUBRESOURCE_DATA imageSubresouceData{};
-		ZeroMemory(&imageSubresouceData, sizeof(imageSubresouceData));
-		imageSubresouceData.pSysMem = buffer.Data;
-		imageSubresouceData.SysMemPitch = texture.GetWidth() * texture.GetSpecification().Channels;
-
-		ComPtr<ID3D11Texture2D> imageTexture;
-
-		if (FAILED(g_Device->CreateTexture2D(&desc, &imageSubresouceData, &imageTexture)))
-		{
-			CORE_ERROR("D3D11: Failed to create texture 2d");
-			return;
-		}
-
-		if (FAILED(g_Device->CreateShaderResourceView(imageTexture.Get(), nullptr, &texture.Texture)))
-		{
-			CORE_ERROR("D3D11: Failed to create shader resource view");
-			return;
-		}
-
-		D3D11_SAMPLER_DESC samplerDesc{};
-		ZeroMemory(&samplerDesc, sizeof(samplerDesc));
-
-		samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-		samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-		samplerDesc.MipLODBias = 0.0f;
-		samplerDesc.MaxAnisotropy = 1;
-		samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-		samplerDesc.BorderColor[0] = 1.0f;
-		samplerDesc.BorderColor[1] = 1.0f;
-		samplerDesc.BorderColor[2] = 1.0f;
-		samplerDesc.BorderColor[3] = 1.0f;
-		samplerDesc.MinLOD = -FLT_MAX;
-		samplerDesc.MaxLOD = FLT_MAX;
-
-		if (FAILED(g_Device->CreateSamplerState(&samplerDesc, &texture.m_SamplerState)))
-		{
-			CORE_ERROR("D3D11: Failed to crate sampler state");
-		}
-	}
+	
 	bool InitImGui()
 	{
 		ImGui_ImplGlfw_InitForOther(Window::GetGLFWWindow(), true);
@@ -224,38 +255,75 @@ namespace Zephyr::D3D11::Core
 	}
 	void CreateVertexBuffer()
 	{
-		constexpr VertexPositionColor vertices[] =
+		g_Model = Zephyr::ModelImporter::LoadModel("Resources/rubber_duck/scene.gltf");
+
 		{
-			{ V3{  0.0f,  0.5f, 0.0f }, Color3{ 1.0f, 0.0f, 0.0f } },
-			{ V3{  0.5f, -0.5f, 0.0f }, Color3{ 0.0f, 1.0f, 0.0f } },
-			{ V3{ -0.5f, -0.5f, 0.0f }, Color3{ 0.0f, 0.0f, 1.0f } },
-		};
+			SceneConstantBuffer buffer{};
 
-		D3D11_BUFFER_DESC bufferInfo = {};
-		bufferInfo.ByteWidth = sizeof(vertices);
-		bufferInfo.Usage = D3D11_USAGE::D3D11_USAGE_IMMUTABLE;
-		bufferInfo.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER;
+			D3D11_BUFFER_DESC desc{
+				.ByteWidth = sizeof(SceneConstantBuffer),
+				.Usage = D3D11_USAGE_DEFAULT,
+			};
+			desc.BindFlags |= D3D11_BIND_CONSTANT_BUFFER;
+			desc.Usage = D3D11_USAGE_DYNAMIC;
+			desc.CPUAccessFlags |= D3D11_CPU_ACCESS_WRITE;
 
-		D3D11_SUBRESOURCE_DATA resourceData = {};
-		resourceData.pSysMem = vertices;
+			D3D11_SUBRESOURCE_DATA resourceData = {};
+			resourceData.pSysMem = &buffer;
+			resourceData.SysMemPitch = 0;
+			resourceData.SysMemSlicePitch = 0;
 
-		if (FAILED(g_Device->CreateBuffer(&bufferInfo, &resourceData, &g_TriangleVertexBuffer)))
-		{
-			CORE_ERROR("D3D11: Failed to create triangle vertex buffer");
+			HRESULT hr = Core::Device().CreateBuffer(&desc, &resourceData, &g_ConstantBuffer);
+			if (FAILED(hr))
+			{
+				CORE_ERROR("D3D11: Failed to create scene constant buffer: {}", Win32ErrorMessage(hr));
+			}
 		}
 	}
 	bool CreateSwapChainResources()
 	{
 		ComPtr<ID3D11Texture2D> backBuffer = nullptr;
-		if (FAILED(g_SwapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer))))
+		HRESULT hr = g_SwapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer));
+		if (FAILED(hr))
 		{
-			CORE_ERROR("D3D11: Failed to get back buffer from swap chain!");
+			CORE_ERROR("D3D11: Failed to get back buffer from swap chain! {0}", Win32ErrorMessage(hr));
+			return false;
+		}
+		hr = g_Device->CreateRenderTargetView(backBuffer.Get(), nullptr, &g_RenderTarget);
+		if (FAILED(hr))
+		{
+			CORE_ERROR("D3D11: Failed to create RTV from back buffer!");
+			return false;
+		}
+		D3D11_TEXTURE2D_DESC backBufferDesc{};
+		backBuffer->GetDesc(&backBufferDesc);
+
+		D3D11_TEXTURE2D_DESC depthTextureDesc{};
+		depthTextureDesc.Width = backBufferDesc.Width;
+		depthTextureDesc.Height = backBufferDesc.Height;
+		depthTextureDesc.MipLevels = 1;
+		depthTextureDesc.ArraySize = 1;
+		depthTextureDesc.SampleDesc.Count = 1;
+		depthTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		depthTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+
+		ComPtr<ID3D11Texture2D> depthStencilTexture;
+		hr = g_Device->CreateTexture2D(&depthTextureDesc, NULL, &depthStencilTexture);
+
+		if (FAILED(hr))
+		{
+			CORE_ERROR("DX11: Failed to create depth stencil texture: {}", Win32ErrorMessage(hr));
 			return false;
 		}
 
-		if (FAILED(g_Device->CreateRenderTargetView(backBuffer.Get(), nullptr, &g_RenderTarget)))
+		D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
+		dsvDesc.Format = depthTextureDesc.Format;
+		dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
+
+		hr = g_Device->CreateDepthStencilView(depthStencilTexture.Get(), &dsvDesc, &g_DepthBuffer);
+		if (FAILED(hr))
 		{
-			CORE_ERROR("D3D11: Failed to create RTV from back buffer!");
+			CORE_ERROR("DX11: Failed to create depth stencil view: {}", Win32ErrorMessage(hr));
 			return false;
 		}
 
@@ -264,6 +332,7 @@ namespace Zephyr::D3D11::Core
 	void DestroySwapChainResources()
 	{
 		g_RenderTarget.Reset();
+		g_DepthBuffer.Reset();
 	}
 
 	ID3D11Device& Device()
@@ -282,7 +351,10 @@ namespace Zephyr::D3D11::Core
 		g_Adapter->GetDesc(&desc);
 
 		DXGI_QUERY_VIDEO_MEMORY_INFO videoMemoryInfo;
-		g_Adapter->QueryVideoMemoryInfo(0, DXGI_MEMORY_SEGMENT_GROUP_LOCAL, &videoMemoryInfo);
+		ComPtr<IDXGIAdapter3> adapter;
+		g_Adapter.As(&adapter);
+
+		adapter->QueryVideoMemoryInfo(0, DXGI_MEMORY_SEGMENT_GROUP_LOCAL, &videoMemoryInfo);
 
 		RenderDevice device;
 		std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
@@ -308,7 +380,7 @@ namespace Zephyr::D3D11::Core
 		CreateSwapChainResources();
 	}
 
-	void BeginFrame()
+	void BeginFrame( Camera& camera)
 	{
 		const auto& windowData = Window::GetWindowData();
 		D3D11_VIEWPORT viewport = {};
@@ -319,29 +391,42 @@ namespace Zephyr::D3D11::Core
 		viewport.MinDepth = 0.0f;
 		viewport.MaxDepth = 1.0f;
 
+		camera.OnResize(windowData.Height, windowData.Width);
 		constexpr f32 clearColor[] = { 0.1f, 0.1f, 0.1f, 1.0f };
-		g_DeviceContext->OMSetRenderTargets(1, g_RenderTarget.GetAddressOf(), nullptr);
+		g_DeviceContext->OMSetRenderTargets(1, g_RenderTarget.GetAddressOf(), g_DepthBuffer.Get());
+		
 		g_DeviceContext->ClearRenderTargetView(g_RenderTarget.Get(), clearColor);
-
-
+		g_DeviceContext->ClearDepthStencilView(g_DepthBuffer.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+		
+		g_DeviceContext->RSSetState(g_RastState.Get());
 		g_DeviceContext->RSSetViewports(1, &viewport);
+		
 		Ref<D3D11Shader> shader = Cast<D3D11Shader>(Renderer::GetShaderLibrary().Get("main"));
 
-		g_DeviceContext->IASetInputLayout(shader->Layout().Get());
+		g_DeviceContext->IASetInputLayout(shader->GetLayout().Get());
 
-		UINT vertexStride = sizeof(VertexPositionColor);
-		UINT vertexOffset = 0;
+	
+		g_DeviceContext->VSSetShader(shader->GetVertex().Get(), nullptr, 0);
+		g_DeviceContext->PSSetShader(shader->GetPixel().Get(), nullptr, 0);
 
-		g_DeviceContext->IASetVertexBuffers(0, 1, g_TriangleVertexBuffer.GetAddressOf(), &vertexStride, &vertexOffset);
+		Mat4 model = Mat4(1.0);
+		model = glm::rotate(model, 90.f, V3{0.f, 1.0f, 0.0f});
+		SceneConstantBuffer constantBuffer
+		{
+			.Model = model,
+			.View = camera.GetView(),
+			.Projection = camera.GetProjection(),
+		};
 
-		g_DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		D3D11_MAPPED_SUBRESOURCE subresource{};
+		g_DeviceContext->Map(g_ConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
+		memcpy(subresource.pData, &constantBuffer, sizeof(SceneConstantBuffer));
+		g_DeviceContext->Unmap(g_ConstantBuffer.Get(), 0);
 
-		g_DeviceContext->VSSetShader(shader->Vertex().Get(), nullptr, 0);
-		g_DeviceContext->PSSetShader(shader->Pixel().Get(), nullptr, 0);
+		g_DeviceContext->VSSetConstantBuffers(0, 1, g_ConstantBuffer.GetAddressOf());
 
-
-
-		g_DeviceContext->Draw(3, 0);
+		g_Model->Draw(0);
+		
 	}
 
 	void EndFrame()

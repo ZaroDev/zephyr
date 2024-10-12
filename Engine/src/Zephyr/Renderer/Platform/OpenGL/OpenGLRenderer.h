@@ -8,7 +8,7 @@ namespace Zephyr::OpenGL::Core
 	bool Init();
 	void Shutdown();
 	void OnResize(i32 width, i32 height);
-	void BeginFrame();
+	void BeginFrame(Camera& camera);
 	void EndFrame();
 	//void CreateTexture(D3D11Texture2D& texture, Buffer buffer = Buffer());
 

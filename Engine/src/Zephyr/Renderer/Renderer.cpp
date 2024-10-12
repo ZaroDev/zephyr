@@ -1,10 +1,14 @@
 #include <pch.h>
 #include "Renderer.h"
 
+#include <Zephyr/Time/Time.h>
+
 #include <imgui.h>
 
 #include <Zephyr/Renderer/Platform/D3D11/D3D11RHI.h>
 #include <Zephyr/Renderer/Platform/OpenGL/OpenGLRHI.h>
+
+#include <Zephyr/Renderer/Camera.h>
 
 namespace Zephyr::Renderer
 {
@@ -28,6 +32,8 @@ namespace Zephyr::Renderer
 
 			return false;
 		}
+
+		Camera g_Camera;
 	}
 
 
@@ -60,10 +66,12 @@ namespace Zephyr::Renderer
 	{
 		CORE_INFO("Resize event: {0}x{1}p", width, height);
 		g_GraphicsInterface.Core.OnResize(width, height);
+		g_Camera.OnResize(width, height);
 	}
 	void BeginFrame()
 	{
-		g_GraphicsInterface.Core.BeginFrame();
+		g_Camera.OnUpdate(Time::GetDeltaTime());
+		g_GraphicsInterface.Core.BeginFrame(g_Camera);
 	}
 	void EndFrame()
 	{

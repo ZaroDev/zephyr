@@ -14,7 +14,24 @@ namespace Zephyr::OpenGL
 		const String vertexShaderSource = FileSystem::ReadFileContents(FileSystem::ReplaceExtension(file, "vs"));
 		const String fragmentShaderSource = FileSystem::ReadFileContents(FileSystem::ReplaceExtension(file, "fs"));
 
+		m_ProgramID = glCreateProgram();
 
+		const u32 vertexShader = glCreateShader(GL_VERTEX_SHADER);
+		const u32 fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+
+		const char* cVertSrc = vertexShaderSource.c_str();
+		glShaderSource(vertexShader, 1, &cVertSrc, NULL);
+		glCompileShader(vertexShader);
+
+		glAttachShader(m_ProgramID, vertexShader);
+		glDeleteShader(vertexShader);
+
+		const char* cFragSrc = fragmentShaderSource.c_str();
+		glShaderSource(fragmentShader, 1, &cFragSrc, NULL);
+		glCompileShader(fragmentShader);
+
+		glAttachShader(m_ProgramID, fragmentShader);
+		glDeleteShader(fragmentShader);
 	}
 	void OpenGLShader::Bind()
 	{

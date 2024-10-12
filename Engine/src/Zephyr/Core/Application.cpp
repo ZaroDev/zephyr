@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "Application.h"
 
+#include <Time/Time.h>
 
 namespace Zephyr
 {
@@ -29,6 +30,8 @@ namespace Zephyr
 
 		while (m_Running)
 		{
+			Time::StartTimeUpdate();
+
 			Window::Update();
 			OnUpdate();
 			Renderer::BeginFrame();
@@ -36,6 +39,8 @@ namespace Zephyr
 			OnImGuiUpdate();
 			Renderer::ImGuiEndFrame();
 			Renderer::EndFrame();
+
+			Time::EndTimeUpdate();
 		}
 
 		OnShutdown();
