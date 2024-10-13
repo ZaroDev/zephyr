@@ -8,7 +8,7 @@
 #include <Zephyr/Renderer/Platform/D3D11/D3D11RHI.h>
 #include <Zephyr/Renderer/Platform/OpenGL/OpenGLRHI.h>
 
-#include <Zephyr/Renderer/Camera.h>
+
 
 namespace Zephyr::Renderer
 {
@@ -19,6 +19,7 @@ namespace Zephyr::Renderer
 		ShaderLibrary g_Library;
 		RenderDevice g_Device;
 		RenderingPath g_RenderingPath;
+		Camera g_Camera;
 
 		bool SetPlatformInterface(GraphicsAPI api)
 		{
@@ -32,8 +33,6 @@ namespace Zephyr::Renderer
 
 			return false;
 		}
-
-		Camera g_Camera;
 	}
 
 
@@ -132,5 +131,9 @@ namespace Zephyr::Renderer
 	void ShutdownImGui()
 	{
 		ImGui::DestroyContext();
+	}
+	Camera& GetMainCamera()
+	{
+		return g_Camera;
 	}
 }

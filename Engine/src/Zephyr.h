@@ -4,6 +4,7 @@
 
 #include <Zephyr/Core/Base.h>
 #include <Zephyr/Core/Assert.h>
+#include <Zephyr/Core/UUID.h>
 #include <Zephyr/Core/PlatformDetection.h>
 #include <Zephyr/Core/Application.h>
 #include <Zephyr/Core/EntryPoint.h>

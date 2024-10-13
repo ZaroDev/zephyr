@@ -13,7 +13,8 @@ namespace Editor
 		void OnImGui() override;
 
 	private:
-		std::vector<float> m_vramUsage;
-
+		std::vector<float> m_VramUsage;
+		std::vector<float> m_FPSRecord;
+		std::vector<float> m_MSRecord;
 	};
 }

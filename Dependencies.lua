@@ -7,6 +7,7 @@ IncludeDir["glm"] = "%{wks.location}/Engine/Vendor/glm"
 IncludeDir["meshoptimizer"] = "%{wks.location}/Engine/Vendor/meshoptimizer/include"
 IncludeDir["ImGui"] = "%{wks.location}/Engine/Vendor/ImGui"
 IncludeDir["ImGuizmo"] = "%{wks.location}/Editor/Vendor/ImGuizmo"
+IncludeDir["IconHeaders"] = "%{wks.location}/Editor/Vendor/IconFontCppHeaders"
 
 LibraryDir = {}
 LibraryDir["assimp"] = "%{wks.location}/Engine/Vendor/assimp/lib/%{cfg.buildcfg}"

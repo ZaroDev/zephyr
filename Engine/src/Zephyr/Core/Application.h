@@ -5,6 +5,10 @@
 
 namespace Zephyr
 {
+	namespace ECS
+	{
+		class Scene;
+	}
 	struct ApplicationCommandLineArgs
 	{
 		int Count = 0;
@@ -24,7 +28,7 @@ namespace Zephyr
 		Window::WindowData WindowData = {};
 	};
 
-
+	
 	class Application
 	{
 	public:
@@ -39,7 +43,7 @@ namespace Zephyr
 
 		NODISCARD static Application& Get() { return *s_Instance; }
 		NODISCARD const ApplicationSpecification& Specification() const { return m_Specification; }
-
+		NODISCARD virtual Ref<ECS::Scene> GetActiveScene() const = 0;
 	protected:
 		virtual void OnInit() = 0;
 		virtual void OnUpdate() = 0;

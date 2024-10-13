@@ -18,11 +18,8 @@ namespace Editor
 	class AssetBrowserPanel final : public Panel
 	{
 	public:
-		AssetBrowserPanel() : Panel("Asset Browser", PanelCategory::WINDOW)
-		{
-			UpdateDirectories();
-			UpdateFolders();
-		}
+		AssetBrowserPanel();
+		virtual ~AssetBrowserPanel() = default;
 
 		void OnUpdate() override;
 		void OnImGui() override;
@@ -33,17 +30,19 @@ namespace Editor
 
 
 
-
+		void DrawFolder(const Folder& folder);
 		void DrawFolder(float cellSize, int& id, Folder& folder);
-		void DrawFileBrowser();
-		void DrawFolderSearch();
-		void DrawFileSearch();
-
-
+		void DrawFile(File& file, float thumbnailSize, float padding);
+		void TopBar();
+		void FolderBrowser();
+		void FileBrowser();
+		void SearchForFile(const Folder& folder);
+		void FileSearch();
+		void FolderSearch();
 	private:
 		Zephyr::Path m_CurrentDir;
 		Zephyr::Path m_LastDir;
 
-
+		float m_ButtonSize = 1.f;
 	};
 }

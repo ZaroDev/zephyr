@@ -6,6 +6,7 @@
 #include <map>
 #include <unordered_map>
 
+#include <Zephyr/Core/UUID.h>
 #include <Zephyr/Core/Assert.h>
 #include <Zephyr/Core/PlatformDetection.h>
 #include <Zephyr/Core/Base.h>

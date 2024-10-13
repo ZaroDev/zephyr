@@ -3,3 +3,5 @@
 #include "InfoPanel.h"
 #include "ProjectPanel.h"
 #include "ConsolePanel.h"
+#include "HierarchyPanel.h"
+#include "AssetBrowserPanel.h"

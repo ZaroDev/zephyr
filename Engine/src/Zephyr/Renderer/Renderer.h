@@ -4,6 +4,8 @@
 #include <Zephyr/Renderer/Shader.h>
 #include <Zephyr/Renderer/RenderDevice.h>
 
+#include <Zephyr/Renderer/Camera.h>
+
 namespace Zephyr::Renderer
 {
 	enum class RenderingPath
@@ -34,6 +36,6 @@ namespace Zephyr::Renderer
 	bool InitImGui();
 	void ShutdownImGui();
 
-
+	Camera& GetMainCamera();
 
 }

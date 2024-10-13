@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Zephyr/Math/MathTypes.h>
+
 namespace Zephyr
 {
 	class UUID
