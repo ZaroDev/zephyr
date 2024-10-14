@@ -8,6 +8,7 @@ namespace Zephyr
 		NONE = 0,
 
 		RGBA8,
+		RGBA32,
 		RED_INTEGER,
 
 		DEPTH24STENCIL8,
@@ -47,6 +48,7 @@ namespace Zephyr
 	class Framebuffer
 	{
 	public:
+		Framebuffer(const FramebufferSpecification& spec) : m_Specification(spec) {}
 		virtual ~Framebuffer() = default;
 
 		virtual void Bind() = 0;
@@ -59,8 +61,13 @@ namespace Zephyr
 
 		virtual u32 GetColorAttachmentRendererID(u32 index = 0) = 0;
 
-		virtual const FramebufferSpecification& Specification() const = 0;
+		const FramebufferSpecification& Specification() const { return m_Specification; }
 
 		static Ref<Framebuffer> Create(const FramebufferSpecification& spec);
+
+	protected:
+		FramebufferSpecification m_Specification;
+		std::vector<FramebufferTextureSpecification> m_ColorAttachments;
+		FramebufferTextureSpecification m_Depthbuffer = FramebufferTextureFormat::DEPTH;
 	};
 }

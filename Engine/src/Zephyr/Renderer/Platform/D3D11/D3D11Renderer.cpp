@@ -29,7 +29,7 @@ namespace Zephyr::D3D11::Core
 		ComPtr<IDXGIFactory4> g_DxgiFactory = nullptr;
 		ComPtr<ID3D11DeviceContext> g_DeviceContext = nullptr;
 		ComPtr<IDXGISwapChain1> g_SwapChain = nullptr;
-		ComPtr<ID3D11RenderTargetView> g_RenderTarget = nullptr;
+		ComPtr<ID3D11RenderTargetView> g_BackBuffer = nullptr;
 		ComPtr<IDXGIAdapter1> g_Adapter = nullptr;
 
 		std::vector<ComPtr<ID3D11Buffer>> g_Models{};
@@ -43,10 +43,6 @@ namespace Zephyr::D3D11::Core
 		ComPtr<ID3D11Debug> g_DebugLayer = nullptr;
 #endif
 		Ref<Model> g_Model;
-
-		// TODO : Move to a framebuffer
-		ComPtr<ID3D11DepthStencilView> g_DepthBuffer = nullptr;
-
 
 		void GetHardwareAdapter(IDXGIAdapter1** ppAdapter)
 		{
@@ -289,41 +285,10 @@ namespace Zephyr::D3D11::Core
 			CORE_ERROR("D3D11: Failed to get back buffer from swap chain! {0}", Win32ErrorMessage(hr));
 			return false;
 		}
-		hr = g_Device->CreateRenderTargetView(backBuffer.Get(), nullptr, &g_RenderTarget);
+		hr = g_Device->CreateRenderTargetView(backBuffer.Get(), nullptr, &g_BackBuffer);
 		if (FAILED(hr))
 		{
 			CORE_ERROR("D3D11: Failed to create RTV from back buffer!");
-			return false;
-		}
-		D3D11_TEXTURE2D_DESC backBufferDesc{};
-		backBuffer->GetDesc(&backBufferDesc);
-
-		D3D11_TEXTURE2D_DESC depthTextureDesc{};
-		depthTextureDesc.Width = backBufferDesc.Width;
-		depthTextureDesc.Height = backBufferDesc.Height;
-		depthTextureDesc.MipLevels = 1;
-		depthTextureDesc.ArraySize = 1;
-		depthTextureDesc.SampleDesc.Count = 1;
-		depthTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-		depthTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-
-		ComPtr<ID3D11Texture2D> depthStencilTexture;
-		hr = g_Device->CreateTexture2D(&depthTextureDesc, NULL, &depthStencilTexture);
-
-		if (FAILED(hr))
-		{
-			CORE_ERROR("DX11: Failed to create depth stencil texture: {}", Win32ErrorMessage(hr));
-			return false;
-		}
-
-		D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
-		dsvDesc.Format = depthTextureDesc.Format;
-		dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
-
-		hr = g_Device->CreateDepthStencilView(depthStencilTexture.Get(), &dsvDesc, &g_DepthBuffer);
-		if (FAILED(hr))
-		{
-			CORE_ERROR("DX11: Failed to create depth stencil view: {}", Win32ErrorMessage(hr));
 			return false;
 		}
 
@@ -331,8 +296,7 @@ namespace Zephyr::D3D11::Core
 	}
 	void DestroySwapChainResources()
 	{
-		g_RenderTarget.Reset();
-		g_DepthBuffer.Reset();
+		g_BackBuffer.Reset();
 	}
 
 	ID3D11Device& Device()
@@ -393,10 +357,9 @@ namespace Zephyr::D3D11::Core
 
 		camera.OnResize(windowData.Height, windowData.Width);
 		constexpr f32 clearColor[] = { 0.1f, 0.1f, 0.1f, 1.0f };
-		g_DeviceContext->OMSetRenderTargets(1, g_RenderTarget.GetAddressOf(), g_DepthBuffer.Get());
+		g_DeviceContext->OMSetRenderTargets(1, g_BackBuffer.GetAddressOf(), g_DepthBuffer.Get());
 		
-		g_DeviceContext->ClearRenderTargetView(g_RenderTarget.Get(), clearColor);
-		g_DeviceContext->ClearDepthStencilView(g_DepthBuffer.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+		g_DeviceContext->ClearRenderTargetView(g_BackBuffer.Get(), clearColor);
 		
 		g_DeviceContext->RSSetState(g_RastState.Get());
 		g_DeviceContext->RSSetViewports(1, &viewport);
