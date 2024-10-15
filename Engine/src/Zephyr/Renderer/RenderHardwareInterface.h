@@ -12,6 +12,7 @@ namespace Zephyr
 		struct
 		{
 			bool (*Init)(void);
+			bool (*InitRenderPasses)(void);
 			RenderDevice (*GetRenderDevice)(void);
 			void (*Shutdown)();
 			void (*OnResize)(i32 width, i32 height);

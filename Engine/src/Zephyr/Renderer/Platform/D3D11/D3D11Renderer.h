@@ -19,6 +19,7 @@ namespace Zephyr::D3D11::Core
 	static_assert(sizeof(SceneConstantBuffer) % 16 == 0, "Constant Buffer size must be 16-byte aligned");
 
 	bool Init();
+	bool InitRenderPasses();
 	void Shutdown();
 	void OnResize(i32 width, i32 height);
 	void BeginFrame(Camera& camera);

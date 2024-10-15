@@ -110,6 +110,8 @@ namespace Zephyr::D3D11::Core
 
 			*ppAdapter = adapter.Detach();
 		}
+
+		
 	}
 
 	extern "C"
@@ -214,6 +216,15 @@ namespace Zephyr::D3D11::Core
 
 
 		CORE_INFO("D3D11: Renderer initialized!");
+
+		return true;
+	}
+	bool InitRenderPasses()
+	{
+		{
+			Ref<D3D11Shader> shader = Cast<D3D11Shader>(Renderer::GetShaderLibrary().Get("FullScreenQuad"));
+			g_FullscreenPass = CreateScope<D3D11FullScreenPass>(shader);
+		}
 
 		return true;
 	}
@@ -327,9 +338,9 @@ namespace Zephyr::D3D11::Core
 		std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 		device.Name = converter.to_bytes(desc.Description);
 		device.Vendor = std::to_string(desc.VendorId);
-		device.AvailableVRAM = videoMemoryInfo.Budget / 1024 / 1024;
-		device.UsedVRAM = videoMemoryInfo.CurrentUsage / 1024 / 1024;
-		device.TotalVRAM = desc.DedicatedVideoMemory / 1024 / 1024;
+		device.AvailableVRAM = static_cast<u32>(videoMemoryInfo.Budget) / 1024u / 1024u;
+		device.UsedVRAM = static_cast<u32>(videoMemoryInfo.CurrentUsage) / 1024u / 1024u;
+		device.TotalVRAM = static_cast<u32>(desc.DedicatedVideoMemory) / 1024u / 1024u;
 		return device;
 	}
 
@@ -368,7 +379,11 @@ namespace Zephyr::D3D11::Core
 		g_DeviceContext->Unmap(g_ConstantBuffer.Get(), 0);
 		g_DeviceContext->VSSetConstantBuffers(0, 1, g_ConstantBuffer.GetAddressOf());*/
 
-
+		
+		
+		Renderer::GetMainBuffer()->ClearAttachment(0, Color{ 1.0f });
+		Renderer::GetMainBuffer()->Bind();
+		g_FullscreenPass->Render();
 	}
 
 	void EndFrame()
@@ -383,17 +398,11 @@ namespace Zephyr::D3D11::Core
 		viewport.MaxDepth = 1.0f;
 
 
-		constexpr f32 clearColor[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+		constexpr f32 clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 		g_DeviceContext->OMSetRenderTargets(1, g_BackBuffer.GetAddressOf(), nullptr);
 		g_DeviceContext->ClearRenderTargetView(g_BackBuffer.Get(), clearColor);
 		g_DeviceContext->RSSetState(g_RastState.Get());
 		g_DeviceContext->RSSetViewports(1, &viewport);
-
-		
-		
-
-		g_FullscreenPass->Render();
-
 		g_SwapChain->Present(1, 0);
 	}
 }

@@ -14,7 +14,7 @@ namespace Zephyr::D3D11
 		{
 			const auto& mesh = meshes[i];
 			D3D11_BUFFER_DESC bufferInfo = {};
-			bufferInfo.ByteWidth = mesh.GetVertexCount() * sizeof(Vertex);
+			bufferInfo.ByteWidth = static_cast<u32>(mesh.GetVertexCount() * sizeof(Vertex));
 			bufferInfo.Usage = D3D11_USAGE::D3D11_USAGE_IMMUTABLE;
 			bufferInfo.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER;
 
@@ -36,7 +36,7 @@ namespace Zephyr::D3D11
 
 				const auto& mesh = meshes[i];
 				D3D11_BUFFER_DESC bufferInfo = {};
-				bufferInfo.ByteWidth = mesh.GetIndexCount() * sizeof(u32);
+				bufferInfo.ByteWidth = static_cast<u32>(mesh.GetIndexCount()) * sizeof(u32);
 				bufferInfo.Usage = D3D11_USAGE::D3D11_USAGE_IMMUTABLE;
 				bufferInfo.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER;
 
@@ -66,7 +66,7 @@ namespace Zephyr::D3D11
 		{
 			const auto& vertexBuffer = m_VertexBuffers[i];
 			const auto& indexBuffer = m_IndexBuffers[lod][i];
-			const u32 indexCount = m_Meshes[lod][i].GetIndexCount();
+			const u32 indexCount = static_cast<u32>(m_Meshes[lod][i].GetIndexCount());
 
 			deviceContext.IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &vertexStride, &vertexOffset);
 			deviceContext.IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);

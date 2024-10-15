@@ -57,6 +57,7 @@ namespace Editor
 			m_ViewPort->Resize(view.x, view.y);
 		}
 
+		m_ViewPort->ClearAttachment(0, { 1.0f, 1.0f, 1.0f, 1.0f });
 		ImGui::SetCursorPos((ImGui::GetContentRegionAvail() - viewport) * 0.5f + ImGui::GetWindowSize() - ImGui::GetContentRegionAvail());
 		ImGui::Image(m_ViewPort->GetImGuiAttachment(0), viewport);
 

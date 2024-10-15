@@ -166,7 +166,7 @@ namespace Zephyr::D3D11
 	}
 	void D3D11Framebuffer::Bind()
 	{
-		Core::DeviceContext().OMSetRenderTargets(m_ColorAttachments.size(), m_ColorRTVs[0].GetAddressOf(), m_DepthStencilAttachment.RTV.Get());
+		Core::DeviceContext().OMSetRenderTargets(static_cast<u32>(m_ColorAttachments.size()), m_ColorRTVs[0].GetAddressOf(), m_DepthStencilAttachment.RTV.Get());
 	}
 	void D3D11Framebuffer::Unbind()
 	{

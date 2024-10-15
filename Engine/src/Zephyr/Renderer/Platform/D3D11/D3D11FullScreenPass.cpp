@@ -75,11 +75,9 @@ namespace Zephyr::D3D11
 		auto& context = Core::DeviceContext();
 
 		context.IASetInputLayout(m_InputLayout.Get());
-		context.VSSetShader(m_Shader->GetVertex().Get(), nullptr, 0);
-		context.PSSetShader(m_Shader->GetPixel().Get(), nullptr, 0);
+
 		context.IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		context.IASetVertexBuffers(0, 1, m_QuadBuffer.GetAddressOf(), &vertexStride, &vertexOffset);
 		context.Draw(4, 0);
-
 	}
 }

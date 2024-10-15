@@ -16,11 +16,12 @@ namespace Zephyr::D3D11
 
 		m_VertexShader = CreateVertexShader(FileSystem::ReplaceExtension(file, "vs.hlsl"), m_VertexShaderBlob);
 		m_PixelShader = CreatePixelShader(FileSystem::ReplaceExtension(file, "ps.hlsl"), m_PixelShaderBlob);
-
-		CreateInputLayout();
 	}
 	void D3D11Shader::Bind()
 	{
+		auto& context = Core::DeviceContext();
+		context.VSSetShader(m_VertexShader.Get(), nullptr, 0);
+		context.PSSetShader(m_PixelShader.Get(), nullptr, 0);
 	}
 	void D3D11Shader::UnBind()
 	{

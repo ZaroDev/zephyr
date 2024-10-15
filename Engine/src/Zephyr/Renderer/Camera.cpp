@@ -63,15 +63,17 @@ namespace Zephyr
 		return moved;
 	}
 
-	void Camera::OnResize(uint32_t width, uint32_t height)
+	void Camera::OnResize(u32 width, u32 height)
 	{
 		if (width == m_ViewportWidth && height == m_ViewportHeight)
+		{
 			return;
+		}
 
 		m_ViewportWidth = width;
 		m_ViewportHeight = height;
 
-		const float ar = m_ViewportWidth / m_ViewportHeight;
+		const float ar = static_cast<float>(m_ViewportWidth / m_ViewportHeight);
 
 		if (ar >= 1.0)
 		{

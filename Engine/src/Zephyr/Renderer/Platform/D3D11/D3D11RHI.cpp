@@ -9,6 +9,7 @@ namespace Zephyr::D3D11
 	void GetPlatformInterface(RenderHardwareInterface& rhi)
 	{
 		rhi.Core.Init = Core::Init;
+		rhi.Core.InitRenderPasses = Core::InitRenderPasses;
 		rhi.Core.GetRenderDevice = Core::GetRenderDevice;
 		rhi.Core.BeginFrame = Core::BeginFrame;
 		rhi.Core.EndFrame = Core::EndFrame;

@@ -3,5 +3,5 @@
 
 u32 Zephyr::BytesToMB(u64 bytes)
 {
-	return bytes / 1024 / 1024;
+	return static_cast<u32>(bytes) / 1024u / 1024;
 }

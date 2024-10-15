@@ -52,6 +52,8 @@ namespace Zephyr::Renderer
 
 		ret &= g_Library.LoadEngineShaders();
 
+		ret &= g_GraphicsInterface.Core.InitRenderPasses();
+
 		ret &= InitImGui();
 		ret &= g_GraphicsInterface.ImGui.Init();
 
