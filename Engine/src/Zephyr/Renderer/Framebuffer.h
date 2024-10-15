@@ -8,6 +8,7 @@ namespace Zephyr
 		NONE = 0,
 
 		RGBA8,
+		RGBA16,
 		RGBA32,
 		RED_INTEGER,
 

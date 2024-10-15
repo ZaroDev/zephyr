@@ -357,7 +357,7 @@ namespace Zephyr::D3D11::Core
 
 		camera.OnResize(windowData.Height, windowData.Width);
 		constexpr f32 clearColor[] = { 0.1f, 0.1f, 0.1f, 1.0f };
-		g_DeviceContext->OMSetRenderTargets(1, g_BackBuffer.GetAddressOf(), g_DepthBuffer.Get());
+		g_DeviceContext->OMSetRenderTargets(1, g_BackBuffer.GetAddressOf(), nullptr);
 		
 		g_DeviceContext->ClearRenderTargetView(g_BackBuffer.Get(), clearColor);
 		

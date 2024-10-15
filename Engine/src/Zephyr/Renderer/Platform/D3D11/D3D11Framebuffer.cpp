@@ -17,10 +17,45 @@ namespace Zephyr::D3D11
 
 			return false;
 		}
+		bool IsFormatSupported(DXGI_FORMAT format, u32 flag)
+		{
+			u32 support = 0;
+			HRESULT hr = Core::Device().CheckFormatSupport(format, &support);
+			if(FAILED(hr))
+			{
+				CORE_ERROR("D3D11: Failed to check format support {}", Win32ErrorMessage(hr));
+				return false;
+			}
+
+			if (support & flag)
+			{
+				return true;
+			}
+			
+			return false;
+		}
+
+		DXGI_FORMAT GetFormat(FramebufferTextureFormat format)
+		{
+			switch (format)
+			{
+			case FramebufferTextureFormat::RGBA8: return DXGI_FORMAT_R8G8B8A8_UNORM;
+			case FramebufferTextureFormat::RGBA16: return DXGI_FORMAT_R16G16B16A16_FLOAT;
+			case FramebufferTextureFormat::RGBA32: return DXGI_FORMAT_R32G32B32_FLOAT; 
+			case FramebufferTextureFormat::RED_INTEGER: return DXGI_FORMAT_R8_UINT; 
+			}
+
+			return c_DefaultFormat;
+		}
+
 		D3D11RenderTarget CreateColorRenderTarget(u32 width, u32 height, DXGI_FORMAT format, u32 samples)
 		{
 			D3D11RenderTarget result;
+
+			const u32 usageFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 			HRESULT hr = S_OK;
+			format = IsFormatSupported(format, usageFlags) ? format : c_DefaultFormat;
+
 
 			D3D11_TEXTURE2D_DESC textureDesc{};
 			textureDesc.Width = width;
@@ -69,14 +104,15 @@ namespace Zephyr::D3D11
 		{
 			D3D11DepthTarget result;
 			HRESULT hr = S_OK;
-
+			DXGI_FORMAT format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			format = IsFormatSupported(format, D3D11_BIND_DEPTH_STENCIL) ? format : c_DefaultDepth;
 			D3D11_TEXTURE2D_DESC textureDesc{};
 			textureDesc.Width = width;
 			textureDesc.Height = height;
 			textureDesc.MipLevels = 1;
 			textureDesc.ArraySize = 1;
 			textureDesc.SampleDesc.Count = samples;
-			textureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			textureDesc.Format = format;
 			textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 			textureDesc.Usage = D3D11_USAGE_DEFAULT;
 
@@ -104,33 +140,29 @@ namespace Zephyr::D3D11
 	D3D11Framebuffer::D3D11Framebuffer(const FramebufferSpecification& spec)
 		: Framebuffer(spec)
 	{
-		for (u32 i = 0; i < spec.Attachments.Attachments.size(); i++)
+		for (const auto& attachment:  spec.Attachments.Attachments)
 		{
-			const auto& attachment = spec.Attachments.Attachments[i];
-			if (IsDepthFormat(attachment.TextureFormat))
+			if (!IsDepthFormat(attachment.TextureFormat))
 			{
-				DXGI_FORMAT format = DXGI_FORMAT_R32G32B32_FLOAT;
-				switch (attachment.TextureFormat)
-				{
-				case FramebufferTextureFormat::RGBA8: format = DXGI_FORMAT_R8G8B8A8_UNORM; break;
-				case FramebufferTextureFormat::RGBA32: format = DXGI_FORMAT_R32G32B32_FLOAT; break;
-				case FramebufferTextureFormat::RED_INTEGER: format = DXGI_FORMAT_R8_UINT; break;
-				}
-				D3D11RenderTarget renderTarget = CreateColorRenderTarget(spec.Width, spec.Height, format, spec.Samples);
-				m_ColorTextures.emplace_back(renderTarget.Texture);
-				m_ColorRTVs.emplace_back(renderTarget.RTV);
-				m_ColorSRVs.emplace_back(renderTarget.SRV);
 				m_ColorAttachments.emplace_back(attachment);
 			}
 			else
 			{
 				m_Depthbuffer = attachment.TextureFormat;
-				m_DepthStencilAttachment = CreateDepthTarget(spec.Width, spec.Height, spec.Samples);
 			}
 		}
+
+		Reset();
 	}
 	D3D11Framebuffer::~D3D11Framebuffer()
 	{
+		m_ColorAttachments.clear();
+		m_ColorTextures.clear();
+		m_ColorSRVs.clear();
+		m_ColorRTVs.clear();
+
+		m_DepthStencilAttachment = {};
+
 	}
 	void D3D11Framebuffer::Bind()
 	{
@@ -138,9 +170,18 @@ namespace Zephyr::D3D11
 	}
 	void D3D11Framebuffer::Unbind()
 	{
+		m_ColorTextures.clear();
+		m_ColorSRVs.clear();
+		m_ColorRTVs.clear();
+
+		m_DepthStencilAttachment = {};
 	}
 	void D3D11Framebuffer::Resize(u32 width, u32 height)
 	{
+		m_Specification.Width = width;
+		m_Specification.Height = height;
+
+		Reset();
 	}
 	i32 D3D11Framebuffer::ReadPixel(u32 attachmentIndex, i32 x, i32 y)
 	{
@@ -148,10 +189,35 @@ namespace Zephyr::D3D11
 	}
 	void D3D11Framebuffer::ClearAttachment(u32 attachmentIndex, i32 value)
 	{
-
+		CORE_ASSERT(attachmentIndex < m_ColorRTVs.size());
+		const float colors[4] = { value };
+		Core::DeviceContext().ClearRenderTargetView(m_ColorRTVs[attachmentIndex].Get(), colors);
 	}
 	u32 D3D11Framebuffer::GetColorAttachmentRendererID(u32 index)
 	{
 		return u32();
+	}
+	void D3D11Framebuffer::Reset()
+	{
+		m_ColorTextures.clear();
+		m_ColorSRVs.clear();
+		m_ColorRTVs.clear();
+
+		m_DepthStencilAttachment = {};
+
+		for (const auto& attachment : m_ColorAttachments)
+		{
+			DXGI_FORMAT format = GetFormat(attachment.TextureFormat);
+			
+			
+			D3D11RenderTarget renderTarget = CreateColorRenderTarget(m_Specification.Width, m_Specification.Height, format, m_Specification.Samples);
+			m_ColorTextures.emplace_back(renderTarget.Texture);
+			m_ColorRTVs.emplace_back(renderTarget.RTV);
+			m_ColorSRVs.emplace_back(renderTarget.SRV);
+		}
+		if (m_Depthbuffer.TextureFormat != FramebufferTextureFormat::NONE)
+		{
+			m_DepthStencilAttachment = CreateDepthTarget(m_Specification.Width, m_Specification.Height, m_Specification.Samples);
+		}
 	}
 }

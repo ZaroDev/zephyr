@@ -8,6 +8,8 @@
 #include <Zephyr/Renderer/Platform/D3D11/D3D11RHI.h>
 #include <Zephyr/Renderer/Platform/OpenGL/OpenGLRHI.h>
 
+#include "Framebuffer.h"
+
 
 
 namespace Zephyr::Renderer
@@ -20,6 +22,8 @@ namespace Zephyr::Renderer
 		RenderDevice g_Device;
 		RenderingPath g_RenderingPath;
 		Camera g_Camera;
+
+		Ref<Framebuffer> m_TestBuffer;
 
 		bool SetPlatformInterface(GraphicsAPI api)
 		{
@@ -50,6 +54,21 @@ namespace Zephyr::Renderer
 		ret &= InitImGui();
 		ret &= g_GraphicsInterface.ImGui.Init();
 
+		const FramebufferSpecification spec = {
+			.Width = Window::GetWindowData().Width,
+			.Height = Window::GetWindowData().Height,
+			.Attachments = FramebufferAttachmentSpecification{
+				FramebufferTextureFormat::RGBA16,
+				FramebufferTextureFormat::RGBA16,
+				FramebufferTextureFormat::RGBA16,
+				FramebufferTextureFormat::DEPTH
+			},
+			.Samples = 1,
+			.SwapChainTarget = false,
+		};
+
+		m_TestBuffer = Framebuffer::Create(spec);
+
 
 		return ret;
 	}
@@ -66,6 +85,7 @@ namespace Zephyr::Renderer
 		CORE_INFO("Resize event: {0}x{1}p", width, height);
 		g_GraphicsInterface.Core.OnResize(width, height);
 		g_Camera.OnResize(width, height);
+		m_TestBuffer->Resize(width, height);
 	}
 	void BeginFrame()
 	{
@@ -118,7 +138,7 @@ namespace Zephyr::Renderer
 		ImGui::CreateContext();
 
 		ImGuiIO& io = ImGui::GetIO();
-		io.ConfigFlags |= ImGuiConfigFlags_IsSRGB;
+		//io.ConfigFlags |= ImGuiConfigFlags_IsSRGB;
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking

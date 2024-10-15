@@ -7,8 +7,8 @@ namespace Zephyr::Window
 {
 	struct WindowData
 	{
-		i32 Width = 1280;
-		i32 Height = 720;
+		u32 Width = 1280;
+		u32 Height = 720;
 		String Title = "Zephyr";
 		bool Fullscreen = false;
 		bool Vsync = false;

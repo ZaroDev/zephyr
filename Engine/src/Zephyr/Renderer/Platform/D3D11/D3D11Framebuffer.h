@@ -17,6 +17,9 @@ namespace Zephyr::D3D11
 		ComPtr<ID3D11DepthStencilView> RTV = nullptr;
 	};
 
+	constexpr DXGI_FORMAT c_DefaultFormat = DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM;
+	constexpr DXGI_FORMAT c_DefaultDepth = DXGI_FORMAT::DXGI_FORMAT_D32_FLOAT;
+
 	class D3D11Framebuffer final : public Framebuffer
 	{
 	public:
@@ -31,6 +34,9 @@ namespace Zephyr::D3D11
 		void ClearAttachment(u32 attachmentIndex, i32 value) override;
 		u32 GetColorAttachmentRendererID(u32 index = 0) override;
 	private:
+		void Reset();
+
+
 		std::vector<ComPtr<ID3D11Texture2D>> m_ColorTextures;
 		std::vector<ComPtr<ID3D11RenderTargetView>> m_ColorRTVs;
 		std::vector<ComPtr<ID3D11ShaderResourceView>> m_ColorSRVs;
