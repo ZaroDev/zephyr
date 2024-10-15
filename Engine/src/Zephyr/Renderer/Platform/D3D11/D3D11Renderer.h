@@ -36,8 +36,6 @@ namespace Zephyr::D3D11::Core
 	NODISCARD ID3D11Device& Device();
 	NODISCARD ID3D11DeviceContext& DeviceContext();
 	NODISCARD RenderDevice GetRenderDevice();
-
-	
 }
 
 #endif

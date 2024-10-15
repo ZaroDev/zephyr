@@ -39,7 +39,7 @@ namespace Zephyr
 		void Close();
 		void RequestClose() { m_Running = false; }
 
-		void OnResize(i32 width, i32 height);
+		virtual void OnResize(u32 width, u32 height) ;
 
 		NODISCARD static Application& Get() { return *s_Instance; }
 		NODISCARD const ApplicationSpecification& Specification() const { return m_Specification; }

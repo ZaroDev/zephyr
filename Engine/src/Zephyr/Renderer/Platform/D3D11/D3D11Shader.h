@@ -23,13 +23,13 @@ namespace Zephyr::D3D11
 		D3D11Shader(const Path& filePath);
 		void Bind() override;
 		void UnBind() override;
-
-		ComPtr<ID3D11InputLayout> GetLayout() const { return m_VertexLayout; }
 		ComPtr<ID3D11VertexShader> GetVertex() const { return m_VertexShader; }
 		ComPtr<ID3D11PixelShader> GetPixel() const { return m_PixelShader; }
+
+		ComPtr<ID3DBlob> GetVertexBlob() const { return m_VertexShaderBlob; }
 		
 	private:
-		void CreateInputLayout();
+	
 
 		bool CompileShader(const Path& filePath, std::string_view profile, ComPtr<ID3DBlob>& shaderBlob) const;
 
@@ -37,7 +37,6 @@ namespace Zephyr::D3D11
 		ComPtr<ID3D11PixelShader> CreatePixelShader(const Path& filePath, ComPtr<ID3DBlob>& pixelShaderBlob);
 
 	private:
-		ComPtr<ID3D11InputLayout> m_VertexLayout;
 		ComPtr<ID3DBlob> m_PixelShaderBlob;
 		ComPtr<ID3DBlob> m_VertexShaderBlob;
 		ComPtr<ID3D11VertexShader> m_VertexShader;

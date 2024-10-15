@@ -19,6 +19,9 @@
 #include <dxgi1_6.h>
 
 #include "D3D11Model.h"
+#include "D3D11FullScreenPass.h"
+
+
 #include <Zephyr/Asset/ModelImporter.h>
 
 namespace Zephyr::D3D11::Core
@@ -38,6 +41,8 @@ namespace Zephyr::D3D11::Core
 		// TODO: Move to a geometry pass
 		ComPtr<ID3D11Buffer> g_ConstantBuffer = nullptr;
 		ComPtr<ID3D11RasterizerState> g_RastState;
+
+		Scope<D3D11FullScreenPass> g_FullscreenPass;
 
 #ifndef DIST
 		ComPtr<ID3D11Debug> g_DebugLayer = nullptr;
@@ -130,8 +135,6 @@ namespace Zephyr::D3D11::Core
 		
 		GetHardwareAdapter(g_Adapter.GetAddressOf());
 		
-		
-
 		if (FAILED(D3D11CreateDevice(
 			nullptr,
 			D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_HARDWARE,
@@ -344,36 +347,14 @@ namespace Zephyr::D3D11::Core
 		CreateSwapChainResources();
 	}
 
-	void BeginFrame( Camera& camera)
+	void BeginFrame(Camera& camera)
 	{
 		const auto& windowData = Window::GetWindowData();
-		D3D11_VIEWPORT viewport = {};
-		viewport.TopLeftX = 0;
-		viewport.TopLeftY = 0;
-		viewport.Height = static_cast<FLOAT>(windowData.Height);
-		viewport.Width = static_cast<FLOAT>(windowData.Width);
-		viewport.MinDepth = 0.0f;
-		viewport.MaxDepth = 1.0f;
-
 		camera.OnResize(windowData.Height, windowData.Width);
-		constexpr f32 clearColor[] = { 0.1f, 0.1f, 0.1f, 1.0f };
-		g_DeviceContext->OMSetRenderTargets(1, g_BackBuffer.GetAddressOf(), nullptr);
 		
-		g_DeviceContext->ClearRenderTargetView(g_BackBuffer.Get(), clearColor);
-		
-		g_DeviceContext->RSSetState(g_RastState.Get());
-		g_DeviceContext->RSSetViewports(1, &viewport);
-		
-		Ref<D3D11Shader> shader = Cast<D3D11Shader>(Renderer::GetShaderLibrary().Get("main"));
-
-		g_DeviceContext->IASetInputLayout(shader->GetLayout().Get());
-
-	
-		g_DeviceContext->VSSetShader(shader->GetVertex().Get(), nullptr, 0);
-		g_DeviceContext->PSSetShader(shader->GetPixel().Get(), nullptr, 0);
-
-		Mat4 model = Mat4(1.0);
-		model = glm::rotate(model, 90.f, V3{0.f, 1.0f, 0.0f});
+		// Should happen on a geometry pass
+		/*Mat4 model = Mat4(1.0);
+		model = glm::rotate(model, 90.f, V3{ 0.f, 1.0f, 0.0f });
 		SceneConstantBuffer constantBuffer
 		{
 			.Model = model,
@@ -385,15 +366,34 @@ namespace Zephyr::D3D11::Core
 		g_DeviceContext->Map(g_ConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
 		memcpy(subresource.pData, &constantBuffer, sizeof(SceneConstantBuffer));
 		g_DeviceContext->Unmap(g_ConstantBuffer.Get(), 0);
+		g_DeviceContext->VSSetConstantBuffers(0, 1, g_ConstantBuffer.GetAddressOf());*/
 
-		g_DeviceContext->VSSetConstantBuffers(0, 1, g_ConstantBuffer.GetAddressOf());
 
-		g_Model->Draw(0);
-		
 	}
 
 	void EndFrame()
 	{
+		const auto& windowData = Window::GetWindowData();
+		D3D11_VIEWPORT viewport = {};
+		viewport.TopLeftX = 0;
+		viewport.TopLeftY = 0;
+		viewport.Height = static_cast<FLOAT>(windowData.Height);
+		viewport.Width = static_cast<FLOAT>(windowData.Width);
+		viewport.MinDepth = 0.0f;
+		viewport.MaxDepth = 1.0f;
+
+
+		constexpr f32 clearColor[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+		g_DeviceContext->OMSetRenderTargets(1, g_BackBuffer.GetAddressOf(), nullptr);
+		g_DeviceContext->ClearRenderTargetView(g_BackBuffer.Get(), clearColor);
+		g_DeviceContext->RSSetState(g_RastState.Get());
+		g_DeviceContext->RSSetViewports(1, &viewport);
+
+		
+		
+
+		g_FullscreenPass->Render();
+
 		g_SwapChain->Present(1, 0);
 	}
 }

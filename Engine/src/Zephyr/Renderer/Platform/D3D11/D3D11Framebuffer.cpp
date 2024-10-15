@@ -187,15 +187,19 @@ namespace Zephyr::D3D11
 	{
 		return i32();
 	}
-	void D3D11Framebuffer::ClearAttachment(u32 attachmentIndex, i32 value)
+	void D3D11Framebuffer::ClearAttachment(u32 attachmentIndex, Color color)
 	{
 		CORE_ASSERT(attachmentIndex < m_ColorRTVs.size());
-		const float colors[4] = { value };
+		const float colors[4] = { color.r, color.g, color.b, color.a };
 		Core::DeviceContext().ClearRenderTargetView(m_ColorRTVs[attachmentIndex].Get(), colors);
 	}
 	u32 D3D11Framebuffer::GetColorAttachmentRendererID(u32 index)
 	{
 		return u32();
+	}
+	void* D3D11Framebuffer::GetImGuiAttachment(u32 id)const
+	{
+		return (void*)(intptr_t)m_ColorSRVs[id].Get();
 	}
 	void D3D11Framebuffer::Reset()
 	{

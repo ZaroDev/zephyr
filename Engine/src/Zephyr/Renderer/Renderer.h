@@ -3,8 +3,8 @@
 #include <Zephyr/Renderer/RenderHardwareInterface.h>
 #include <Zephyr/Renderer/Shader.h>
 #include <Zephyr/Renderer/RenderDevice.h>
-
 #include <Zephyr/Renderer/Camera.h>
+#include <Zephyr/Renderer/Framebuffer.h>
 
 namespace Zephyr::Renderer
 {
@@ -12,6 +12,15 @@ namespace Zephyr::Renderer
 	{
 		FORWARD,
 		DEFERRED,
+		MAX
+	};
+
+	enum class DeferredBuffers
+	{
+		POSITION,
+		COLOR,
+		NORMAL,
+		DEPTH,
 
 		MAX
 	};
@@ -37,5 +46,7 @@ namespace Zephyr::Renderer
 	void ShutdownImGui();
 
 	Camera& GetMainCamera();
+
+	Ref<Framebuffer> GetMainBuffer();
 
 }

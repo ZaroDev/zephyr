@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <Zephyr/Core/Base.h>
+#include <FontIcons/IconsForkAwesome.h>
 
 namespace Editor
 {

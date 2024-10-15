@@ -18,7 +18,8 @@ namespace Zephyr
 	{
 		enum
 		{
-			MAIN = 0,
+			FULLSCREENQUAD = 0,
+			GEOMETRY,
 			MAX
 		};
 	};

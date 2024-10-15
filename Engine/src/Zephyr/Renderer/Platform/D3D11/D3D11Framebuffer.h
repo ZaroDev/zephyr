@@ -31,8 +31,9 @@ namespace Zephyr::D3D11
 		
 		void Resize(u32 width, u32 height) override;
 		i32	ReadPixel(u32 attachmentIndex, i32 x, i32 y) override;
-		void ClearAttachment(u32 attachmentIndex, i32 value) override;
+		void ClearAttachment(u32 attachmentIndex, Color color) override;
 		u32 GetColorAttachmentRendererID(u32 index = 0) override;
+		void* GetImGuiAttachment(u32 id)const override;
 	private:
 		void Reset();
 

@@ -8,7 +8,7 @@
 #include <Zephyr/Renderer/Platform/D3D11/D3D11RHI.h>
 #include <Zephyr/Renderer/Platform/OpenGL/OpenGLRHI.h>
 
-#include "Framebuffer.h"
+
 
 
 
@@ -23,7 +23,8 @@ namespace Zephyr::Renderer
 		RenderingPath g_RenderingPath;
 		Camera g_Camera;
 
-		Ref<Framebuffer> m_TestBuffer;
+		// This is where the game viewport is needs to be controlled by each application
+		Ref<Framebuffer> g_MainBuffer;
 
 		bool SetPlatformInterface(GraphicsAPI api)
 		{
@@ -59,15 +60,12 @@ namespace Zephyr::Renderer
 			.Height = Window::GetWindowData().Height,
 			.Attachments = FramebufferAttachmentSpecification{
 				FramebufferTextureFormat::RGBA16,
-				FramebufferTextureFormat::RGBA16,
-				FramebufferTextureFormat::RGBA16,
-				FramebufferTextureFormat::DEPTH
 			},
 			.Samples = 1,
 			.SwapChainTarget = false,
 		};
 
-		m_TestBuffer = Framebuffer::Create(spec);
+		g_MainBuffer = Framebuffer::Create(spec);
 
 
 		return ret;
@@ -76,6 +74,9 @@ namespace Zephyr::Renderer
 	void Shutdown()
 	{
 		CORE_INFO("Closing renderer!");
+
+		g_MainBuffer.reset();
+
 		g_GraphicsInterface.ImGui.Shutdown();
 		ShutdownImGui();
 		g_GraphicsInterface.Core.Shutdown();
@@ -85,7 +86,6 @@ namespace Zephyr::Renderer
 		CORE_INFO("Resize event: {0}x{1}p", width, height);
 		g_GraphicsInterface.Core.OnResize(width, height);
 		g_Camera.OnResize(width, height);
-		m_TestBuffer->Resize(width, height);
 	}
 	void BeginFrame()
 	{
@@ -155,5 +155,9 @@ namespace Zephyr::Renderer
 	Camera& GetMainCamera()
 	{
 		return g_Camera;
+	}
+	Ref<Framebuffer> GetMainBuffer()
+	{
+		return g_MainBuffer;
 	}
 }

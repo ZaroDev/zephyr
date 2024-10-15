@@ -25,48 +25,7 @@ namespace Zephyr::D3D11
 	void D3D11Shader::UnBind()
 	{
 	}
-	void D3D11Shader::CreateInputLayout()
-	{
-		constexpr D3D11_INPUT_ELEMENT_DESC vertexInputLayoutInfo[] =
-		{
-			{
-				"POSITION",
-				0,
-				DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,
-				0,
-				offsetof(Vertex, Position),
-				D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA,
-				0
-			},
-			{
-				"NORMAL",
-				0,
-				DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,
-				0,
-				offsetof(Vertex, Normal),
-				D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA,
-				0
-			},
-			{
-				"TEXCOORD",
-				0,
-				DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT,
-				0,
-				offsetof(Vertex, TexCoord),
-				D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA,
-				0
-			}
-		};
-
-		
-
-		if (FAILED(Core::Device().CreateInputLayout(vertexInputLayoutInfo, _countof(vertexInputLayoutInfo), m_VertexShaderBlob->GetBufferPointer(), m_VertexShaderBlob->GetBufferSize(),
-			&m_VertexLayout)))
-		{
-			CORE_ERROR("D3D11: Failed to create vertex input layout!");
-
-		}
-	}
+	
 	bool D3D11Shader::CompileShader(const Path& filePath, std::string_view profile, ComPtr<ID3DBlob>& shaderBlob) const
 	{
 		constexpr UINT compileFlags = D3DCOMPILE_ENABLE_STRICTNESS;

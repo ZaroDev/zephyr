@@ -9,9 +9,10 @@
 
 namespace Zephyr
 {
-    constexpr std::string_view c_EngineShaders[] =
+    constexpr StrView c_EngineShaders[] =
     {
-        "main"
+        "FullScreenQuad",
+        "Geometry",
     };
 
     static_assert(_countof(c_EngineShaders) == EngineShader::MAX);

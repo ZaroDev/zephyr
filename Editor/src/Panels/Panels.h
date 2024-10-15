@@ -5,3 +5,4 @@
 #include "ConsolePanel.h"
 #include "HierarchyPanel.h"
 #include "AssetBrowserPanel.h"
+#include "ScenePanel.h"

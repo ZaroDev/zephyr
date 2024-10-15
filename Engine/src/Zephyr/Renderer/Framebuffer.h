@@ -58,13 +58,15 @@ namespace Zephyr
 		virtual void Resize(u32 width, u32 height) = 0;
 		virtual i32	ReadPixel(u32 attachmentIndex, i32 x, i32 y) = 0;
 
-		virtual void ClearAttachment(u32 attachmentIndex, i32 value) = 0;
+		virtual void ClearAttachment(u32 attachmentIndex, Color color) = 0;
 
 		virtual u32 GetColorAttachmentRendererID(u32 index = 0) = 0;
 
 		const FramebufferSpecification& Specification() const { return m_Specification; }
 
 		static Ref<Framebuffer> Create(const FramebufferSpecification& spec);
+
+		virtual void* GetImGuiAttachment(u32 id) const = 0;
 
 	protected:
 		FramebufferSpecification m_Specification;

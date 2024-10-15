@@ -51,7 +51,7 @@ namespace Zephyr
 		Renderer::Shutdown();
 		Window::Shutdown();
 	}
-	void Application::OnResize(i32 width, i32 height)
+	void Application::OnResize(u32 width, u32 height)
 	{
 		Renderer::OnResize(width, height);
 	}
