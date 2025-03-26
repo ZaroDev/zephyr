@@ -6,47 +6,45 @@
 #include <Zephyr/Renderer/Camera.h>
 #include <Zephyr/Renderer/Framebuffer.h>
 
-namespace Zephyr::Renderer
+namespace Zephyr
 {
-	enum class RenderingPath
+	class Renderer final
 	{
-		FORWARD,
-		DEFERRED,
-		MAX
+	public:
+		Renderer() = default;
+		~Renderer() = default;
+
+		DEFAULT_MOVE_AND_COPY(Renderer)
+
+		bool Initialize(GraphicsAPI api);
+		void Shutdown();
+
+		void OnResize(u32 width, u32 height);
+		void BeginFrame();
+		void EndFrame();
+		void ImGuiNewFrame();
+		void ImGuiEndFrame();
+		void RebuildFontTextures() const;
+
+		NODISCARD const RenderHardwareInterface& GetRenderHardwareInterface() const { return *m_GraphicsInterface; }
+
+		NODISCARD Ref<Framebuffer> GetGBuffer() const { return m_GBuffer; }
+		NODISCARD Ref<Framebuffer> GetViewPort() const { return m_ViewPort; }
+
+		NODISCARD Camera& GetMainCamera() { return m_MainCamera; }
+	private:
+		bool InitImGui();
+		void ShutdownImGui();
+		
+
+		Scope<RenderHardwareInterface> CreateRHI(GraphicsAPI api);
+	protected:
+		GraphicsAPI m_API = GraphicsAPI::MAX;
+		Scope<RenderHardwareInterface> m_GraphicsInterface = nullptr;
+		ShaderLibrary m_Library;
+
+		Ref<Framebuffer> m_GBuffer;
+		Ref<Framebuffer> m_ViewPort;
+		Camera m_MainCamera;
 	};
-
-	enum class DeferredBuffers
-	{
-		POSITION,
-		COLOR,
-		NORMAL,
-		DEPTH,
-
-		MAX
-	};
-
-
-	bool Initialize(GraphicsAPI api, RenderingPath renderPath = RenderingPath::DEFERRED);
-	void Shutdown();
-
-	void OnResize(i32 width, i32 height);
-	void BeginFrame();
-	void EndFrame();
-
-	void ImGuiNewFrame();
-	void ImGuiEndFrame();
-
-	NODISCARD RenderHardwareInterface& GetHardwareInterface();
-	NODISCARD ShaderLibrary& GetShaderLibrary();
-	NODISCARD GraphicsAPI GetAPI();
-	NODISCARD RenderDevice GetRenderDevice();
-	NODISCARD RenderingPath GetRenderPath();
-
-	bool InitImGui();
-	void ShutdownImGui();
-
-	Camera& GetMainCamera();
-
-	Ref<Framebuffer> GetMainBuffer();
-
 }

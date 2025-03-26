@@ -12,8 +12,6 @@ namespace Editor
 		SetImGuiTheme();
 		m_Scene = Zephyr::CreateRef<Zephyr::ECS::Scene>();
 
-		Zephyr::Project::New();
-
 
 		m_Panels.emplace_back(Zephyr::CreateScope<InfoPanel>());
 		m_Panels.emplace_back(Zephyr::CreateScope<ProjectPanel>());
@@ -42,8 +40,6 @@ namespace Editor
 				panel->OnImGui();
 			}
 		}
-
-		
 	}
 	void Application::OnShutdown()
 	{
@@ -187,7 +183,6 @@ namespace Editor
 
 		ImGuiIO& io = ImGui::GetIO();
 		io.Fonts->AddFontFromFileTTF("Resources/Fonts/CascadiaCode.ttf", 16.0f);
-
 		{
 			const ImWchar icons_ranges[] = { ICON_MIN_FK, ICON_MAX_FK, 0 };
 			ImFontConfig icons_config;
@@ -195,17 +190,9 @@ namespace Editor
 			icons_config.GlyphMinAdvanceX = 16.0f;
 			io.Fonts->AddFontFromFileTTF("Resources/Fonts/forkawesome-webfont.ttf", 16.0f, &icons_config, icons_ranges);
 		}
-		// NOTE: Idk why but the app crashes when this icons load 
-		//{
-		//	ImVector<ImWchar> ranges;
-		//	ImFontGlyphRangesBuilder builder;
-		//	builder.AddChar((ImWchar)ICON_FK_FILE_O);//ICON_FK_FILE_O
-		//	builder.AddChar((ImWchar)ICON_FK_FOLDER_O);//ICON_FK_FOLDER_O
-		//	builder.BuildRanges(&ranges);
-
-		//	io.Fonts->AddFontFromFileTTF("Resources/Fonts/forkawesome-webfont.ttf", 150, 0, ranges.Data);
-		//}
 		io.Fonts->Build();
+
+		m_Renderer.RebuildFontTextures();
 	}
 }
 
@@ -215,12 +202,7 @@ namespace Zephyr
 	{
 		ApplicationSpecification spec;
 		spec.Args = args;
-
-#ifdef PLATFORM_WINDOWS
-		spec.WindowData.API = GraphicsAPI::DX11;
-#else
-		spec.WindowData.API = GraphicsAPI::OPENGL;
-#endif
+		spec.WindowData.API = GraphicsAPI::VULKAN;
 		spec.Name = "Zephyr Editor";
 
 		return new Editor::Application(spec);

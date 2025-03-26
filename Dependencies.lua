@@ -1,3 +1,5 @@
+VULKAN_SDK = os.getenv("VULKAN_SDK")
+
 IncludeDir = {}
 IncludeDir["GLFW"] = "%{wks.location}/Engine/Vendor/GLFW/include"
 IncludeDir["spdlog"] = "%{wks.location}/Engine/Vendor/spdlog/include"
@@ -8,11 +10,14 @@ IncludeDir["meshoptimizer"] = "%{wks.location}/Engine/Vendor/meshoptimizer/inclu
 IncludeDir["ImGui"] = "%{wks.location}/Engine/Vendor/ImGui"
 IncludeDir["ImGuizmo"] = "%{wks.location}/Editor/Vendor/ImGuizmo"
 IncludeDir["IconHeaders"] = "%{wks.location}/Editor/Vendor/IconFontCppHeaders"
+IncludeDir["VulkanSDK"] = "%{VULKAN_SDK}/Include"
 
 LibraryDir = {}
+LibraryDir["VulkanSDK"] = "%{VULKAN_SDK}/Lib"
 LibraryDir["assimp"] = "%{wks.location}/Engine/Vendor/assimp/lib/%{cfg.buildcfg}"
 LibraryDir["meshoptimizer"] = "%{wks.location}/Engine/Vendor/meshoptimizer/lib/%{cfg.buildcfg}"
 
 Library = {}
+Library["VulkanSDK"] = "%{LibraryDir.VulkanSDK}/vulkan-1.lib"
 Library["assimp"] = "%{LibraryDir.assimp}/assimp.lib"
 Library["meshoptimizer"] = "%{LibraryDir.meshoptimizer}/meshoptimizer.lib"

@@ -7,8 +7,7 @@ namespace Zephyr
 	{
 		switch (api)
 		{
-		case Zephyr::GraphicsAPI::OPENGL: return "OpenGL";
-		case Zephyr::GraphicsAPI::DX11: return "Direct3D11";
+		case GraphicsAPI::VULKAN: return "Vulkan";
 		}
 
 		return "Unknown API";

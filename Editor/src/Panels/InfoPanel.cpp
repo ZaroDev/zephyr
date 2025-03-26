@@ -25,7 +25,8 @@ namespace Editor
 	}
 	void InfoPanel::OnImGui()
 	{
-		{
+		//TODO: Rewrite with new API
+		/*{
 			ImGui::Begin(m_Name.c_str(), &m_Open);
 			ImGui::Text("Application name: %s", Zephyr::Application::Get().Specification().Name.c_str());
 			if (ImGui::CollapsingHeader("Renderer"))
@@ -61,6 +62,6 @@ namespace Editor
 
 
 			ImGui::End();
-		}
+		}*/
 	}
 }

@@ -3,7 +3,7 @@
 
 namespace Zephyr
 {
-	enum class FramebufferTextureFormat
+	enum class FramebufferTextureFormat : u8
 	{
 		NONE = 0,
 
@@ -52,6 +52,8 @@ namespace Zephyr
 		Framebuffer(const FramebufferSpecification& spec) : m_Specification(spec) {}
 		virtual ~Framebuffer() = default;
 
+		DEFAULT_MOVE_AND_COPY(Framebuffer)
+
 		virtual void Bind() = 0;
 		virtual void Unbind() = 0;
 
@@ -71,6 +73,6 @@ namespace Zephyr
 	protected:
 		FramebufferSpecification m_Specification;
 		std::vector<FramebufferTextureSpecification> m_ColorAttachments;
-		FramebufferTextureSpecification m_Depthbuffer = FramebufferTextureFormat::DEPTH;
+		FramebufferTextureSpecification m_DepthBuffer = FramebufferTextureFormat::DEPTH;
 	};
 }

@@ -35,6 +35,8 @@ namespace Zephyr
 		Application(const ApplicationSpecification& specs);
 		virtual ~Application() = default;
 
+		DEFAULT_MOVE_AND_COPY(Application)
+
 		void Run();
 		void Close();
 		void RequestClose() { m_Running = false; }
@@ -44,23 +46,24 @@ namespace Zephyr
 		NODISCARD static Application& Get() { return *s_Instance; }
 		NODISCARD const ApplicationSpecification& Specification() const { return m_Specification; }
 		NODISCARD virtual Ref<ECS::Scene> GetActiveScene() const = 0;
+
+		NODISCARD const Window& GetWindow() const { return m_Window; }
+		NODISCARD Renderer& GetRenderer() { return m_Renderer; }
 	protected:
 		virtual void OnInit() = 0;
 		virtual void OnUpdate() = 0;
 		virtual void OnImGuiUpdate() = 0;
 		virtual void OnShutdown() = 0;
 
-	private:
 		void LoadConfig();
 		void SaveConfig();
 
-	private:
 		ApplicationSpecification m_Specification;
 		bool m_Running = false;
 
+		Renderer m_Renderer{};
+		Window m_Window{};
 
-
-	private:
 		static Application* s_Instance;
 	};
 

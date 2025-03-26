@@ -14,6 +14,6 @@ Texture2D Texture : register(t0);
 PSOutput Main(PSInput input)
 {
     PSOutput output = (PSOutput) 0;
-    output.color = Texture.Sample(LinearSampler, input.texCoord);;
+    output.color = Texture.Sample(LinearSampler, input.texCoord);
     return output;
 }

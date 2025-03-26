@@ -81,7 +81,7 @@ namespace Zephyr
 	typedef std::filesystem::path Path;
 	typedef std::string String;
 	typedef std::string_view StrView;
-	typedef std::fstream FileStream;
+	typedef std::ifstream FileStream;
 	typedef std::stringstream StringStream;
 
 	template<typename T>

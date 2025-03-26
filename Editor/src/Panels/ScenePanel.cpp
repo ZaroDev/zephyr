@@ -3,6 +3,9 @@
 
 #include <Zephyr/Renderer/Renderer.h>
 #include <imgui.h>
+
+#include "Zephyr/Core/Application.h"
+
 namespace Editor
 {
 	ImVec2 operator-(ImVec2 v1, ImVec2 v2)
@@ -22,7 +25,7 @@ namespace Editor
 	ScenePanel::ScenePanel()
 		: Panel(ICON_FK_TELEVISION "Scene", PanelCategory::WINDOW) 
 	{
-		m_ViewPort = Zephyr::Renderer::GetMainBuffer();
+		m_ViewPort = Zephyr::Application::Get().GetRenderer().GetViewPort();
 		m_LastViewportSize = { 0, 0};
 	}
 	ScenePanel::~ScenePanel()
@@ -59,7 +62,7 @@ namespace Editor
 
 		m_ViewPort->ClearAttachment(0, { 1.0f, 1.0f, 1.0f, 1.0f });
 		ImGui::SetCursorPos((ImGui::GetContentRegionAvail() - viewport) * 0.5f + ImGui::GetWindowSize() - ImGui::GetContentRegionAvail());
-		ImGui::Image(m_ViewPort->GetImGuiAttachment(0), viewport);
+		//ImGui::Image(m_ViewPort->GetImGuiAttachment(0), viewport);
 
 
 		ImGui::End();

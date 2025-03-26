@@ -88,6 +88,12 @@ namespace Zephyr
 			return stream.str();
 		}
 	}
+
+	File::File(const Path& filePath, i32 mode)
+	{
+		m_Stream.open(filePath, mode);
+	}
+
 	File::File(const Path& filePath, OpenMode mode)
 	{
 		m_Stream.open(filePath, mode);
@@ -112,7 +118,7 @@ namespace Zephyr
 	}
 	void File::Write(const Buffer& buffer)
 	{
-		m_Stream.write((const char*)buffer.Data, buffer.Size);
+		//m_Stream.write((const char*)buffer.Data, buffer.Size);
 	}
 	bool File::IsEndOfFile() const
 	{

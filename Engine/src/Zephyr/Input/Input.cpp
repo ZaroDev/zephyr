@@ -29,25 +29,27 @@ SOFTWARE.
 
 #include <GLFW/glfw3.h>
 
+#include "Core/Application.h"
+
 namespace Zephyr::Input
 {
 	bool Input::IsKeyDown(KeyCode keycode)
 	{
-		GLFWwindow* windowHandle = Window::GetGLFWWindow();
+		GLFWwindow* windowHandle = Application::Get().GetWindow().GetGLFWWindow();
 		int state = glfwGetKey(windowHandle, (int)keycode);
 		return state == GLFW_PRESS || state == GLFW_REPEAT;
 	}
 
 	bool Input::IsMouseButtonDown(MouseButton button)
 	{
-		GLFWwindow* windowHandle = Window::GetGLFWWindow();
+		GLFWwindow* windowHandle = Application::Get().GetWindow().GetGLFWWindow();
 		int state = glfwGetMouseButton(windowHandle, (int)button);
 		return state == GLFW_PRESS;
 	}
 
 	V2 Input::GetMousePosition()
 	{
-		GLFWwindow* windowHandle = Window::GetGLFWWindow();
+		GLFWwindow* windowHandle = Application::Get().GetWindow().GetGLFWWindow();
 
 		double x, y;
 		glfwGetCursorPos(windowHandle, &x, &y);
@@ -56,7 +58,7 @@ namespace Zephyr::Input
 
 	void Input::SetCursorMode(CursorMode mode)
 	{
-		GLFWwindow* windowHandle = Window::GetGLFWWindow();
+		GLFWwindow* windowHandle = Application::Get().GetWindow().GetGLFWWindow();
 		glfwSetInputMode(windowHandle, GLFW_CURSOR, GLFW_CURSOR_NORMAL + (int)mode);
 	}
 }

@@ -3,6 +3,8 @@
 
 #include <Time/Time.h>
 
+#include "Project/Project.h"
+
 namespace Zephyr
 {
 	Application* Application::s_Instance = nullptr;
@@ -20,9 +22,9 @@ namespace Zephyr
 		{
 			FileSystem::WorkingDirectory(m_Specification.WorkingDir);
 		}
-
-		Window::Initialize(m_Specification.WindowData);
-		Renderer::Initialize(m_Specification.WindowData.API);
+		Project::New();
+		m_Window.Initialize(m_Specification.WindowData);
+		m_Renderer.Initialize(m_Specification.WindowData.API);
 	}
 	void Application::Run()
 	{
@@ -32,13 +34,13 @@ namespace Zephyr
 		{
 			Time::StartTimeUpdate();
 
-			Window::Update();
+			m_Window.Update();
 			OnUpdate();
-			Renderer::BeginFrame();
-			Renderer::ImGuiNewFrame();
+			m_Renderer.ImGuiNewFrame();
 			OnImGuiUpdate();
-			Renderer::ImGuiEndFrame();
-			Renderer::EndFrame();
+			m_Renderer.BeginFrame();
+			m_Renderer.ImGuiEndFrame();
+			m_Renderer.EndFrame();
 
 			Time::EndTimeUpdate();
 		}
@@ -48,12 +50,12 @@ namespace Zephyr
 	void Application::Close()
 	{
 		CORE_INFO("Closing application!");
-		Renderer::Shutdown();
-		Window::Shutdown();
+		m_Renderer.Shutdown();
+		m_Window.Shutdown();
 	}
 	void Application::OnResize(u32 width, u32 height)
 	{
-		Renderer::OnResize(width, height);
+		m_Renderer.OnResize(width, height);
 	}
 	void Application::LoadConfig()
 	{

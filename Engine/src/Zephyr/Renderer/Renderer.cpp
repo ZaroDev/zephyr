@@ -1,65 +1,39 @@
 #include <pch.h>
 #include "Renderer.h"
+#include "Core/Application.h"
 
 #include <Zephyr/Time/Time.h>
-
 #include <imgui.h>
 
-#include <Zephyr/Renderer/Platform/D3D11/D3D11RHI.h>
-#include <Zephyr/Renderer/Platform/OpenGL/OpenGLRHI.h>
+#include "Platform/Vulkan/VulkanRHI.h"
 
-
-
-
-
-namespace Zephyr::Renderer
+namespace Zephyr
 {
-	namespace
+	bool Renderer::Initialize(GraphicsAPI api)
 	{
-		GraphicsAPI g_API = GraphicsAPI::MAX;
-		RenderHardwareInterface g_GraphicsInterface{};
-		ShaderLibrary g_Library;
-		RenderDevice g_Device;
-		RenderingPath g_RenderingPath;
-		Camera g_Camera;
-
-		// This is where the game viewport is needs to be controlled by each application
-		Ref<Framebuffer> g_MainBuffer;
-
-		bool SetPlatformInterface(GraphicsAPI api)
-		{
-			switch (api)
-			{
-			case GraphicsAPI::OPENGL: OpenGL::GetPlatformInterface(g_GraphicsInterface); return true;
-			case GraphicsAPI::DX11: D3D11::GetPlatformInterface(g_GraphicsInterface); return true;
-			}
-
-			CORE_ASSERT(false);
-
-			return false;
-		}
-	}
-
-
-	bool Initialize(GraphicsAPI api, RenderingPath renderPath)
-	{
-		g_API = api;
-		g_RenderingPath = renderPath;
+		m_API = api;
+		
 
 		bool ret = true;
-		ret &= SetPlatformInterface(api);
-		ret &= g_GraphicsInterface.Core.Init();
 
-		ret &= g_Library.LoadEngineShaders();
+		m_GraphicsInterface = CreateRHI(api);
+		if(!m_GraphicsInterface)
+		{
+			CORE_ASSERT(false, "Failed to create RHI");
+		}
+		ret &= m_GraphicsInterface->Init();
 
-		ret &= g_GraphicsInterface.Core.InitRenderPasses();
+		//ret &= m_Library.LoadEngineShaders();
+
 
 		ret &= InitImGui();
-		ret &= g_GraphicsInterface.ImGui.Init();
+		ret &= m_GraphicsInterface->ImGuiInit();
 
+
+		const Window::WindowData& WindowData = Application::Get().GetWindow().GetWindowData();
 		const FramebufferSpecification spec = {
-			.Width = Window::GetWindowData().Width,
-			.Height = Window::GetWindowData().Height,
+			.Width = WindowData.Width,
+			.Height = WindowData.Height,
 			.Attachments = FramebufferAttachmentSpecification{
 				FramebufferTextureFormat::RGBA16,
 			},
@@ -67,74 +41,72 @@ namespace Zephyr::Renderer
 			.SwapChainTarget = false,
 		};
 
-		g_MainBuffer = Framebuffer::Create(spec);
+		m_ViewPort = Framebuffer::Create(spec);
 
 
 		return ret;
 	}
 
-	void Shutdown()
+	void Renderer::Shutdown()
 	{
 		CORE_INFO("Closing renderer!");
 
-		g_MainBuffer.reset();
+		m_ViewPort.reset();
 
-		g_GraphicsInterface.ImGui.Shutdown();
+		m_GraphicsInterface->ImGuiShutdown();
 		ShutdownImGui();
-		g_GraphicsInterface.Core.Shutdown();
+		m_GraphicsInterface->Shutdown();
 	}
-	void OnResize(i32 width, i32 height)
+	void Renderer::OnResize(u32 width, u32 height)
 	{
 		CORE_INFO("Resize event: {0}x{1}p", width, height);
-		g_GraphicsInterface.Core.OnResize(width, height);
-		g_Camera.OnResize(width, height);
+		m_GraphicsInterface->OnResize(width, height);
 	}
-	void BeginFrame()
+
+	
+
+	void Renderer::BeginFrame()
 	{
-		g_Camera.OnUpdate(Time::GetDeltaTime());
-		g_GraphicsInterface.Core.BeginFrame(g_Camera);
+		m_GraphicsInterface->BeginFrame();
 	}
-	void EndFrame()
+	void Renderer::EndFrame()
 	{
-		g_GraphicsInterface.Core.EndFrame();
+		m_GraphicsInterface->EndFrame();
 	}
-	void ImGuiNewFrame()
+	void Renderer::ImGuiNewFrame()
 	{
-		g_GraphicsInterface.ImGui.NewFrame();
+		m_GraphicsInterface->ImGuiNewFrame();
 		ImGui::NewFrame();
 	}
-	void ImGuiEndFrame()
+	void Renderer::ImGuiEndFrame()
 	{
 		ImGui::Render();
-		g_GraphicsInterface.ImGui.EndFrame();
+		m_GraphicsInterface->ImGuiEndFrame();
+
+		if ((ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) != 0)
+		{
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+		}
 	}
 
-	RenderHardwareInterface& GetHardwareInterface()
+	void Renderer::RebuildFontTextures() const
 	{
-		return g_GraphicsInterface;
+		m_GraphicsInterface->RebuildFontTextures();
 	}
 
-	ShaderLibrary& GetShaderLibrary()
+	Scope<RenderHardwareInterface> Renderer::CreateRHI(GraphicsAPI api)
 	{
-		return g_Library;
+		switch (api)
+		{
+		case GraphicsAPI::VULKAN: return CreateScope<VulkanRHI>();
+		}
+
+		return nullptr;
 	}
 
-	GraphicsAPI GetAPI()
-	{
-		return g_API;
-	}
 
-	RenderDevice GetRenderDevice()
-	{
-		return g_GraphicsInterface.Core.GetRenderDevice();
-	}
-
-	NODISCARD RenderingPath GetRenderPath()
-	{
-		return g_RenderingPath;
-	}
-
-	bool InitImGui()
+	bool Renderer::InitImGui()
 	{
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -150,16 +122,8 @@ namespace Zephyr::Renderer
 
 		return true;
 	}
-	void ShutdownImGui()
+	void Renderer::ShutdownImGui()
 	{
 		ImGui::DestroyContext();
-	}
-	Camera& GetMainCamera()
-	{
-		return g_Camera;
-	}
-	Ref<Framebuffer> GetMainBuffer()
-	{
-		return g_MainBuffer;
 	}
 }

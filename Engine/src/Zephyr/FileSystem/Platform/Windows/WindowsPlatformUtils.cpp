@@ -1,6 +1,8 @@
 #include <pch.h>
 
 #include "WindowsPlatformUtils.h"
+
+#include "Core/Application.h"
 #ifdef PLATFORM_WINDOWS
 
 #include <commdlg.h>
@@ -19,7 +21,7 @@ namespace Zephyr::FileDialogs::Windows
 		//Initialize OPENFILENAME
 		ZeroMemory(&ofn, sizeof(OPENFILENAME));
 		ofn.lStructSize = sizeof(OPENFILENAME);
-		ofn.hwndOwner = glfwGetWin32Window(Window::GetGLFWWindow());
+		ofn.hwndOwner = glfwGetWin32Window(Application::Get().GetWindow().GetGLFWWindow());
 		ofn.lpstrFile = szFile;
 		ofn.nMaxFile = sizeof(szFile);
 		ofn.lpstrFilter = filter.data();
@@ -39,7 +41,7 @@ namespace Zephyr::FileDialogs::Windows
 		//Initialize OPENFILENAME
 		ZeroMemory(&ofn, sizeof(OPENFILENAME));
 		ofn.lStructSize = sizeof(OPENFILENAME);
-		ofn.hwndOwner = glfwGetWin32Window(Window::GetGLFWWindow());
+		ofn.hwndOwner = glfwGetWin32Window(Application::Get().GetWindow().GetGLFWWindow());
 		ofn.lpstrFile = szFile;
 		ofn.nMaxFile = sizeof(szFile);
 		ofn.lpstrFilter = filter.data();

@@ -1,8 +1,7 @@
 #include <pch.h>
 #include "Shader.h"
 #include "Renderer.h"
-#include <Zephyr/Renderer/Platform/D3D11/D3D11Shader.h>
-#include <Zephyr/Renderer/Platform/OpenGL/OpenGLShader.h>
+
 
 #include <Zephyr/Core/Application.h>
 
@@ -20,11 +19,7 @@ namespace Zephyr
 
     Ref<Shader> Shader::Create(const std::filesystem::path& path)
     {
-        switch (Renderer::GetAPI())
-        {
-        case Zephyr::GraphicsAPI::OPENGL: return CreateRef<OpenGL::OpenGLShader>(path);
-        case Zephyr::GraphicsAPI::DX11: return CreateRef<D3D11::D3D11Shader>(path);
-        }
+       
 
         CORE_ASSERT(false, "Unkown GraphicsAPI!");
         return nullptr;

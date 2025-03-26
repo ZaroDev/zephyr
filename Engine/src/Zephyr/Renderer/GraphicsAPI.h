@@ -1,12 +1,10 @@
 #pragma once
-
+#include <Zephyr/Core/BasicTypes.h>
 namespace Zephyr
 {
-	enum class GraphicsAPI
+	enum class GraphicsAPI : u8
 	{
-		OPENGL,
-		DX11,
-
+		VULKAN,
 		MAX
 	};
 

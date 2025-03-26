@@ -124,7 +124,8 @@ namespace Editor
 
 	void HierarchyPanel::OnUpdate()
 	{
-		Zephyr::Camera& cam = Zephyr::Renderer::GetMainCamera();
+
+		Zephyr::Camera& cam = Zephyr::Application::Get().GetRenderer().GetMainCamera();
 		cam.SetCameraTarget(glm::vec3( 0.0f, 0.0f, 0.0f ));
 
 		if (m_SelectionContext) {
@@ -190,11 +191,11 @@ namespace Editor
 		{
 			ImGuizmo::SetOrthographic(false);
 
-			const Zephyr::Window::WindowData& window = Zephyr::Window::GetWindowData();
+			const Zephyr::Window::WindowData& window = Zephyr::Application::Get().GetWindow().GetWindowData();
 
 			ImGuizmo::SetRect(0, 0, window.Width, window.Height);
 
-			const auto& camera = Zephyr::Renderer::GetMainCamera();
+			const auto& camera = Zephyr::Application::Get().GetRenderer().GetMainCamera();
 			const Zephyr::Mat4 view = camera.GetView();
 			const Zephyr::Mat4 projection = camera.GetProjection();
 
@@ -235,7 +236,7 @@ namespace Editor
 
 		ImGuiTreeNodeFlags flags = ((m_SelectionContext == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_Leaf;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
-		ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
+		ImGui::TreeNodeEx((void*)(u64)(u32)entity, flags, tag.c_str());
 		if (ImGui::IsItemClicked())
 		{
 			m_SelectionContext = entity;
