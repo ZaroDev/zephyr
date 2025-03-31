@@ -29,6 +29,8 @@ namespace Zephyr::Time
 	float GetDeltaTime();
 	float GetFPS();
 	float GetTimeSinceStart();
+	float GetAverageFrameTime();
+	float GetAverageFPS();
 
 	void StartTimeUpdate();
 	void EndTimeUpdate();

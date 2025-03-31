@@ -34,12 +34,24 @@ namespace Zephyr::Time
 		std::chrono::time_point<std::chrono::steady_clock> g_LastTime;
 
 		float g_TimeSinceStart = 0.0f;
+		u64 g_FrameCount = 0;
 	}
 
 	float GetTimeSinceStart()
 	{
 		return g_TimeSinceStart;
 	}
+
+	float GetAverageFrameTime()
+	{
+		return 0.f;
+	}
+
+	float GetAverageFPS()
+	{
+		return 0;
+	}
+
 	float GetDeltaTime()
 	{
 		return g_DeltaTime;
@@ -62,5 +74,6 @@ namespace Zephyr::Time
 		g_DeltaTime = duration.count() * 1000.0f;
 
 		g_TimeSinceStart += duration.count();
+		g_FrameCount++;
 	}
 }

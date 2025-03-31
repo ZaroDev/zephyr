@@ -16,5 +16,7 @@ namespace Editor
 		std::vector<float> m_VramUsage;
 		std::vector<float> m_FPSRecord;
 		std::vector<float> m_MSRecord;
+
+		float m_Counter = 0;
 	};
 }

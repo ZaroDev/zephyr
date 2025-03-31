@@ -473,9 +473,11 @@ namespace Zephyr
 		vkb::SwapchainBuilder swapchainBuilder{ m_PhysicalDevice, m_Device, m_Surface };
 		m_SwapchainImageFormat = VK_FORMAT_B8G8R8A8_UNORM;
 
+		const Window::WindowData& data = Application::Get().GetWindow().GetWindowData();
+		const VkPresentModeKHR presentMode = data.Vsync ? VK_PRESENT_MODE_FIFO_KHR : VK_PRESENT_MODE_IMMEDIATE_KHR;
 		auto swapchainReturn = swapchainBuilder
 			.set_desired_format({ .format = m_SwapchainImageFormat, .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR })
-			.set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR)
+			.set_desired_present_mode(presentMode)
 			.set_desired_extent(width, height)
 			.add_image_usage_flags(VK_IMAGE_USAGE_TRANSFER_DST_BIT)
 			.build();

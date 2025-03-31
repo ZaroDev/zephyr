@@ -1,6 +1,9 @@
 #include "ProjectPanel.h"
 #include <imgui.h>
 
+#include "Zephyr/Core/Log.h"
+
+
 namespace Editor
 {
 	void ProjectPanel::OnUpdate()

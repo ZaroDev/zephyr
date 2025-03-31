@@ -137,7 +137,7 @@ namespace Editor
 
 	void HierarchyPanel::OnImGui()
 	{
-		ImGui::Begin(m_Name.c_str());
+		ImGui::Begin(m_Name.c_str(), &m_Open);
 
 		m_Context = Zephyr::Application::Get().GetActiveScene();
 
