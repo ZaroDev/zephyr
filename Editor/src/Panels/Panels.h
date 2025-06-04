@@ -6,3 +6,4 @@
 #include "HierarchyPanel.h"
 #include "AssetBrowserPanel.h"
 #include "ScenePanel.h"
+#include "CVarPanel.h"

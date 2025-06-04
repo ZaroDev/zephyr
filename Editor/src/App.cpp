@@ -19,6 +19,7 @@ namespace Editor
 		m_Panels.emplace_back(Zephyr::CreateScope<HierarchyPanel>());
 		m_Panels.emplace_back(Zephyr::CreateScope<AssetBrowserPanel>());
 		m_Panels.emplace_back(Zephyr::CreateScope<ScenePanel>());
+		m_Panels.emplace_back(Zephyr::CreateScope<CVarPanel>());
 
 	}
 	void Application::OnUpdate()

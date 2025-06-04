@@ -232,15 +232,39 @@ namespace Zephyr
 	}
 	CVarParameter* CVarManagerImpl::CreateIntCVar(const char* name, const char* description, i32 defaultValue, i32 currentValue)
 	{
-		return nullptr;
+		CVarParameter* param = InitCVar(name, description);
+		if (!param)
+		{
+			return nullptr;
+		}
+
+		param->Type = CVarType::INT;
+		GetCVarArray<i32>()->Add(defaultValue, param);
+		return param;
 	}
 	CVarParameter* CVarManagerImpl::CreateFloatCVar(const char* name, const char* description, f32 defaultValue, f32 currentValue)
 	{
-		return nullptr;
+		CVarParameter* param = InitCVar(name, description);
+		if (!param)
+		{
+			return nullptr;
+		}
+
+		param->Type = CVarType::FLOAT;
+		GetCVarArray<f32>()->Add(defaultValue, param);
+		return param;
 	}
 	CVarParameter* CVarManagerImpl::CreateStringCVar(const char* name, const char* description, String defaultValue, String currentValue)
 	{
-		return nullptr;
+		CVarParameter* param = InitCVar(name, description);
+		if (!param)
+		{
+			return nullptr;
+		}
+
+		param->Type = CVarType::STRING;
+		GetCVarArray<String>()->Add(defaultValue, param);
+		return param;
 	}
 
 	std::optional<bool> CVarManagerImpl::GetBoolCVar(StringUtils::StringHash hash)
@@ -280,7 +304,7 @@ namespace Zephyr
 	{
 		static String searchText = "";
 
-		ImGui::InputText("Filter", searchText.data(), searchText.size());
+		ImGui::InputText("Filter", &searchText);
 		static bool bShowAdvanced = false;
 		ImGui::Checkbox("Advanced", &bShowAdvanced);
 		ImGui::Separator();
@@ -319,7 +343,7 @@ namespace Zephyr
 
 		if (m_CachedEditParameters.size() > 10)
 		{
-			std::unordered_map<std::string, std::vector<CVarParameter*>> categorizedParams;
+			std::unordered_map<String, std::vector<CVarParameter*>> categorizedParams;
 
 			//insert all the edit parameters into the hashmap by category
 			for (auto p : m_CachedEditParameters)
@@ -334,7 +358,7 @@ namespace Zephyr
 						break;
 					}
 				}
-				std::string category = "";
+				String category = "";
 				if (dotPos != -1)
 				{
 					category = p->Name.substr(0, dotPos);
@@ -428,21 +452,21 @@ namespace Zephyr
 
 			if (readonlyFlag)
 			{
-				std::string displayFormat = p->Name + "= %i";
-				ImGui::Text(displayFormat.c_str(), GetCVarArray<int32_t>()->GetCurrent(p->ArrayIndex));
+				String displayFormat = p->Name + "= %i";
+				ImGui::Text(displayFormat.c_str(), GetCVarArray<i32>()->GetCurrent(p->ArrayIndex));
 			}
 			else
 			{
 				if (checkboxFlag)
 				{
-					bool bCheckbox = GetCVarArray<int32_t>()->GetCurrent(p->ArrayIndex) != 0;
+					bool bCheckbox = GetCVarArray<i32>()->GetCurrent(p->ArrayIndex) != 0;
 					Label(p->Name.c_str(), textWidth);
 
 					ImGui::PushID(p->Name.c_str());
 
 					if (ImGui::Checkbox("", &bCheckbox))
 					{
-						GetCVarArray<u32>()->SetCurrent(bCheckbox ? 1 : 0, p->ArrayIndex);
+						GetCVarArray<i32>()->SetCurrent(bCheckbox ? 1 : 0, p->ArrayIndex);
 					}
 					ImGui::PopID();
 				}
@@ -450,7 +474,7 @@ namespace Zephyr
 				{
 					Label(p->Name.c_str(), textWidth);
 					ImGui::PushID(p->Name.c_str());
-					ImGui::InputInt("", GetCVarArray<int32_t>()->GetCurrentPtr(p->ArrayIndex));
+					ImGui::InputInt("", GetCVarArray<i32>()->GetCurrentPtr(p->ArrayIndex));
 					ImGui::PopID();
 				}
 			}
@@ -460,8 +484,8 @@ namespace Zephyr
 
 			if (readonlyFlag)
 			{
-				std::string displayFormat = p->Name + "= %f";
-				ImGui::Text(displayFormat.c_str(), GetCVarArray<double>()->GetCurrent(p->ArrayIndex));
+				String displayFormat = p->Name + "= %f";
+				ImGui::Text(displayFormat.c_str(), GetCVarArray<f32>()->GetCurrent(p->ArrayIndex));
 			}
 			else
 			{
@@ -469,11 +493,11 @@ namespace Zephyr
 				ImGui::PushID(p->Name.c_str());
 				if (dragFlag)
 				{
-					ImGui::InputDouble("", GetCVarArray<double>()->GetCurrentPtr(p->ArrayIndex), 0, 0, "%.3f");
+					ImGui::InputFloat("", GetCVarArray<f32>()->GetCurrentPtr(p->ArrayIndex), 0, 0, "%.3f");
 				}
 				else
 				{
-					ImGui::InputDouble("", GetCVarArray<double>()->GetCurrentPtr(p->ArrayIndex), 0, 0, "%.3f");
+					ImGui::InputFloat("", GetCVarArray<f32>()->GetCurrentPtr(p->ArrayIndex), 0, 0, "%.3f");
 				}
 				ImGui::PopID();
 			}
@@ -483,9 +507,9 @@ namespace Zephyr
 
 			if (readonlyFlag)
 			{
-				std::string displayFormat = p->Name + "= %s";
+				String displayFormat = p->Name + "= %s";
 				ImGui::PushID(p->Name.c_str());
-				ImGui::Text(displayFormat.c_str(), GetCVarArray<std::string>()->GetCurrent(p->ArrayIndex));
+				ImGui::Text(displayFormat.c_str(), GetCVarArray<String>()->GetCurrent(p->ArrayIndex));
 
 				ImGui::PopID();
 			}
