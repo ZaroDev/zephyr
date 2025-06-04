@@ -12,9 +12,9 @@ files {"src/**.h", "src/**.hpp", "src/**.c", "src/**.cpp", "src/**.cc"}
 
 includedirs {"src", "src/Zephyr", "%{IncludeDir.GLFW}", "%{IncludeDir.spdlog}",
              "%{IncludeDir.glad}", "%{IncludeDir.glm}", "%{IncludeDir.ImGui}", "%{IncludeDir.assimp}", 
-            "%{IncludeDir.meshoptimizer}", "%{IncludeDir.VulkanSDK}"}
+            "%{IncludeDir.meshoptimizer}", "%{IncludeDir.VulkanSDK}", "%{IncludeDir.nvrhi}"}
 
-links {"GLFW", "glad", "ImGui", "%{Library.assimp}", "%{Library.meshoptimizer}", "%{Library.VulkanSDK}"}
+links {"GLFW", "glad", "ImGui", "%{Library.assimp}", "%{Library.meshoptimizer}", "%{Library.VulkanSDK}", "nvrhi"}
 
 targetdir("../Binaries/" .. outputdir .. "/%{prj.name}")
 objdir("../Binaries/Intermediates/" .. outputdir .. "/%{prj.name}")

@@ -11,6 +11,7 @@ IncludeDir["ImGui"] = "%{wks.location}/Engine/Vendor/ImGui"
 IncludeDir["ImGuizmo"] = "%{wks.location}/Editor/Vendor/ImGuizmo"
 IncludeDir["IconHeaders"] = "%{wks.location}/Editor/Vendor/IconFontCppHeaders"
 IncludeDir["VulkanSDK"] = "%{VULKAN_SDK}/Include"
+IncludeDir["nvrhi"] ="%{wks.location}/Engine/Vendor/nvrhi/include"
 
 LibraryDir = {}
 LibraryDir["VulkanSDK"] = "%{VULKAN_SDK}/Lib"

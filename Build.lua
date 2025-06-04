@@ -22,6 +22,7 @@ group "Engine/Dependencies"
 include "Engine/Vendor/GLFW"
 include "Engine/Vendor/glad"
 include "Engine/Vendor/ImGui"
+include "Engine/Vendor/nvrhi"
 group ""
 
 

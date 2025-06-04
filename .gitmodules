@@ -8,3 +8,6 @@
 [submodule "Editor/Vendor/ImGuizmo"]
 	path = Editor/Vendor/ImGuizmo
 	url = https://github.com/CedricGuillemet/ImGuizmo.git
+[submodule "Engine/Vendor/nvrhi"]
+	path = Engine/Vendor/nvrhi
+	url = https://github.com/ZaroDev/nvrhi.git
