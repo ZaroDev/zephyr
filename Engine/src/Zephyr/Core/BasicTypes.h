@@ -26,7 +26,7 @@ SOFTWARE.
 #include <stdint.h>
 
 //! Signed byte type
-typedef signed char ibyte;
+typedef signed char byte;
 //! Unsigned byte type
 typedef unsigned char ubyte;
 
