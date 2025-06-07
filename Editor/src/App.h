@@ -3,8 +3,6 @@
 
 #include "Panels/Panel.h"
 
-#include <Zephyr/Asset/TextureImporter.h>
-#include <Zephyr/Asset/ModelImporter.h>
 
 #include <Zephyr/ECS/Scene.h>
 
@@ -29,10 +27,6 @@ namespace Editor
 		void SetImGuiTheme();
 	private:
 		std::vector<Zephyr::Scope<Panel>> m_Panels;
-
-		std::vector<Zephyr::Ref<Zephyr::Texture2D>> m_Textures;
-		Zephyr::Ref<Zephyr::Model> m_Model;
-
 		Zephyr::Ref<Zephyr::ECS::Scene> m_Scene;
 	};
 }

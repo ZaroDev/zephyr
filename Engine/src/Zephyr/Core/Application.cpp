@@ -23,39 +23,24 @@ namespace Zephyr
 			FileSystem::WorkingDirectory(m_Specification.WorkingDir);
 		}
 		Project::New();
-		m_Window.Initialize(m_Specification.WindowData);
-		m_Renderer.Initialize(m_Specification.WindowData.API);
+
+		m_DeviceManager = DeviceManager::Create(specs.GraphicsBackend);
+		m_DeviceManager->CreateWindowDeviceAndSwapChain(specs.DeviceParams, specs.Name.c_str());
 	}
 	void Application::Run()
 	{
 		OnInit();
-
-		while (m_Running)
-		{
-			Time::StartTimeUpdate();
-
-			m_Window.Update();
-			OnUpdate();
-			m_Renderer.ImGuiNewFrame();
-			OnImGuiUpdate();
-			m_Renderer.BeginFrame();
-			m_Renderer.ImGuiEndFrame();
-			m_Renderer.EndFrame();
-
-			Time::EndTimeUpdate();
-		}
-
+		m_DeviceManager->Update();
 		OnShutdown();
 	}
 	void Application::Close()
 	{
 		CORE_INFO("Closing application!");
-		m_Renderer.Shutdown();
-		m_Window.Shutdown();
+		m_DeviceManager->Shutdown();
+		delete m_DeviceManager;
 	}
 	void Application::OnResize(u32 width, u32 height)
 	{
-		m_Renderer.OnResize(width, height);
 	}
 	void Application::LoadConfig()
 	{

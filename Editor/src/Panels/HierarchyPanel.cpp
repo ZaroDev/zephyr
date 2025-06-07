@@ -4,11 +4,12 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <Zephyr/Input/Input.h>
-#include <Zephyr/Renderer/Renderer.h>
 
 #include <Zephyr/Core/Application.h>
 
 #include <FontIcons/IconsForkAwesome.h>
+
+#include "Zephyr/Renderer/Camera.h"
 
 namespace Editor
 {
@@ -125,14 +126,14 @@ namespace Editor
 	void HierarchyPanel::OnUpdate()
 	{
 
-		Zephyr::Camera& cam = Zephyr::Application::Get().GetRenderer().GetMainCamera();
+	/*	Zephyr::Camera& cam = Zephyr::Application::Get().GetRenderer().GetMainCamera();
 		cam.SetCameraTarget(glm::vec3( 0.0f, 0.0f, 0.0f ));
 
 		if (m_SelectionContext) {
 			Zephyr::ECS::TransformComponent& tcomp = m_SelectionContext.GetComponent<Zephyr::ECS::TransformComponent>();
 
 			cam.SetCameraTarget(tcomp.Translation);
-		}
+		}*/
 	}
 
 	void HierarchyPanel::OnImGui()
@@ -191,11 +192,11 @@ namespace Editor
 		{
 			ImGuizmo::SetOrthographic(false);
 
-			const Zephyr::Window::WindowData& window = Zephyr::Application::Get().GetWindow().GetWindowData();
+			auto& deviceParams = Zephyr::Application::Get().GetDeviceManager().GetDeviceParams();
 
-			ImGuizmo::SetRect(0, 0, window.Width, window.Height);
+			ImGuizmo::SetRect(0, 0, deviceParams.BackBufferWidth, deviceParams.BackBufferHeight);
 
-			const auto& camera = Zephyr::Application::Get().GetRenderer().GetMainCamera();
+			/*const auto& camera = Zephyr::Application::Get().GetRenderer().GetMainCamera();
 			const Zephyr::Mat4 view = camera.GetView();
 			const Zephyr::Mat4 projection = camera.GetProjection();
 
@@ -226,7 +227,7 @@ namespace Editor
 				transformCmp.Translation = translation;
 				transformCmp.Rotation = rotation;
 				transformCmp.Scale = scale;
-			}
+			}*/
 		}
 	}
 

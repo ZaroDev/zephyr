@@ -3,7 +3,8 @@
 
 #include <Zephyr/Core/Base.h>
 #include <Zephyr/Math/MathTypes.h>
-#include <Zephyr/Renderer/Framebuffer.h>
+
+#include "../../../Engine/Vendor/nvrhi/include/nvrhi/nvrhi.h"
 
 
 namespace Editor
@@ -18,7 +19,7 @@ namespace Editor
 		void OnImGui() override;
 
 	private:
-		Zephyr::Ref<Zephyr::Framebuffer> m_ViewPort;
+		Zephyr::Ref<nvrhi::FramebufferHandle> m_ViewPort;
 
 		Zephyr::Iv2 m_LastViewportSize;
 

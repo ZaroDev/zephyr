@@ -5,6 +5,7 @@
 #include <Zephyr/Core/BasicTypes.h>
 #include <Zephyr/Core/Log.h>
 
+
 namespace Editor
 {
 	class ConsolePanel final : public Panel

@@ -25,7 +25,7 @@ namespace std {
 	{
 		std::size_t operator()(const Zephyr::UUID& uuid) const
 		{
-			return (u64)uuid;
+			return (Zephyr::u64)uuid;
 		}
 	};
 

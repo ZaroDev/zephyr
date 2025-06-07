@@ -1,6 +1,10 @@
 #pragma once
 
 
+#if PLATFORM_WINDOWS
+#define NOMINMAX
+#endif
+
 
 #include <Zephyr/Core/Base.h>
 #include <Zephyr/Core/Assert.h>
@@ -10,5 +14,3 @@
 #include <Zephyr/Core/EntryPoint.h>
 #include <Zephyr/Core/BasicTypes.h>
 #include <Zephyr/Math/MathTypes.h>
-#include <Zephyr/Renderer/Window.h>
-#include <Zephyr/Renderer/Renderer.h>

@@ -3,13 +3,12 @@
 #include <Panels/Panels.h>
 
 #include <FontIcons/IconsForkAwesome.h>
-#include <Zephyr/Project/Project.h>
 
 namespace Editor
 {
 	void Application::OnInit()
 	{
-		SetImGuiTheme();
+		/*SetImGuiTheme();
 		m_Scene = Zephyr::CreateRef<Zephyr::ECS::Scene>();
 
 
@@ -18,7 +17,7 @@ namespace Editor
 		m_Panels.emplace_back(Zephyr::CreateScope<ConsolePanel>());
 		m_Panels.emplace_back(Zephyr::CreateScope<HierarchyPanel>());
 		m_Panels.emplace_back(Zephyr::CreateScope<AssetBrowserPanel>());
-		m_Panels.emplace_back(Zephyr::CreateScope<ScenePanel>());
+		m_Panels.emplace_back(Zephyr::CreateScope<ScenePanel>());*/
 
 	}
 	void Application::OnUpdate()
@@ -136,7 +135,7 @@ namespace Editor
 			{
 				if (ImGui::MenuItem("Load dummy texture"))
 				{
-					m_Textures.emplace_back(Zephyr::TextureImporter::LoadTexture2D("Resources/test.png"));
+
 				}
 				if (ImGui::MenuItem("Load model"))
 				{
@@ -192,7 +191,7 @@ namespace Editor
 		}
 		io.Fonts->Build();
 
-		m_Renderer.RebuildFontTextures();
+		
 	}
 }
 
@@ -202,8 +201,16 @@ namespace Zephyr
 	{
 		ApplicationSpecification spec;
 		spec.Args = args;
-		spec.WindowData.API = GraphicsAPI::VULKAN;
+		spec.GraphicsBackend = GraphicsAPI::VULKAN;
 		spec.Name = "Zephyr Editor";
+		spec.DeviceParams.BackBufferWidth = 1920;
+		spec.DeviceParams.BackBufferHeight = 1080;
+		spec.DeviceParams.SwapChainSampleCount = 1;
+		spec.DeviceParams.SwapChainBufferCount = 3;
+		spec.DeviceParams.StartFullscreen = false;
+		spec.DeviceParams.VsyncEnabled = true;
+		spec.DeviceParams.EnablePerMonitorDPI = true;
+		spec.DeviceParams.SupportExplicitDisplayScaling = true;
 
 		return new Editor::Application(spec);
 	}

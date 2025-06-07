@@ -9,7 +9,7 @@
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
-#include <Zephyr/Renderer/Window.h>
+#include <Zephyr/Renderer/DeviceManager.h>
 
 namespace Zephyr::FileDialogs::Windows
 {
@@ -21,7 +21,7 @@ namespace Zephyr::FileDialogs::Windows
 		//Initialize OPENFILENAME
 		ZeroMemory(&ofn, sizeof(OPENFILENAME));
 		ofn.lStructSize = sizeof(OPENFILENAME);
-		ofn.hwndOwner = glfwGetWin32Window(Application::Get().GetWindow().GetGLFWWindow());
+		ofn.hwndOwner = glfwGetWin32Window(Application::Get().GetDeviceManager().GetWindow());
 		ofn.lpstrFile = szFile;
 		ofn.nMaxFile = sizeof(szFile);
 		ofn.lpstrFilter = filter.data();
@@ -41,7 +41,7 @@ namespace Zephyr::FileDialogs::Windows
 		//Initialize OPENFILENAME
 		ZeroMemory(&ofn, sizeof(OPENFILENAME));
 		ofn.lStructSize = sizeof(OPENFILENAME);
-		ofn.hwndOwner = glfwGetWin32Window(Application::Get().GetWindow().GetGLFWWindow());
+		ofn.hwndOwner = glfwGetWin32Window(Application::Get().GetDeviceManager().GetWindow());
 		ofn.lpstrFile = szFile;
 		ofn.nMaxFile = sizeof(szFile);
 		ofn.lpstrFilter = filter.data();

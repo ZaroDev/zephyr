@@ -1,7 +1,5 @@
 #pragma once
-
-#include <Zephyr/Renderer/Renderer.h>
-#include <Zephyr/Renderer/Window.h>
+#include <Zephyr/Renderer/DeviceManager.h>
 
 namespace Zephyr
 {
@@ -25,7 +23,8 @@ namespace Zephyr
 		ApplicationCommandLineArgs Args = {};
 		String Name = {};
 		Path WorkingDir = {};
-		Window::WindowData WindowData = {};
+		GraphicsAPI GraphicsBackend = GraphicsAPI::VULKAN;
+		DeviceCreationParameters DeviceParams = {};
 	};
 
 	
@@ -47,8 +46,8 @@ namespace Zephyr
 		NODISCARD const ApplicationSpecification& Specification() const { return m_Specification; }
 		NODISCARD virtual Ref<ECS::Scene> GetActiveScene() const = 0;
 
-		NODISCARD const Window& GetWindow() const { return m_Window; }
-		NODISCARD Renderer& GetRenderer() { return m_Renderer; }
+		NODISCARD DeviceManager& GetDeviceManager() const { return *m_DeviceManager; }
+
 	protected:
 		virtual void OnInit() = 0;
 		virtual void OnUpdate() = 0;
@@ -61,8 +60,7 @@ namespace Zephyr
 		ApplicationSpecification m_Specification;
 		bool m_Running = false;
 
-		Renderer m_Renderer{};
-		Window m_Window{};
+		DeviceManager* m_DeviceManager = nullptr;
 
 		static Application* s_Instance;
 	};

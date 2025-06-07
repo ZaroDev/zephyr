@@ -1,9 +1,5 @@
 #pragma once
 
-#include <Zephyr/Asset/AssetManagerBase.h>
-#include <Zephyr/Asset/EditorAssetManager.h>
-#include <Zephyr/Asset/RuntimeAssetManager.h>
-
 namespace Zephyr
 {
 	struct ProjectData
@@ -44,9 +40,7 @@ namespace Zephyr
 		ProjectData& GetData() { return m_Data;  }
 
 		static Ref<Project> GetActive() { return s_ActiveProject; }
-		Ref<AssetManagerBase> GetAssetManager() { return m_AssetManager; }
-		Ref<EditorAssetManager> GetEditorAssetManager() { return Cast<EditorAssetManager>(m_AssetManager); }
-		Ref<RuntimeAssetManager> GetRuntimeAssetManager() { return Cast<RuntimeAssetManager>(m_AssetManager); }
+	
 
 
 		static Ref<Project> New();
@@ -56,8 +50,6 @@ namespace Zephyr
 	private:
 		ProjectData m_Data;
 		Path m_ProjectPath;
-
-		Ref<AssetManagerBase> m_AssetManager;
 
 		inline static Ref<Project> s_ActiveProject;
 	};

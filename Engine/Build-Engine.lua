@@ -11,7 +11,7 @@ pchsource "src/pch.cpp"
 files {"src/**.h", "src/**.hpp", "src/**.c", "src/**.cpp", "src/**.cc"}
 
 includedirs {"src", "src/Zephyr", "%{IncludeDir.GLFW}", "%{IncludeDir.spdlog}",
-             "%{IncludeDir.glad}", "%{IncludeDir.glm}", "%{IncludeDir.ImGui}", "%{IncludeDir.assimp}", 
+             "%{IncludeDir.glad}", "%{IncludeDir.glm}", "%{IncludeDir.ImGui}",
             "%{IncludeDir.meshoptimizer}", "%{IncludeDir.VulkanSDK}", "%{IncludeDir.nvrhi}"}
 
 links {"GLFW", "glad", "ImGui", "%{Library.assimp}", "%{Library.meshoptimizer}", "%{Library.VulkanSDK}", "nvrhi"}

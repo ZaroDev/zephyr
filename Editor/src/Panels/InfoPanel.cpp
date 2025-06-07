@@ -3,7 +3,6 @@
 #include <imgui.h>
 #include <Zephyr/Core/Base.h>
 #include <Zephyr/Core/Application.h>
-#include <Zephyr/Renderer/Renderer.h>
 
 #include <Zephyr/Time/Time.h>
 
@@ -31,7 +30,7 @@ namespace Editor
 			ImGui::Text("Application name: %s", Zephyr::Application::Get().Specification().Name.c_str());
 			if (ImGui::CollapsingHeader("Renderer"))
 			{
-				Zephyr::RenderDevice device = Zephyr::Application::Get().GetRenderer().GetRenderHardwareInterface().GetRenderDevice();
+			/*	Zephyr::RenderDevice device = Zephyr::Application::Get().GetRenderer().GetRenderHardwareInterface().GetRenderDevice();
 				m_VramUsage.emplace_back(device.UsedVRAM);
 				if (m_VramUsage.size() > 100)
 				{
@@ -39,15 +38,15 @@ namespace Editor
 				}
 
 
-				ImGui::Text("Graphics API: %s", Zephyr::GetGraphicsName(Zephyr::Application::Get().Specification().WindowData.API).data());
+				ImGui::Text("Graphics API: %s", Zephyr::GetGraphicsName(Zephyr::Application::Get().Specification().WindowData.API).data());*/
 				ImGui::Text("Deferred renderer");
 				ImGui::Separator();
-				ImGui::Text("Device: %s", device.Name.data());
+				/*ImGui::Text("Device: %s", device.Name.data());
 				ImGui::Text("Vendor: %s", device.VendorIdName().data());
 				ImGui::Text("Application used VRAM: %i/%i (MB)", device.UsedVRAM, device.AvailableVRAM);
 				ImGui::PlotLines("##vram", m_VramUsage.data(), (int)m_VramUsage.size(), 0, "VRAM Usage", 0.0f, 1000.0f, ImVec2(200, 100));
 
-				ImGui::Text("Total VRAM: %i (MB)", device.TotalVRAM);
+				ImGui::Text("Total VRAM: %i (MB)", device.TotalVRAM);*/
 			}
 			if (ImGui::CollapsingHeader("Frame rate"))
 			{

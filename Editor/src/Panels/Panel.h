@@ -10,7 +10,7 @@ namespace Editor
 		WINDOW = BIT(0),
 		INFO = BIT(1),
 	};
-
+	using namespace Zephyr;
 	class Panel
 	{
 	public:

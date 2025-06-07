@@ -10,7 +10,7 @@ files {"src/**.h", "src/**.cpp", "Vendor/ImGuizmo/ImGuizmo.h", "Vendor/ImGuizmo/
 
 includedirs {"src", -- Include Core
 "%{wks.location}/Engine/src", "%{IncludeDir.spdlog}", "%{IncludeDir.glm}", "%{IncludeDir.ImGui}", "%{IncludeDir.GLFW}",
-             "%{IncludeDir.assimp}", "%{IncludeDir.ImGuizmo}", "%{IncludeDir.IconHeaders}"
+            "%{IncludeDir.ImGuizmo}", "%{IncludeDir.IconHeaders}", "%{IncludeDir.nvrhi}", "%{IncludeDir.VulkanSDK}",
             }
 
 links {"Engine"}

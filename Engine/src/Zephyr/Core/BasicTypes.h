@@ -24,49 +24,51 @@ SOFTWARE.
 
 #pragma once
 #include <stdint.h>
+namespace Zephyr
+{
+	//! Signed byte type
+	typedef signed char byte;
+	//! Unsigned byte type
+	typedef unsigned char ubyte;
 
-//! Signed byte type
-typedef signed char byte;
-//! Unsigned byte type
-typedef unsigned char ubyte;
+	// Signed types
 
-// Signed types
+	//! Singed integer 8 bit type
+	typedef signed __int8 i8;
+	//! Singed integer 16 bit type
+	typedef signed __int16 i16;
+	//! Singed integer 32 bit type
+	typedef signed __int32 i32;
+	//! Singed integer 64 bit type
+	typedef signed __int64 i64;
 
-//! Singed integer 8 bit type
-typedef signed __int8 i8;
-//! Singed integer 16 bit type
-typedef signed __int16 i16;
-//! Singed integer 32 bit type
-typedef signed __int32 i32;
-//! Singed integer 64 bit type
-typedef signed __int64 i64;
+	constexpr i8    I8_MAX = INT8_MAX;		/**< Maximum value for a signed 8 bit integer */
+	constexpr i16   I16_MAX = INT16_MAX;	/**< Maximum value for a signed 16 bit integer */
+	constexpr i32   I32_MAX = INT32_MAX;	/**< Maximum value for a signed 32 bit integer */
+	constexpr i64   I64_MAX = INT64_MAX;	/**< Maximum value for a signed 64 bit integer */
 
-constexpr i8    I8_MAX = INT8_MAX;		/**< Maximum value for a signed 8 bit integer */
-constexpr i16   I16_MAX = INT16_MAX;	/**< Maximum value for a signed 16 bit integer */
-constexpr i32   I32_MAX = INT32_MAX;	/**< Maximum value for a signed 32 bit integer */
-constexpr i64   I64_MAX = INT64_MAX;	/**< Maximum value for a signed 64 bit integer */
+	// Unsigned
+	//! Unsigned integer 8 bit type
+	typedef unsigned __int8     u8;
+	//! Unsigned integer 16 bit type
+	typedef unsigned __int16    u16;
+	//! Unsigned integer 32 bit type
+	typedef unsigned __int32    u32;
+	//! Unsigned integer 64 bit type
+	typedef unsigned __int64    u64;
 
-// Unsigned
-//! Unsigned integer 8 bit type
-typedef unsigned __int8     u8;
-//! Unsigned integer 16 bit type
-typedef unsigned __int16    u16;
-//! Unsigned integer 32 bit type
-typedef unsigned __int32    u32;
-//! Unsigned integer 64 bit type
-typedef unsigned __int64    u64;
+	constexpr u8    U8_MAX = UINT8_MAX;		/**< Maximum value for an unsigned 8 bit integer */
+	constexpr u16   U16_MAX = UINT16_MAX;	/**< Maximum value for an unsigned 16 bit integer */
+	constexpr u32   U32_MAX = UINT32_MAX;	/**< Maximum value for an unsigned 32 bit integer */
+	constexpr u64   U64_MAX = UINT64_MAX;	/**< Maximum value for an unsigned 64 bit integer */
 
-constexpr u8    U8_MAX = UINT8_MAX;		/**< Maximum value for an unsigned 8 bit integer */
-constexpr u16   U16_MAX = UINT16_MAX;	/**< Maximum value for an unsigned 16 bit integer */
-constexpr u32   U32_MAX = UINT32_MAX;	/**< Maximum value for an unsigned 32 bit integer */
-constexpr u64   U64_MAX = UINT64_MAX;	/**< Maximum value for an unsigned 64 bit integer */
+	// Floating pointer type
 
-// Floating pointer type
+	//! Singed floating pointer 32 bit type
+	typedef float f32;
 
-//! Singed floating pointer 32 bit type
-typedef float f32;
+	//! Singed floating pointer 64 bit type
+	typedef double f64;
 
-//! Singed floating pointer 64 bit type
-typedef double f64;
-
-typedef size_t size;
+	typedef size_t size;
+}
