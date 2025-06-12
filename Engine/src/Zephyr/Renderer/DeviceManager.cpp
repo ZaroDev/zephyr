@@ -270,7 +270,7 @@ namespace Zephyr
 		while (!glfwWindowShouldClose(m_Window))
 		{
 
-			if (m_Callbacks.beforeFrame) m_Callbacks.beforeFrame(*this, m_FrameIndex);
+			if (m_Callbacks.BeforeFrame) m_Callbacks.BeforeFrame(*this, m_FrameIndex);
 			glfwPollEvents();
 			UpdateWindowSize();
 			bool presentSuccess = AnimateRenderPresent();
@@ -423,9 +423,9 @@ namespace Zephyr
 				m_PrevDPIScaleFactorY = m_DPIScaleFactorY;
 			}
 
-			if (m_Callbacks.beforeAnimate) m_Callbacks.beforeAnimate(*this, m_FrameIndex);
+			if (m_Callbacks.BeforeAnimate) m_Callbacks.BeforeAnimate(*this, m_FrameIndex);
 			Animate(elapsedTime);
-			if (m_Callbacks.afterAnimate) m_Callbacks.afterAnimate(*this, m_FrameIndex);
+			if (m_Callbacks.AfterAnimate) m_Callbacks.AfterAnimate(*this, m_FrameIndex);
 
 			// normal rendering           : A0    R0 P0 A1 R1 P1
 			// m_SkipRenderOnFirstFrame on: A0 A1 R0 P0 A2 R1 P1
@@ -443,12 +443,12 @@ namespace Zephyr
 						frameIndex--;
 					}
 
-					if (m_Callbacks.beforeRender) m_Callbacks.beforeRender(*this, frameIndex);
+					if (m_Callbacks.BeforeRender) m_Callbacks.BeforeRender(*this, frameIndex);
 					Render();
-					if (m_Callbacks.afterRender) m_Callbacks.afterRender(*this, frameIndex);
-					if (m_Callbacks.beforePresent) m_Callbacks.beforePresent(*this, frameIndex);
+					if (m_Callbacks.AfterRender) m_Callbacks.AfterRender(*this, frameIndex);
+					if (m_Callbacks.BeforePresent) m_Callbacks.BeforePresent(*this, frameIndex);
 					bool presentSuccess = Present();
-					if (m_Callbacks.afterPresent) m_Callbacks.afterPresent(*this, frameIndex);
+					if (m_Callbacks.AfterPresent) m_Callbacks.AfterPresent(*this, frameIndex);
 					if (!presentSuccess)
 					{
 						return false;
@@ -510,9 +510,9 @@ namespace Zephyr
 
 		if (m_EnableRenderDuringWindowMovement && m_SwapChainFramebuffers.size() > 0)
 		{
-			if (m_Callbacks.beforeFrame)
+			if (m_Callbacks.BeforeFrame)
 			{
-				m_Callbacks.beforeFrame(*this, m_FrameIndex);
+				m_Callbacks.BeforeFrame(*this, m_FrameIndex);
 			}
 			AnimateRenderPresent();
 		}

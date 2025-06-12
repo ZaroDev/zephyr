@@ -258,14 +258,15 @@ namespace Zephyr
 
         // GetFrameIndex cannot be used inside of these callbacks, hence the additional passing of frameID
         // Refer to AnimateRenderPresent implementation for more details
-        struct PipelineCallbacks {
-            std::function<void(DeviceManager&, uint32_t)> beforeFrame = nullptr;
-            std::function<void(DeviceManager&, uint32_t)> beforeAnimate = nullptr;
-            std::function<void(DeviceManager&, uint32_t)> afterAnimate = nullptr;
-            std::function<void(DeviceManager&, uint32_t)> beforeRender = nullptr;
-            std::function<void(DeviceManager&, uint32_t)> afterRender = nullptr;
-            std::function<void(DeviceManager&, uint32_t)> beforePresent = nullptr;
-            std::function<void(DeviceManager&, uint32_t)> afterPresent = nullptr;
+        struct PipelineCallbacks
+		{
+            std::function<void(DeviceManager&, uint32_t)> BeforeFrame = nullptr;
+            std::function<void(DeviceManager&, uint32_t)> BeforeAnimate = nullptr;
+            std::function<void(DeviceManager&, uint32_t)> AfterAnimate = nullptr;
+            std::function<void(DeviceManager&, uint32_t)> BeforeRender = nullptr;
+            std::function<void(DeviceManager&, uint32_t)> AfterRender = nullptr;
+            std::function<void(DeviceManager&, uint32_t)> BeforePresent = nullptr;
+            std::function<void(DeviceManager&, uint32_t)> AfterPresent = nullptr;
         } m_Callbacks;
     private:
         static DeviceManager* CreateD3D11();

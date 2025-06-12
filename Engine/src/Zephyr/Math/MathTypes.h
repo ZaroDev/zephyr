@@ -24,6 +24,7 @@ SOFTWARE.
 
 #pragma once
 #include <Zephyr/Core/BasicTypes.h>
+#include <Zephyr/Core/PlatformDetection.h>
 #ifdef PLATFORM_WINDOWS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_FORCE_XYZW_ONLY
