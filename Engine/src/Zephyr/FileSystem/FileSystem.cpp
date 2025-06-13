@@ -87,6 +87,13 @@ namespace Zephyr
 			StringStream stream = file.ReadStream();
 			return stream.str();
 		}
+		Ref<Buffer> ReadFile(const Path& path)
+		{
+			File file(path, File::INPUT);
+			StringStream stream = file.ReadStream();
+
+			return CreateRef<Buffer>(stream.str().data(), stream.str().size());
+		}
 	}
 
 	File::File(const Path& filePath, i32 mode)

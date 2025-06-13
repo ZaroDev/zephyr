@@ -98,5 +98,6 @@ namespace Zephyr
 		bool IsDirectory(const Path& path);
 
 		String ReadFileContents(const Path& path);
+		Ref<Buffer> ReadFile(const Path& path);
 	}
 }
