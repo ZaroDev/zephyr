@@ -54,10 +54,8 @@ namespace Editor
 		{
 			auto savePath = Zephyr::FileDialogs::SaveFile("Log file (*.log)\0.log\0");
 			savePath.replace_extension(".log");
-			Zephyr::Buffer buffer(m_Buf.c_str(), m_Buf.size());
+			//Blob buffer = Blob(const_cast<void*>(m_Buf.c_str()), m_Buf.size());
 
-			Zephyr::File file(savePath, Zephyr::File::OpenMode::OUTPUT);
-			file.Write(buffer);
 		}
 
 		ImGui::SameLine();

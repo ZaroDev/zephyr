@@ -1,103 +1,169 @@
+/*
+MIT License
+
+Copyright (c) 2025 ZaroDev
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 #pragma once
-#include "Buffer.h"
+#include <Zephyr/Core/Base.h>
 
 namespace Zephyr
 {
-	class File final 
+	namespace Status
+	{
+		constexpr i32 OK = 0;
+		constexpr i32 Failed = -1;
+		constexpr i32 PathNotFound = -2;
+		constexpr i32 NotImplemented = -3;
+	}
+
+	/*
+	 * @interface IBlob
+	 * @brief Base class for untyped data, typically read from a file.
+	 */
+	class IBlob
 	{
 	public:
-		enum OpenMode : u8
+		virtual ~IBlob() = default;
+
+		// Getter for the stored data
+		NODISCARD virtual const void* Data() const = 0;
+
+		// Getter for the size of the stored data
+		NODISCARD virtual SizeT Size() const = 0;
+
+
+		// Returns true if the provided blob contains no data.
+		static constexpr bool IsEmpty(IBlob const* blob)
 		{
-			INPUT = 0x01,
-			OUTPUT = 0x02,
-			ATE = 0x04,
-			APP = 0x08,
-			TRUNC = 0x10,
-			BINARY = 0x20,
-		};
-
-		
-		explicit File(const Path& filePath, i32 mode);
-		explicit File(const Path& filePath, OpenMode mode);
-		~File();
-
-		DEFAULT_MOVE_AND_COPY(File);
-
-		bool GetLine(String& string);
-		void Read(Buffer& buffer);
-		StringStream ReadStream() const;
-		void Write(const Buffer& buffer);
-		bool IsEndOfFile() const;
-		size Size();
-
-		/*File& operator<<(const String& string)
-		{
-			m_Stream << string;
-			return *this;
+			return blob == nullptr || blob->Data() == nullptr || blob->Size() == 0;
 		}
-
-		File& operator<<(StrView string)
-		{
-			m_Stream << string;
-			return *this;
-		}
-
-		File& operator<<(char ch)
-		{
-			m_Stream << ch;
-			return *this;
-		}*/
-		
-		void operator>>(String& string)
-		{
-			m_Stream >> string;
-		}
-
-		bool IsOpen() const
-		{
-			return m_Stream.is_open();
-		}
-
-	private:
-		FileStream m_Stream;
 	};
 
-	namespace FileSystem
+	/*
+	 * @class Blob
+	 * @brief Specific blob implementation that owns the data and frees it when deleted.
+	 */
+	class Blob final : public IBlob
 	{
+	public:
+		Blob(void* data, SizeT size);
+		virtual ~Blob() override;
 
-		bool Exists(const Path& path);
+		NODISCARD const void* Data() const override;
+		NODISCARD SizeT Size() const override;
 
-		size FileSize(const Path& path);
+	private:
+		void* m_Data;
+		SizeT m_Size;
+	};
 
-		Path WorkingDirectory();
+	typedef const std::function<void(StrView)>& EnumerateCallbackFunc;
 
-		void WorkingDirectory(const Path& path);
+	/*
+	 * @interface IFileSystem
+	 * @brief Basic interface for the virtual file system.
+	 */
+	class IFileSystem
+	{
+	public:
+		virtual ~IFileSystem() = default;
 
-		bool IsEmpty(const Path& path);
+		virtual bool FolderExists(const Path& path) = 0;
+		virtual bool FileExists(const Path& path) = 0;
 
-		bool IsEquivalent(const Path& path1, const Path& path2);
+		virtual Ref<IBlob> ReadFile(const Path& path) = 0;
+		virtual bool WriteFile(const Path& path, const void* data, SizeT size) = 0;
 
-		bool CreateFolder(const Path& path);
+		virtual i32 EnumerateFiles(const Path& path, const std::vector<String>& extensions, EnumerateCallbackFunc callback, bool allowDuplicates = false) = 0;
+		virtual i32 EnumerateDirectories(const Path& path, EnumerateCallbackFunc callback, bool allowDuplicates = false) = 0;
+	};
 
-		bool CreateFolders(const Path& path);
+	/*
+	 * @class DefaultFileSystem
+	 * @brief An implementation of virtual file system that directly maps to the OS files.
+	 */
+	class DefaultFileSystem final : public IFileSystem
+	{
+	public:
+		DefaultFileSystem() = default;
+		virtual ~DefaultFileSystem() override = default;
+		virtual bool FolderExists(const Path& path) override;
+		virtual bool FileExists(const Path& path) override;
+		virtual Ref<IBlob> ReadFile(const Path& path) override;
+		virtual bool WriteFile(const Path& path, const void* data, SizeT size) override;
+		virtual i32 EnumerateFiles(const Path& path, const std::vector<String>& extensions, EnumerateCallbackFunc callback, bool allowDuplicates) override;
+		virtual i32 EnumerateDirectories(const Path& path, EnumerateCallbackFunc callback, bool allowDuplicates) override;
+	};
 
-		void CreateDirectorySymlink(const Path& to, const Path& symlink);
+	/*
+	 * @class RelativeFileSystem
+	 * @brief A layer that represents some path in the underlying file system as an entire FS.
+     * Effectively, just prepends the provided base path to every file name
+	 * and passes the requests to the underlying FS.
+	 */
+	class RelativeFileSystem final : public IFileSystem
+	{
+	public:
 
-		void CreateHardlink(const Path& to, const Path& hardlink);
+		RelativeFileSystem(Scope<IFileSystem> parent, const Path& basePath);
+		NODISCARD const Path& GetBasePath() const { return m_BasePath; }
 
-		void CreateSymlink(const Path& to, const Path& symlink);
+		virtual ~RelativeFileSystem() override = default;
+		virtual bool FolderExists(const Path& path) override;
+		virtual bool FileExists(const Path& path) override;
+		virtual Ref<IBlob> ReadFile(const Path& path) override;
+		virtual bool WriteFile(const Path& path, const void* data, SizeT size) override;
+		virtual i32 EnumerateFiles(const Path& path, const std::vector<String>& extensions, EnumerateCallbackFunc callback, bool allowDuplicates) override;
+		virtual i32 EnumerateDirectories(const Path& path, EnumerateCallbackFunc callback, bool allowDuplicates) override;
 
-		bool Remove(const Path& path);
+	private:
+		Scope<IFileSystem> m_UnderlyingFS;
+		Path m_BasePath;
+	};
 
-		bool RemoveAll(const Path& path);
+	/*
+	 * @class RootFileSystem
+	 * @brief A virtual file system that allows mounting, or attaching, other VFS objects to paths.
+	 * Does not have any file systems by default, all of them must be mounted first.
+	 */
+	class RootFileSystem final : public IFileSystem
+	{
+	public:
+		virtual ~RootFileSystem() override = default;
 
-		Path ReplaceExtension(const Path& path, StrView extension);
+		virtual bool FolderExists(const Path& path) override;
+		virtual bool FileExists(const Path& path) override;
+		virtual Ref<IBlob> ReadFile(const Path& path) override;
+		virtual bool WriteFile(const Path& path, const void* data, SizeT size) override;
+		virtual i32 EnumerateFiles(const Path& path, const std::vector<String>& extensions, EnumerateCallbackFunc callback, bool allowDuplicates) override;
+		virtual i32 EnumerateDirectories(const Path& path, EnumerateCallbackFunc callback, bool allowDuplicates) override;
 
-		Path GetFileName(const Path& path);
+		void Mount(const Path& path, Ref<IFileSystem> fs);
+		void Mount(const Path& path, const Path& nativePath);
+		bool UnMount(const Path& path);
+	private:
+		bool FindMountPoint(const Path& path, Path* pRelativePath, IFileSystem** ppFS);
+	private:
+		std::vector <std::pair<String, Ref<IFileSystem>>> m_MountingPoints;
+	};
 
-		bool IsDirectory(const Path& path);
-
-		String ReadFileContents(const Path& path);
-		Ref<Buffer> ReadFile(const Path& path);
-	}
+	String GetFileSearchRegex(const Path& path, const std::vector<String>& extensions);
 }

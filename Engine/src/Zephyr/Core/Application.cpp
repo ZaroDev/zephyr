@@ -18,10 +18,7 @@ namespace Zephyr
 		m_Running = true;
 		m_Specification = specs;
 
-		if (FileSystem::Exists(m_Specification.WorkingDir))
-		{
-			FileSystem::WorkingDirectory(m_Specification.WorkingDir);
-		}
+		
 		Project::New();
 
 		m_DeviceManager = DeviceManager::Create(specs.GraphicsBackend);

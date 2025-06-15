@@ -20,5 +20,6 @@ LibraryDir["meshoptimizer"] = "%{wks.location}/Engine/Vendor/meshoptimizer/lib/%
 
 Library = {}
 Library["VulkanSDK"] = "%{LibraryDir.VulkanSDK}/vulkan-1.lib"
+Library["slang"] = "%{LibraryDir.VulkanSDK}/slang.lib"
 Library["assimp"] = "%{LibraryDir.assimp}/assimp.lib"
 Library["meshoptimizer"] = "%{LibraryDir.meshoptimizer}/meshoptimizer.lib"

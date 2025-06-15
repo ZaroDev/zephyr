@@ -4,21 +4,21 @@
 
 #include <FontIcons/IconsForkAwesome.h>
 
+#include "Zephyr/FileSystem/FileSystem.h"
+#include "Zephyr/Renderer/ShaderFactory.h"
+
 namespace Editor
 {
 	void Application::OnInit()
 	{
-		/*SetImGuiTheme();
+		SetImGuiTheme();
 		m_Scene = Zephyr::CreateRef<Zephyr::ECS::Scene>();
-
-
 		m_Panels.emplace_back(Zephyr::CreateScope<InfoPanel>());
 		m_Panels.emplace_back(Zephyr::CreateScope<ProjectPanel>());
 		m_Panels.emplace_back(Zephyr::CreateScope<ConsolePanel>());
 		m_Panels.emplace_back(Zephyr::CreateScope<HierarchyPanel>());
 		m_Panels.emplace_back(Zephyr::CreateScope<AssetBrowserPanel>());
-		m_Panels.emplace_back(Zephyr::CreateScope<ScenePanel>());*/
-
+		m_Panels.emplace_back(Zephyr::CreateScope<ScenePanel>());
 	}
 	void Application::OnUpdate()
 	{
@@ -201,7 +201,7 @@ namespace Zephyr
 	{
 		ApplicationSpecification spec;
 		spec.Args = args;
-		spec.GraphicsBackend = GraphicsAPI::VULKAN;
+		spec.GraphicsBackend = GraphicsAPI::D3D11;
 		spec.Name = "Zephyr Editor";
 		spec.DeviceParams.BackBufferWidth = 1920;
 		spec.DeviceParams.BackBufferHeight = 1080;

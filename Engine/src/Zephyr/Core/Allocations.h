@@ -22,9 +22,53 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 #pragma once
+#include <Zephyr/Core/BasicTypes.h>
 
-namespace Zephyr::FileDialogs
+namespace Zephyr
 {
-	Zephyr::Path OpenFile(Zephyr::StrView filter);
-	Zephyr::Path SaveFile(Zephyr::StrView filter);
+	static u64 s_AllocationCount = 0;
+	static u64 s_AllocationsSize = 0;
+}
+
+void* operator new(std::size_t count)
+{
+	if (count == 0)
+	{
+		return nullptr;
+	}
+	Zephyr::s_AllocationCount++;
+	Zephyr::s_AllocationsSize += count;
+
+	return std::malloc(count);
+}
+void* operator new[](std::size_t count)
+{
+	if (count == 0)
+	{
+		return nullptr;
+	}
+	Zephyr::s_AllocationCount++;
+	Zephyr::s_AllocationsSize += count;
+
+	return std::malloc(count);
+}
+
+
+void operator delete(void* pointer) noexcept
+{
+	if (pointer)
+	{
+		Zephyr::s_AllocationCount--;
+		Zephyr::s_AllocationsSize -= sizeof(pointer);
+		std::free(pointer);
+	}
+}
+void operator delete[](void* pointer) noexcept
+{
+	if (pointer)
+	{
+		Zephyr::s_AllocationCount--;
+		Zephyr::s_AllocationsSize -= sizeof(pointer);
+		std::free(pointer);
+	}
 }

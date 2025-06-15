@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2023 Víctor Falcón Zaro
+Copyright (c) 2025 ZaroDev
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,15 +21,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-
 #pragma once
 #include <stdint.h>
 namespace Zephyr
 {
 	//! Signed byte type
-	typedef signed char byte;
+	typedef char Byte;
 	//! Unsigned byte type
-	typedef unsigned char ubyte;
+	typedef unsigned char Ubyte;
 
 	// Signed types
 
@@ -70,5 +69,5 @@ namespace Zephyr
 	//! Singed floating pointer 64 bit type
 	typedef double f64;
 
-	typedef size_t size;
+	typedef size_t SizeT;
 }

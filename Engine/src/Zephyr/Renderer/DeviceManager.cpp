@@ -570,6 +570,11 @@ namespace Zephyr
 		return m_WindowTitle.c_str();
 	}
 
+	DeviceManager* DeviceManager::CreateD3D12()
+	{
+		return nullptr;
+	}
+
 	nvrhi::IFramebuffer* DeviceManager::GetCurrentFramebuffer()
 	{
 		return GetFramebuffer(GetCurrentBackBufferIndex());
@@ -590,17 +595,6 @@ namespace Zephyr
 
 		m_InstanceCreated = false;
 	}
-
-	DeviceManager* DeviceManager::CreateD3D11()
-	{
-		return nullptr;
-	}
-
-	DeviceManager* DeviceManager::CreateD3D12()
-	{
-		return nullptr;
-	}
-
 
 	DefaultMessageCallback& DefaultMessageCallback::GetInstance()
 	{

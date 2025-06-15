@@ -8,7 +8,7 @@
 
 namespace Zephyr
 {
-	enum class CVarType : byte
+	enum class CVarType : Byte
 	{
 		BOOL,
 		INT,
@@ -43,10 +43,10 @@ namespace Zephyr
 	{
 		CVarStorage<T>* CVars;
 		u32 LastCVar = 0;
-		u32 Size = 0;
+		SizeT Size = 0;
 
 
-		CVarArray(size size)
+		CVarArray(SizeT size)
 		{
 			CVars = new CVarStorage<T>[size]();
 			Size = size;
@@ -55,7 +55,7 @@ namespace Zephyr
 		{
 			delete[] CVars;
 		}
-		T* GetCurrentPtr(int32_t index)
+		T* GetCurrentPtr(i32 index)
 		{
 			CORE_ASSERT(index < Size, "Trying to access outside of array bounds");
 			return &CVars[index].Current;

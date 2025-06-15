@@ -80,7 +80,7 @@ namespace Editor
 		}
 
 		// Check if the absolute path exists and it's the current project absolute path
-		if (AbsolutePath != Zephyr::Project::GetActive()->GetWorkingDirectory() && Zephyr::FileSystem::Exists(Zephyr::Project::GetActive()->GetWorkingDirectory()))
+		if (AbsolutePath != Zephyr::Project::GetActive()->GetWorkingDirectory())
 		{
 			AbsolutePath = Zephyr::Project::GetActive()->GetWorkingDirectory();
 			m_CurrentDir = AbsolutePath;
