@@ -91,6 +91,61 @@ namespace Zephyr
 	{
 		ShaderStages.clear();
 
-		//ShaderStages.push_back(Utils::PipelineShaderCreateInfo)
+		ShaderStages.push_back(Utils::PipelineShaderStageCreateInfo(VK_SHADER_STAGE_VERTEX_BIT, vertexShader));
+		ShaderStages.push_back(Utils::PipelineShaderStageCreateInfo(VK_SHADER_STAGE_FRAGMENT_BIT, fragmentShader));
+	}
+	void VulkanPipelineBuilder::SetInputTopology(VkPrimitiveTopology topology)
+	{
+		InputAssembly.topology = topology;
+		// We are not going to use primitive restart for the moment
+		InputAssembly.primitiveRestartEnable = VK_FALSE;
+	}
+	void VulkanPipelineBuilder::SetPolygonMode(VkPolygonMode polygonMode)
+	{
+		Rasterizer.polygonMode = polygonMode;
+		Rasterizer.lineWidth = 1.0f;
+	}
+	void VulkanPipelineBuilder::SetCullMode(VkCullModeFlags cullMode, VkFrontFace frontFace)
+	{
+		Rasterizer.cullMode = cullMode;
+		Rasterizer.frontFace = frontFace;
+	}
+	void VulkanPipelineBuilder::SetMultisamplingNone()
+	{
+		Multisampling.sampleShadingEnable = VK_FALSE;
+		// No multisampling means 1 sample per pixel
+		Multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+		Multisampling.minSampleShading = 1.0f;
+		Multisampling.pSampleMask = nullptr;
+		// No alpha coverage either
+		Multisampling.alphaToCoverageEnable = VK_FALSE;
+		Multisampling.alphaToOneEnable = VK_FALSE;
+	}
+	void VulkanPipelineBuilder::DisableBlending()
+	{
+		ColorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT;
+		ColorBlendAttachment.blendEnable = VK_FALSE;
+	}
+	void VulkanPipelineBuilder::SetColorAttachmentFormat(VkFormat format)
+	{
+		ColorAttachmentFormat = format;
+		RenderInfo.colorAttachmentCount = 1;
+		RenderInfo.pColorAttachmentFormats = &ColorAttachmentFormat;
+	}
+	void VulkanPipelineBuilder::SetDepthFormat(VkFormat format)
+	{
+		RenderInfo.depthAttachmentFormat = format;
+	}
+	void VulkanPipelineBuilder::DisableDepthTest()
+	{
+		DepthStencil.depthTestEnable = VK_FALSE;
+		DepthStencil.depthWriteEnable = VK_FALSE;
+		DepthStencil.depthCompareOp = VK_COMPARE_OP_NEVER;
+		DepthStencil.depthBoundsTestEnable = VK_FALSE;
+		DepthStencil.stencilTestEnable = VK_FALSE;
+		DepthStencil.front = {};
+		DepthStencil.back = {};
+		DepthStencil.minDepthBounds = 0.0f;
+		DepthStencil.maxDepthBounds = 1.0f;
 	}
 }

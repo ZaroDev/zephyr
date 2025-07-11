@@ -26,5 +26,14 @@ namespace Zephyr
 		VkPipeline Build(VkDevice device);
 
 		void SetShaders(VkShaderModule vertexShader, VkShaderModule fragmentShader);
+		void SetInputTopology(VkPrimitiveTopology topology);
+		void SetPolygonMode(VkPolygonMode polygonMode);
+		void SetCullMode(VkCullModeFlags cullMode, VkFrontFace frontFace);
+		void SetMultisamplingNone();
+		void DisableBlending();
+		void SetColorAttachmentFormat(VkFormat format);
+		void SetDepthFormat(VkFormat format);
+		void DisableDepthTest();
+		
 	};
 }

@@ -14,11 +14,11 @@ namespace Zephyr
 
 	// Implementation of what a mesh should contain
 	// A set of vertices and a material reference
-	class Mesh final
+	class Mesh
 	{
 	public:
 		Mesh() = default;
-		~Mesh() = default;
+		virtual ~Mesh() = default;
 
 		DEFAULT_MOVE_AND_COPY(Mesh);
 
@@ -27,6 +27,11 @@ namespace Zephyr
 		{
 		}
 
+		bool IsValid() const
+		{
+			return !m_Vertices.empty() && !m_Indices.empty();
+		}
+		
 		void AddVertex(const Vertex& vertex)
 		{
 			m_Vertices.emplace_back(vertex);

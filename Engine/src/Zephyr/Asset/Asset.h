@@ -26,6 +26,7 @@ namespace Zephyr
 	class Asset
 	{
 	public:
+		virtual ~Asset() = default;
 		AssetHandle Handle; // Generate handle
 
 
