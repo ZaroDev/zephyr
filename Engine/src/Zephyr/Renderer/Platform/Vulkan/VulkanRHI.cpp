@@ -264,7 +264,7 @@ namespace Zephyr
                 vkModel->AddBuffer(newSurface, lod, index);
                 index++;
 
-                m_MainDeletionQueue.PushFunction([=]() {
+                m_MainDeletionQueue.PushFunction([&]() {
                     DestroyBuffer(newSurface.VertexBuffer);
                     DestroyBuffer(newSurface.IndexBuffer);
                 });
