@@ -85,7 +85,19 @@ namespace Zephyr
 
     }
 
-    void VulkanRHI::OnResize(u32 width, u32 height) {}
+    void VulkanRHI::OnResize(u32 width, u32 height) 
+    {
+        // Resize the swapchain
+        vkDeviceWaitIdle(m_Device);
+
+        DestroySwapchain();
+
+        m_SwapchainExtent.height = height;
+        m_SwapchainExtent.width = width;
+
+        CreateSwapchain(width, height);
+
+    }
 
     void VulkanRHI::BeginFrame()
     {
@@ -153,7 +165,7 @@ namespace Zephyr
         vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_GeometryPipeline);
 
         Ref<VulkanModel> vkModel = DynCast<VulkanModel>(m_Model);
-        for (u32 lod = 0; lod < c_MaxLODCount; lod++)
+        for (u32 lod = 0; lod < vkModel->GetLODCount(); lod++)
         {
             u32 index = 0;
             for (auto& mesh : m_Model->GetMeshesAtLOD(lod))
@@ -262,12 +274,13 @@ namespace Zephyr
 
                 Ref<VulkanModel> vkModel = DynCast<VulkanModel>(model);
                 vkModel->AddBuffer(newSurface, lod, index);
-                index++;
-
-                m_MainDeletionQueue.PushFunction([&]() {
-                    DestroyBuffer(newSurface.VertexBuffer);
-                    DestroyBuffer(newSurface.IndexBuffer);
+                m_MainDeletionQueue.PushFunction([&, lod, index, vkModel]() {
+                    GPUMeshBuffers buffer = vkModel->GetBuffer(lod, index);
+                    DestroyBuffer(buffer.VertexBuffer);
+                    DestroyBuffer(buffer.IndexBuffer);
                 });
+
+                index++;
             }
         }
     }
@@ -782,6 +795,7 @@ namespace Zephyr
     }
     void VulkanRHI::DestroyBuffer(const AllocatedBuffer& buffer)
     {
+        CORE_ASSERT(buffer.Buffer != VK_NULL_HANDLE);
         vmaDestroyBuffer(m_Allocator, buffer.Buffer, buffer.Allocation);
     }
     void VulkanRHI::ImmediateSubmit(std::function<void(VkCommandBuffer cmd)>&& func)

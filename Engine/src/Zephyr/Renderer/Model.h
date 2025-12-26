@@ -72,7 +72,7 @@ namespace Zephyr
 
 		const std::vector<Mesh>& GetMeshesAtLOD(u32 lod) const { return m_Meshes[lod]; }
 
-		virtual void Draw(u32 lod) = 0;
+		u32 GetLODCount() const { return m_LODCount; };
 	protected:
 		std::array<std::vector<Mesh>, c_MaxLODCount> m_Meshes;
 		u32 m_LODCount;

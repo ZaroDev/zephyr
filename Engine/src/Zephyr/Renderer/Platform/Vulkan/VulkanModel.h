@@ -17,7 +17,6 @@ namespace Zephyr
         }
         virtual ~VulkanModel() override = default;
         virtual AssetType GetType() const override { return Model::GetType(); }
-        virtual void Draw(u32 lod) override {}
 
         
         void AddBuffer(const GPUMeshBuffers& buffer, u32 lod, u32 index)
