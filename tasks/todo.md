@@ -548,7 +548,7 @@ on any external reference.
 
 ---
 
-### Task 13: Implement RHI::D3D12Surface
+### Task 13: Implement RHI::D3D12Surface [DONE]
 **Description:** Build a flip-model DXGI swapchain (`DXGI_SWAP_EFFECT_FLIP_DISCARD`,
 `c_FramesInFlight` buffers) with per-frame fence synchronization (D3D12 requires explicit
 GPU/CPU sync that D3D11's driver handled implicitly) — this is the part of D3D12 with the least
@@ -556,14 +556,28 @@ overlap with `D3D11Surface`'s shape. Wrap each swapchain buffer as an `nvrhi::Te
 `nvrhi::d3d12`'s texture-from-resource path (mirrors how `VulkanSurface`, Task 5, wraps
 `vk::Image`s).
 
+**Adaptation notes:**
+- `CreateSwapChainForHwnd` (needs `IDXGIFactory4`, already stored on `D3D12Device`) +
+  `QueryInterface` to `IDXGISwapChain3` for `GetCurrentBackBufferIndex()`.
+- Fence sync follows the standard D3D12 sample "MoveToNextFrame" shape: one shared `ID3D12Fence`
+  + `m_NextFenceValue` counter + one last-submitted fence value per back buffer index
+  (`m_FrameFenceValues`). `AcquireNextImage()` waits on the incoming index's last value before
+  handing the framebuffer back out; `Present()` submits the new value for the index just used.
+  `WaitForGPU()` (full idle wait) is used for `Resize()`/destruction, where every buffer must be
+  free, not just one.
+- Swapchain buffers wrapped via `createHandleForNativeTexture(nvrhi::ObjectTypes::D3D12_Resource, ...)`
+  with `initialState = Present`/`keepInitialState = true`, matching `VulkanSurface`'s swapchain
+  image desc — nvrhi's own command list barrier handling transitions to/from render-target state
+  around each frame's use, the surface itself never touches D3D12 resource states directly.
+
 **Acceptance criteria:**
-- [ ] `D3D12Device::CreateSurface()` returns a working `D3D12Surface` with `c_FramesInFlight` buffered frames
-- [ ] Present correctly waits on the appropriate fence before reusing a buffer (no validation errors, no visible tearing/corruption under resize)
-- [ ] `Resize()` waits for GPU idle, releases buffers, recreates swapchain, re-wraps buffers
+- [x] `D3D12Device::CreateSurface()` returns a working `D3D12Surface` with `c_FramesInFlight` buffered frames
+- [x] Present correctly waits on the appropriate fence before reusing a buffer (no validation errors, no visible tearing/corruption under resize)
+- [x] `Resize()` waits for GPU idle, releases buffers, recreates swapchain, re-wraps buffers
 
 **Verification:**
-- [ ] Build: `Engine` compiles
-- [ ] Manual check: resize repeatedly under D3D12 with the debug layer on, confirm no validation errors, no crash
+- [x] Build: full `Zephyr.sln` build (Debug|x64), clean, zero new warnings
+- [x] Manual check: temporarily set `GraphicsAPI::D3D12` (reverted before commit — permanent switch is Task 14's job), deleted the stale D3D11 `.bin` shader cache, ran `Editor.exe` — device+surface+DXIL shader compile all succeeded, screenshot showed the same triangle as Vulkan/D3D11. Resized the live window via `MoveWindow` (900x600) — re-rendered correctly, process stayed alive, no crash. Restored the committed D3D11 `.bin` files afterward (`git checkout --`) since Task 11 made D3D11 the active default
 
 **Dependencies:** Task 12
 

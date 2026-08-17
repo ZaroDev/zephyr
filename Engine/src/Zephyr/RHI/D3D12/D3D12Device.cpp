@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "D3D12Device.h"
+#include "D3D12Surface.h"
 
 #include <nvrhi/validation.h>
 
@@ -42,8 +43,7 @@ namespace Zephyr
 
 	Ref<Surface> D3D12Device::CreateSurface(const Ref<Window>& window)
 	{
-		// D3D12Surface lands in Task 13 - mirrors D3D11Device::CreateSurface()'s pre-Task-10 stub.
-		return Ref<Surface>();
+		return CreateRef<D3D12Surface>(this, window);
 	}
 
 	bool D3D12Device::CreateFactory()
