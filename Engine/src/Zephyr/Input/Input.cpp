@@ -1,8 +1,6 @@
 #include <pch.h>
 #include "Input.h"
 
-#include <Zephyr/Renderer/DeviceManager.h>
-
 #include <GLFW/glfw3.h>
 
 #include "Core/Application.h"

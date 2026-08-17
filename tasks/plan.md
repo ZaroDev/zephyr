@@ -122,12 +122,12 @@ nvrhi's `d3d12.h` API surface.
 - [ ] Human review before deleting the legacy stack
 
 ### Phase 5: Delete the orphaned legacy stack
-- [ ] Task 15: Delete `DeviceManager`, `D3D11DeviceManager`, `VulkanDeviceManager`, `IRenderPass`, `ImGuiRenderPass`; remove dead includes; update `docs/rhi.md`/`docs/renderer.md`
+- [x] Task 15: Delete `DeviceManager`, `D3D11DeviceManager`, `VulkanDeviceManager`, `IRenderPass`, `ImGuiRenderPass`; remove dead includes; update `docs/rhi.md`/`docs/renderer.md`
 
-### Checkpoint: Legacy stack removed
-- [ ] Zero references to `DeviceManager`/`D3D11DeviceManager`/`VulkanDeviceManager` remain in the tree
-- [ ] Full solution builds clean on all three `GraphicsAPI` values
-- [ ] `docs/` reflects the new, single-device-stack reality
+### Checkpoint: Legacy stack removed [REACHED]
+- [x] Zero references to `DeviceManager`/`D3D11DeviceManager`/`VulkanDeviceManager` remain in the tree
+- [x] Full solution builds clean on all three `GraphicsAPI` values
+- [x] `docs/` reflects the new, single-device-stack reality
 
 ### Phase 6: Re-add ImGui rendering against the new RHI
 - [ ] Task 16: Port ImGui draw-data rendering (font atlas, buffers, PSO, binding-set cache) onto `RHI::Device`/`RHI::CommandList`

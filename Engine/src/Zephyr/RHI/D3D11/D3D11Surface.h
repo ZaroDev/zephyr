@@ -18,8 +18,7 @@ namespace Zephyr
 		D3D11Surface(D3D11Device* device, const Ref<Window>& window);
 		~D3D11Surface();
 
-		// D3D11's implicit back buffer model has no app-visible frame index - always 0,
-		// matching D3D11DeviceManager::GetCurrentBackBufferIndex()/GetBackBufferCount() == 1.
+		// D3D11's implicit back buffer model has no app-visible frame index - always 0.
 		virtual u32 GetCurrentFrameIndex() const override { return 0; }
 		virtual u32 GetWidth() const override { return m_Width; }
 		virtual u32 GetHeight() const override { return m_Height; }

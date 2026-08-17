@@ -40,8 +40,7 @@ namespace Zephyr
 		m_SwapChainDesc.BufferDesc.Width = m_Width;
 		m_SwapChainDesc.BufferDesc.Height = m_Height;
 		// DXGI will not create a swap chain with an sRGB format directly, even though its
-		// contents are interpreted as sRGB - use the non-sRGB format here (matches
-		// D3D11DeviceManager's special-casing for SBGRA8_UNORM/SRGBA8_UNORM).
+		// contents are interpreted as sRGB - use the non-sRGB format here.
 		m_SwapChainDesc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
 		m_SwapChainDesc.BufferUsage = DXGI_USAGE_SHADER_INPUT | DXGI_USAGE_RENDER_TARGET_OUTPUT;
 		m_SwapChainDesc.OutputWindow = m_hWnd;

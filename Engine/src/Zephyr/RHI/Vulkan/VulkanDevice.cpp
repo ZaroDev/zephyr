@@ -7,10 +7,9 @@
 #include <GLFW/glfw3.h>
 #include <nvrhi/validation.h>
 
-// NOTE: VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE (the actual global dispatcher
-// definition, required exactly once per binary) currently lives in VulkanDeviceManager.cpp.
-// Do not add it here while that file still exists - it would be a duplicate symbol. When
-// VulkanDeviceManager.cpp is deleted (tasks/plan.md Task 15), move the storage macro here.
+// The actual global Vulkan dynamic dispatcher definition - must occur in exactly one cpp file
+// in the program.
+VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
 namespace Zephyr
 {

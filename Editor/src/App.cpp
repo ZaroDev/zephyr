@@ -5,7 +5,6 @@
 #include <FontIcons/IconsForkAwesome.h>
 
 #include "Zephyr/FileSystem/FileSystem.h"
-#include "Zephyr/Renderer/ShaderFactory.h"
 
 namespace Editor
 {

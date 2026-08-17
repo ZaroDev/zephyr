@@ -61,8 +61,8 @@ namespace Zephyr
 
 	bool D3D11Device::CreateDeviceAndContext()
 	{
-		// Adapter selection: use the first adapter, matching D3D11DeviceManager's default
-		// (AdapterIndex < 0 => 0). No adapter-index selection is exposed yet - see tasks/plan.md.
+		// Adapter selection: use the first adapter. No adapter-index selection is exposed yet -
+		// see tasks/plan.md.
 		if (FAILED(m_DxgiFactory->EnumAdapters(0, &m_DxgiAdapter)))
 		{
 			CORE_ERROR("Cannot find any DXGI adapters in the system.");

@@ -624,7 +624,7 @@ files now committed contain DXIL, since D3D12 is the new active default.
 
 ## Phase 5: Delete the orphaned legacy stack
 
-### Task 15: Delete DeviceManager + subclasses + IRenderPass + ImGuiRenderPass
+### Task 15: Delete DeviceManager + subclasses + IRenderPass + ImGuiRenderPass [DONE]
 **Description:** Now that `RHI::Device`/`Surface` cover Vulkan, D3D11, and D3D12 with real
 working implementations, delete the parallel stack per the explicit instruction to avoid
 `D3D11DeviceManager`/`VulkanDeviceManager`: `Renderer/DeviceManager.{h,cpp}`,
@@ -636,15 +636,33 @@ Editor's vestigial unused `#include <Zephyr/Renderer/ShaderFactory.h>` if it's s
 (`docs/renderer.md` Design Notes), and update `docs/rhi.md`/`docs/renderer.md` to describe the
 finished single-stack state instead of the mid-flight one.
 
+**Adaptation notes:**
+- Re-grepping (not trusting the doc snapshot) found the five files' `.h`/`.cpp` pairs plus stale
+  *name* references (not call sites) in three RHI files that survived the earlier ports as
+  explanatory comments: `RHI/D3D11/D3D11Device.cpp`, `D3D11Surface.cpp`/`.h` (comments citing
+  `D3D11DeviceManager`'s original behavior), and `RHI/Vulkan/VulkanDevice.h`/`.cpp` (comments
+  citing `VulkanDeviceManager`). Reworded all of them so the zero-matches grep target is real,
+  not just true for code.
+- `Input.cpp` had an entirely unused `#include <Zephyr/Renderer/DeviceManager.h>` (nothing in the
+  file referenced it) - removed.
+- `Editor/src/App.cpp`'s `#include "Zephyr/Renderer/ShaderFactory.h"` was confirmed still unused
+  (no `ShaderFactory` symbol referenced anywhere in the file) - removed. Left the neighboring
+  `FileSystem.h` include alone even though it also looks unused - out of this task's scope.
+- Moved `VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE` from `VulkanDeviceManager.cpp` (now
+  deleted) into `VulkanDevice.cpp`, exactly as flagged during Task 4. Confirmed via grep that
+  nvrhi's own `vulkan-device.cpp` guards its copy of the same macro behind
+  `NVRHI_SHARED_LIBRARY_BUILD` (not defined in this static-lib build), so there's no duplicate-
+  symbol risk between nvrhi's copy and this one.
+
 **Acceptance criteria:**
-- [ ] All five files listed above are deleted, plus their now-empty `Platform/D3D11`, `Platform/Vulkan`, `RenderPasses` directories
-- [ ] `grep -r "DeviceManager\|IRenderPass\|ImGuiRenderPass"` across `Engine/` and `Editor/` returns zero matches
-- [ ] `docs/rhi.md` and `docs/renderer.md` updated to reflect: one device stack, three working backends, slang shader pipeline in place
-- [ ] **Discovered during Task 4:** `VulkanDeviceManager.cpp` is currently the sole definer of `VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE` (the actual global Vulkan dispatcher, required exactly once per binary). `RHI/Vulkan/VulkanDevice.cpp` relies on that existing definition and does not define it itself (see the comment at the top of that file). Deleting `VulkanDeviceManager.cpp` in this task **will break the link** (undefined `VULKAN_HPP_DEFAULT_DISPATCHER` symbol) unless `VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE` is added to `VulkanDevice.cpp` in the same commit
+- [x] All five files listed above are deleted, plus their now-empty `Platform/D3D11`, `Platform/Vulkan`, `RenderPasses` directories
+- [x] `grep -r "DeviceManager\|IRenderPass\|ImGuiRenderPass"` across `Engine/` and `Editor/` returns zero matches
+- [x] `docs/rhi.md` and `docs/renderer.md` updated to reflect: one device stack, three working backends, slang shader pipeline in place
+- [x] **Discovered during Task 4:** `VulkanDeviceManager.cpp` is currently the sole definer of `VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE`. Moved into `VulkanDevice.cpp` in this same commit - build+link confirmed clean
 
 **Verification:**
-- [ ] Build: full solution builds clean on all three `GraphicsAPI` values with these files removed
-- [ ] Manual check: re-run the Task 6/11/14 visual checks once more post-deletion to confirm nothing was silently depending on the deleted files
+- [x] Build: full solution builds clean on all three `GraphicsAPI` values with these files removed
+- [x] Manual check: re-ran the Task 6/11/14 visual checks post-deletion by scratch-switching through all three `GraphicsAPI` values (deleting the stale `.bin` cache each time) - D3D12 (the current committed default), Vulkan, and D3D11 all rendered the identical triangle with zero errors, confirming nothing was silently depending on the deleted files. Restored the D3D12 default and its DXIL `.bin` cache afterward
 
 **Dependencies:** Checkpoint after Phase 4
 
@@ -661,10 +679,10 @@ finished single-stack state instead of the mid-flight one.
 
 ---
 
-## Checkpoint: Legacy stack removed
-- [ ] Zero references to `DeviceManager`/`D3D11DeviceManager`/`VulkanDeviceManager`/`IRenderPass`/`ImGuiRenderPass` remain
-- [ ] Full solution builds clean on all three `GraphicsAPI` values
-- [ ] All three backends independently verified rendering the same triangle via slang-compiled shaders
+## Checkpoint: Legacy stack removed [REACHED]
+- [x] Zero references to `DeviceManager`/`D3D11DeviceManager`/`VulkanDeviceManager`/`IRenderPass`/`ImGuiRenderPass` remain
+- [x] Full solution builds clean on all three `GraphicsAPI` values
+- [x] All three backends independently verified rendering the same triangle via slang-compiled shaders
 - [ ] **Human review before starting Phase 6** (Editor UI renders nothing at this point — expected, not a regression to chase)
 
 ---

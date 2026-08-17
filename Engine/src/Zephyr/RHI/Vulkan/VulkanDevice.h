@@ -25,8 +25,7 @@ namespace Zephyr
 
 		// The raw (never validation-wrapped) Vulkan device, needed for the Vulkan-specific
 		// swapchain interop methods (queueWaitForSemaphore/queueSignalSemaphore, native texture
-		// handles) that nvrhi::validation's generic IDevice wrapper doesn't expose - matches how
-		// VulkanDeviceManager used m_NvrhiDevice directly for the same operations.
+		// handles) that nvrhi::validation's generic IDevice wrapper doesn't expose.
 		nvrhi::vulkan::IDevice* GetRawNvrhiDevice() const { return m_NvrhiDevice; }
 
 		// Accessors needed by RHI::VulkanSurface (owns the window surface/swapchain, which this
@@ -54,8 +53,8 @@ namespace Zephyr
 			std::unordered_set<std::string> Device;
 		};
 
-		// Same minimal required-extension set VulkanDeviceManager used - kept verbatim rather
-		// than "cleaned up" during the port, per tasks/plan.md's extension-drift risk note.
+		// Minimal required-extension set, kept verbatim from the original port rather than
+		// "cleaned up", per tasks/plan.md's extension-drift risk note.
 		VulkanExtensionSet m_EnabledExtensions = {
 			// Instance
 			{
