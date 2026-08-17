@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "VulkanDevice.h"
+#include "VulkanSurface.h"
 
 #include <sstream>
 
@@ -82,8 +83,7 @@ namespace Zephyr
 
 	Ref<Surface> VulkanDevice::CreateSurface(const Ref<Window>& window)
 	{
-		// See tasks/plan.md Task 5 - RHI::VulkanSurface is not implemented yet.
-		return Ref<Surface>();
+		return CreateRef<VulkanSurface>(this, window);
 	}
 
 	bool VulkanDevice::CreateVulkanInstance()

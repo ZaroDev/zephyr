@@ -135,7 +135,7 @@ graphics/present queues, and `m_NvrhiDevice`/`m_ValidationLayer` populated via
 
 ---
 
-### Task 5: Implement RHI::VulkanSurface
+### Task 5: Implement RHI::VulkanSurface [DONE]
 **Description:** Create `RHI::VulkanSurface : Surface`, porting `createWindowSurface`,
 `createSwapChain`/`destroySwapChain`, `BeginFrame`/`Present`, and the `SwapChainImage`
 (`vk::Image` + `nvrhi::TextureHandle`) pattern from `VulkanDeviceManager`. `VulkanDevice::CreateSurface(window)`
@@ -145,15 +145,31 @@ as the old code). Implement `Surface`'s existing interface (`GetCurrentFrameInde
 to `Surface.h` if the current interface is insufficient — it currently has no present/acquire
 methods at all).
 
+**Adaptation notes:**
+- `Surface.h` gained `AcquireNextImage()`, `GetCurrentFramebuffer()`, `Present()`.
+- `VulkanDevice` gained `GetRawNvrhiDevice() -> nvrhi::vulkan::IDevice*`: the Vulkan-specific
+  `queueWaitForSemaphore`/`queueSignalSemaphore`/native-texture-handle methods used by the
+  swapchain aren't on the generic `nvrhi::IDevice` interface (they're Vulkan-only extensions),
+  and worse, they're not safe to call through the validation-layer-wrapped device
+  (`GetNvrhiDevice()`) since that wrapper only exposes the generic interface — matches how
+  `VulkanDeviceManager` always called these directly on its raw `m_NvrhiDevice`, never through
+  `GetDevice()`'s validated wrapper.
+- Framebuffer objects (one per swapchain image, `nvrhi::FramebufferDesc().addColorAttachment(...)`)
+  ARE created through the validated device, matching the original `DeviceManager::BackBufferResized()`.
+- Fixed a bug caught during the port (not present in a straight copy, introduced while writing
+  the mutable-format image-view list): the alias format must be the UNORM counterpart of
+  `SBGRA8_UNORM`'s underlying `VK_FORMAT_B8G8R8A8_SRGB`, i.e. `vk::Format::eB8G8R8A8Unorm` — an
+  earlier draft duplicated the primary format instead.
+
 **Acceptance criteria:**
-- [ ] `VulkanDevice::CreateSurface()` returns a working `VulkanSurface`, not `Ref<Surface>()`
-- [ ] Swapchain is created at the window's current size with `c_FramesInFlight` images
-- [ ] `Resize()` correctly recreates the swapchain (port `ResizeSwapChain`'s destroy+recreate pattern)
-- [ ] `Surface.h` gains whatever acquire/present methods are needed (e.g. `AcquireNextImage`, `Present`) — extend the interface, don't bypass it
+- [x] `VulkanDevice::CreateSurface()` returns a working `VulkanSurface`, not `Ref<Surface>()`
+- [x] Swapchain is created at the window's current size with `c_FramesInFlight` images
+- [x] `Resize()` correctly recreates the swapchain (port `ResizeSwapChain`'s destroy+recreate pattern)
+- [x] `Surface.h` gains whatever acquire/present methods are needed (e.g. `AcquireNextImage`, `Present`) — extend the interface, don't bypass it
 
 **Verification:**
-- [ ] Build: `Engine` compiles
-- [ ] Manual check: run Editor, confirm swapchain images are created (log or debugger check), resize the window without a crash
+- [x] Build: full `Zephyr.sln` build (Debug|x64) clean, zero new warnings
+- [x] Manual check: temporarily called `CreateSurface()`/`AcquireNextImage()`/`Present()`/`Resize()` from `Renderer::Initialize()` (scratch code, reverted before commit — real wiring is Task 6's job) and ran `Editor.exe`. Confirmed: surface created at `1920x1009`; 3 distinct framebuffer pointers cycling across 5 acquire calls (matches `c_FramesInFlight=3`); `Resize(800,600)` recreated the swapchain and updated `GetWidth()`/`GetHeight()`; no crash across the run. Three Vulkan validation warnings observed are artifacts of the scratch harness itself (never records/submits a real command list, so nvrhi never transitions the image out of `UNDEFINED` layout before present; resizes without a matching real window resize event) — not defects in `VulkanSurface`; Task 6's real render loop exercises the actually-used path
 
 **Dependencies:** Task 4
 

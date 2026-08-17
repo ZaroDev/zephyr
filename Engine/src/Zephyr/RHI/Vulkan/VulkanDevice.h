@@ -23,6 +23,12 @@ namespace Zephyr
 		virtual Ref<Surface> CreateSurface(const Ref<Window>& window);
 		virtual nvrhi::DeviceHandle GetNvrhiDevice() const { return m_ValidationLayer ? m_ValidationLayer : nvrhi::DeviceHandle(m_NvrhiDevice); }
 
+		// The raw (never validation-wrapped) Vulkan device, needed for the Vulkan-specific
+		// swapchain interop methods (queueWaitForSemaphore/queueSignalSemaphore, native texture
+		// handles) that nvrhi::validation's generic IDevice wrapper doesn't expose - matches how
+		// VulkanDeviceManager used m_NvrhiDevice directly for the same operations.
+		nvrhi::vulkan::IDevice* GetRawNvrhiDevice() const { return m_NvrhiDevice; }
+
 		// Accessors needed by RHI::VulkanSurface (owns the window surface/swapchain, which this
 		// Device knows nothing about - see tasks/plan.md Task 5).
 		vk::Instance GetVulkanInstance() const { return m_VulkanInstance; }
