@@ -689,7 +689,7 @@ finished single-stack state instead of the mid-flight one.
 
 ## Phase 6: Re-add ImGui rendering against the new RHI
 
-### Task 16: Port ImGui draw-data rendering onto RHI::Device
+### Task 16: Port ImGui draw-data rendering onto RHI::Device [DONE]
 **Description:** Task 15 deleted `ImGuiRenderPass`/`ImGui_NVRHI` along with `DeviceManager`. Its
 rendering logic (font atlas upload, dynamically-growing vertex/index buffers, per-texture
 `BindingSetHandle` cache, PSO setup, draw-command translation from `ImDrawData`) was real and
@@ -699,15 +699,47 @@ working — only its plumbing to `DeviceManager`/`IRenderPass` was orphaned. Rec
 and a `RHI::CommandList` instead of a `DeviceManager*`/`IRenderPass` base. `ImGui::CreateContext()`
 still happens once at construction, same as before.
 
+**Adaptation notes:**
+- New `Zephyr::ImGuiRenderer` (`Renderer/ImGuiRenderer.h`/`.cpp`) owns its own dedicated
+  `RHI::CommandList`, separate from `Renderer`'s triangle command list — self-contained, matching
+  the original `ImGui_NVRHI`'s own dedicated `nvrhi::CommandListHandle`.
+- No `.hlsl`/pre-baked bytecode existed anywhere for the original `imgui_vertex`/`imgui_pixel`
+  shaders referenced by name in the recovered `.cpp` (`shaderFactory->CreateShader("imgui_vertex", ...)`)
+  — those were always compiled elsewhere/pre-baked, never in this repo. Wrote new
+  `Assets/Shaders/ImGui.vs.slang`/`ImGui.ps.slang` from scratch, following the `Triangle.*.slang`
+  pattern (Task 8) and matching `ImGui_NVRHI::Init`'s binding layout exactly (`PushConstants(0, 8 bytes)`,
+  `Texture_SRV(0)`, `Sampler(0)`).
+- **Found and fixed, real bug, not a recovery artifact:** on the D3D12/DXIL path, returning the
+  pixel shader's `input.col * fontTexture.Sample(...)` result directly (or via an unmodified
+  `float4 c = ...; return c;`) compiles fine but the output alpha channel is lost — every pixel
+  blends as if alpha were 0, hiding the entire UI, even though `c.a` reads correctly in isolation
+  (verified by branching on it in a throwaway diagnostic shader). Explicitly reconstructing
+  `return float4(c.rgb, c.a);` fixes it. Root cause (Slang/DXC codegen quirk, most likely) not
+  identified further; documented in a comment at the fix site. Diagnosed via a sequence of
+  screenshot-driven diagnostic shader variants (color-coding vertex alpha vs. texture alpha vs.
+  the real combined value) rather than guesswork.
+- Dropped the original's `m_supportExplicitDisplayScaling` toggle (sourced from
+  `DeviceCreationParameters::SupportExplicitDisplayScaling`, which `RHI` has no equivalent of) —
+  DPI-aware font rescaling (`DisplayScaleChanged`) is preserved but now always active, not
+  optionally gated. Documented with a one-line comment at the `DisplayScaleChanged` declaration.
+- `KeyboardUpdate`/`MouseButtonUpdate`/etc. from the original `IRenderPass` interface were **not**
+  ported — they relied on `io.KeysDown[]`, which no longer exists in this vendored ImGui version
+  (1.92.0 WIP; legacy array removed, only `io.AddKeyEvent()` remains). Task 16's acceptance
+  criteria don't require input wiring; that's explicitly Task 17's job, which may use the
+  vendored `imgui_impl_glfw.*` callbacks directly instead of hand-rolling a GLFW-key mapping.
+- `Renderer::Render()` wires the new renderer in: `Animate()` + a temporary `ImGui::ShowDemoWindow()`
+  call (placeholder pending Task 17's `OnImGui` wiring) + `Render(framebuffer)`, after the triangle
+  draw and before `Present()`. `BackBufferResizing()` is called on resize.
+
 **Acceptance criteria:**
-- [ ] New renderer class builds the ImGui font atlas texture, vertex/index buffers, and PSO via `RHI::Device`'s nvrhi handle (`GetNvrhiDevice()`) and `ShaderFactory` (Task 7/8's path) instead of raw `nvrhi::DeviceHandle` plumbing through `DeviceManager`
-- [ ] `Render(ImDrawData*)`-equivalent records draw commands into a `RHI::CommandList` (Task 3) and submits against the current `RHI::Surface` framebuffer
-- [ ] Per-texture `BindingSetHandle` caching behavior is preserved (don't regress to rebuilding binding sets every frame)
-- [ ] DPI-aware font rescaling (`DisplayScaleChanged`) is either preserved from the ported logic or explicitly dropped with a one-line note in the code — don't silently lose it
+- [x] New renderer class builds the ImGui font atlas texture, vertex/index buffers, and PSO via `RHI::Device`'s nvrhi handle (`GetNvrhiDevice()`) and `ShaderFactory` (Task 7/8's path) instead of raw `nvrhi::DeviceHandle` plumbing through `DeviceManager`
+- [x] `Render(ImDrawData*)`-equivalent records draw commands into a `RHI::CommandList` (Task 3) and submits against the current `RHI::Surface` framebuffer
+- [x] Per-texture `BindingSetHandle` caching behavior is preserved (don't regress to rebuilding binding sets every frame)
+- [x] DPI-aware font rescaling (`DisplayScaleChanged`) is either preserved from the ported logic or explicitly dropped with a one-line note in the code — preserved, with the explicit-scaling *toggle* dropped (noted above)
 
 **Verification:**
-- [ ] Build: `Engine`/`Editor` compile and link
-- [ ] Manual check: launch Editor, confirm ImGui's demo window (or a minimal test window) renders correctly on all three `GraphicsAPI` backends, with no visible texture/binding corruption
+- [x] Build: `Engine`/`Editor` compile and link, zero new warnings
+- [x] Manual check: launched Editor, confirmed ImGui's demo window renders correctly (crisp text, correct translucent window/header blending, no texture/binding corruption) on all three `GraphicsAPI` backends via scratch API switches — screenshots pixel-identical across Vulkan/D3D11/D3D12. Restored the D3D12 default and regenerated its DXIL `.bin` cache afterward
 
 **Dependencies:** Checkpoint after Phase 5 (Task 15); Task 7/8 (`ShaderFactory` wired to `RHI::Device`)
 

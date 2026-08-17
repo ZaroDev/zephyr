@@ -4,6 +4,7 @@
 #include <Zephyr/RHI/Surface.h>
 #include <Zephyr/RHI/CommandBuffer.h>
 #include <Zephyr/Renderer/ShaderFactory.h>
+#include <Zephyr/Renderer/ImGuiRenderer.h>
 #include <Zephyr/Window/Window.h>
 
 namespace Zephyr
@@ -49,6 +50,7 @@ namespace Zephyr
 		Ref<Surface> m_Surface;
 		Scope<CommandList> m_CommandList;
 		Scope<ShaderFactory> m_ShaderFactory;
+		Scope<ImGuiRenderer> m_ImGuiRenderer;
 
 		nvrhi::ShaderHandle m_VertexShader;
 		nvrhi::ShaderHandle m_PixelShader;

@@ -3,6 +3,7 @@
 
 #include <nvrhi/utils.h>
 #include <GLFW/glfw3.h>
+#include <imgui.h>
 
 namespace Zephyr
 {
@@ -38,6 +39,8 @@ namespace Zephyr
             return false;
         }
 
+        m_ImGuiRenderer = CreateScope<ImGuiRenderer>(m_DeviceHandle, *m_ShaderFactory);
+
         return true;
     }
     void Renderer::Shutdown()
@@ -72,6 +75,8 @@ namespace Zephyr
         if (u32(width) != m_Surface->GetWidth() || u32(height) != m_Surface->GetHeight())
         {
             m_Surface->Resize(u32(width), u32(height));
+            if (m_ImGuiRenderer)
+                m_ImGuiRenderer->BackBufferResizing();
         }
 
         if (!m_Surface->AcquireNextImage())
@@ -117,6 +122,16 @@ namespace Zephyr
         m_CommandList->Close();
 
         m_DeviceHandle->GetNvrhiDevice()->executeCommandList(m_CommandList->GetNvrhiCommandList());
+
+        // ImGui overlay: rendered on top of the triangle, into the same framebuffer, via its
+        // own dedicated RHI::CommandList. Building the demo window here (rather than real UI
+        // content) is a temporary placeholder pending Task 17, which wires Application::OnImGui
+        // and GLFW input into this same Animate()/Render() pair.
+        float scaleX, scaleY;
+        glfwGetWindowContentScale(m_Data.Window->GetGLFWHandle(), &scaleX, &scaleY);
+        m_ImGuiRenderer->Animate(deltaTime, m_Surface->GetWidth(), m_Surface->GetHeight(), scaleX, scaleY);
+        ImGui::ShowDemoWindow();
+        m_ImGuiRenderer->Render(framebuffer);
 
         m_Surface->Present();
     }

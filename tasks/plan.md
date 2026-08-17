@@ -130,7 +130,7 @@ nvrhi's `d3d12.h` API surface.
 - [x] `docs/` reflects the new, single-device-stack reality
 
 ### Phase 6: Re-add ImGui rendering against the new RHI
-- [ ] Task 16: Port ImGui draw-data rendering (font atlas, buffers, PSO, binding-set cache) onto `RHI::Device`/`RHI::CommandList`
+- [x] Task 16: Port ImGui draw-data rendering (font atlas, buffers, PSO, binding-set cache) onto `RHI::Device`/`RHI::CommandList`
 - [ ] Task 17: Wire GLFW input into ImGui and enable `Application::OnImGui`
 
 ### Checkpoint: Complete
