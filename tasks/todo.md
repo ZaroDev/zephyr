@@ -589,18 +589,22 @@ overlap with `D3D11Surface`'s shape. Wrap each swapchain buffer as an `nvrhi::Te
 
 ---
 
-### Task 14: Verify triangle renders via D3D12
+### Task 14: Verify triangle renders via D3D12 [DONE]
 **Description:** Same as Task 11 but for D3D12: switch `Application.cpp`'s `GraphicsAPI` value,
 confirm the existing `Renderer`/`ShaderFactory` code renders the same triangle unmodified via
 the DXIL path.
 
+**Known limitation (same as Task 11):** deleted the stale D3D11 `.bin` shader cache before
+building — the `.bin` cache is still filename-only keyed, no per-API disambiguation. The `.bin`
+files now committed contain DXIL, since D3D12 is the new active default.
+
 **Acceptance criteria:**
-- [ ] With `GraphicsAPI::D3D12` set, Editor renders the same triangle as Vulkan/D3D11
-- [ ] No `Renderer.cpp`/`Renderer.h` changes needed beyond the `GraphicsAPI` value
+- [x] With `GraphicsAPI::D3D12` set, Editor renders the same triangle as Vulkan/D3D11
+- [x] No `Renderer.cpp`/`Renderer.h` changes needed beyond the `GraphicsAPI` value — confirmed via `git status`: only `Application.cpp` (the switch) and the two `.bin` files are dirty
 
 **Verification:**
-- [ ] Build: `Editor` builds against DXIL/D3D12 shader target
-- [ ] Manual check: visually compare all three backends' output
+- [x] Build: full `Zephyr.sln` build (Debug|x64), `Editor.exe` links against DXIL/D3D12 shader target, clean, zero new warnings
+- [x] Manual check: launched `Editor.exe`, screenshot — same downward-pointing RGB triangle, identical position/colors to the Vulkan and D3D11 screenshots. Zero errors/crashes
 
 **Dependencies:** Task 13
 
@@ -611,9 +615,9 @@ the DXIL path.
 
 ---
 
-## Checkpoint: All three backends render
-- [ ] Vulkan, D3D11, D3D12 all render the identical triangle by only changing the `GraphicsAPI` value
-- [ ] No backend-specific branches exist in `Renderer.cpp`/`ShaderFactory` call sites
+## Checkpoint: All three backends render [REACHED]
+- [x] Vulkan, D3D11, D3D12 all render the identical triangle by only changing the `GraphicsAPI` value
+- [x] No backend-specific branches exist in `Renderer.cpp`/`ShaderFactory` call sites (the only per-API branching anywhere is `ShaderFactory`'s target-format switch, which is inherent to compiling one source to three bytecode formats, not a `Renderer`-level backend branch)
 - [ ] **Human review before deleting the legacy stack**
 
 ---

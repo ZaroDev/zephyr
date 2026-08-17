@@ -32,7 +32,7 @@ namespace Zephyr
 
 		RendererData renderData
 		{
-			.Api = GraphicsAPI::D3D11,
+			.Api = GraphicsAPI::D3D12,
 			.Window = window,
 		};
 
