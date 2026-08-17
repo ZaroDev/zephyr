@@ -42,4 +42,9 @@ namespace Zephyr
 	// Converts the engine's GraphicsAPI selector to nvrhi's own enum, needed anywhere
 	// engine code has to hand an API selection to nvrhi (e.g. ShaderFactory's target selection).
 	nvrhi::GraphicsAPI ToNVRHI(GraphicsAPI api);
+
+	// Parses a case-insensitive backend name ("d3d11"/"dx11", "d3d12"/"dx12", "vulkan"/"vk") used
+	// by the --api command-line switch. Returns false (leaving outApi untouched) if name doesn't
+	// match a known backend.
+	bool TryParseGraphicsAPI(StrView name, GraphicsAPI& outApi);
 }

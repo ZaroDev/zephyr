@@ -9,6 +9,37 @@
 
 namespace Zephyr
 {
+	// Command-line backend override: --api=<name> or --api <name>, where <name> is one of
+	// d3d11/dx11, d3d12/dx12, vulkan/vk (case-insensitive). Falls back to the hardcoded default
+	// below if absent or unrecognized - lets the same build switch GraphicsAPI without
+	// recompiling (e.g. `Editor.exe --api=vulkan`).
+	static GraphicsAPI ResolveGraphicsAPI(const ApplicationCommandLineArgs& args)
+	{
+		constexpr GraphicsAPI defaultApi = GraphicsAPI::D3D12;
+
+		for (int i = 1; i < args.Count; i++)
+		{
+			StrView arg = args[i];
+
+			StrView value;
+			if (arg.starts_with("--api="))
+				value = arg.substr(6);
+			else if (arg == "--api" && i + 1 < args.Count)
+				value = args[++i];
+			else
+				continue;
+
+			GraphicsAPI api;
+			if (TryParseGraphicsAPI(value, api))
+				return api;
+
+			CORE_WARN("Unrecognized --api value '{}', falling back to {}", value, GetGraphicsName(defaultApi));
+			return defaultApi;
+		}
+
+		return defaultApi;
+	}
+
 	Application* Application::s_Instance = nullptr;
 
 	Application::Application(const ApplicationSpecification& specs)
@@ -30,9 +61,12 @@ namespace Zephyr
 		auto window = m_ModuleManager.RegisterModule<Window>(params);
 		m_ModuleManager.RegisterModule<Input>(window->GetGLFWHandle());
 
+		const GraphicsAPI api = ResolveGraphicsAPI(specs.Args);
+		CORE_INFO("Using graphics backend: {}", GetGraphicsName(api));
+
 		RendererData renderData
 		{
-			.Api = GraphicsAPI::D3D12,
+			.Api = api,
 			.Window = window,
 		};
 
