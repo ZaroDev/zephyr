@@ -148,7 +148,7 @@ namespace Zephyr
         }
 
         const Path outputPath = m_BasePath / (String(fileName) + ".bin");
-        m_FileSystem->WriteFile(outputPath, byteCode.readRef(), byteCode->getBufferSize());
+        m_FileSystem->WriteFile(outputPath, byteCode->getBufferPointer(), byteCode->getBufferSize());
         Ref<IBlob>& data = m_ByteCodeCache[shaderFilePath.generic_string()];
         data = m_FileSystem->ReadFile(outputPath);
         if (!data)

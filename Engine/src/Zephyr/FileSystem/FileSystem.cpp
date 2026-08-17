@@ -47,7 +47,9 @@ namespace Zephyr
 	{
 		if (!FileExists(path))
 		{
-			CORE_ASSERT(false, "Error file doesn't exist");
+			// Not an assert: callers like ShaderFactory::GetByteCode() routinely probe for a
+			// cached file that may legitimately not exist yet (first-time compile) and fall
+			// back to regenerating it - that's a normal, recoverable path, not a bug.
 			CORE_ERROR("[DefaultFileSystem]: Error {} doesn't exist!", path.generic_string().c_str());
 			return nullptr;
 		}
