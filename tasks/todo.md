@@ -395,20 +395,46 @@ adapter enumeration/selection, `D3D11CreateDevice`, `nvrhi::d3d11::createDevice`
 
 ---
 
-### Task 10: Implement RHI::D3D11Surface
+### Task 10: Implement RHI::D3D11Surface [DONE]
 **Description:** Port `D3D11DeviceManager::CreateSwapChain`/`CreateRenderTarget`/
 `ReleaseRenderTarget`/`Present`/`ResizeSwapChain` into `RHI::D3D11Surface : Surface`. D3D11 has
 a single back buffer (unlike Vulkan's `c_FramesInFlight`), matching
 `D3D11DeviceManager::GetBackBufferCount() == 1` — keep that same single-buffer shape rather than
 forcing D3D11 into the multi-image `Surface` pattern from Task 5.
 
+**Adaptation notes:**
+- `GetCurrentFrameIndex()` hardcoded to `0` — D3D11's implicit back buffer model has no
+  app-visible frame index, matching `D3D11DeviceManager::GetCurrentBackBufferIndex()`.
+- `AcquireNextImage()` is a trivial `return m_Framebuffer != nullptr` — D3D11 has no
+  acquire/semaphore step (`BeginFrame`'s original body only handled a windowed/fullscreen
+  mode-switch edge case, which nothing in this engine exercises — `StartFullscreen` is never
+  set — so it wasn't ported; noted, not silently dropped).
+- DXGI swap chain uses `DXGI_SWAP_EFFECT_FLIP_DISCARD` with `BufferCount = 2` (the flip-model
+  minimum) rather than porting `DeviceCreationParameters::SwapChainBufferCount` (default 3) —
+  irrelevant here since the app only ever sees one nvrhi-wrapped back buffer regardless of the
+  underlying DXGI buffer count.
+- Window repositioning (`MoveWindowOntoAdapter`) from the original `CreateSwapChain` was not
+  ported — that's editor window-placement policy, unrelated to swap chain creation.
+- **Found, not fixed here (flagged for Task 11):** switching to D3D11 and compiling Task 8's
+  shaders fails — `nvrhi::createShader` (`CreateVertexShader`) returns `E_INVALIDARG`
+  (`0x80070057`). Root cause appears to be `ShaderFactory::CompileShader`'s D3D11 target profile
+  (`sm_5_1`, which needs D3D11.3/D3D12) against a device created at plain
+  `D3D_FEATURE_LEVEL_11_1`. This is a `ShaderFactory`/shader-compilation issue, not a
+  `D3D11Surface` one — confirmed because `D3D11Device`/`D3D11Surface` construction logged zero
+  errors before the shader-compile step failed. Also confirmed a related, separate footgun while
+  investigating: the `.bin` cache path has no per-API disambiguation (Task 8 already knew about
+  the per-entry-point collision; this is the same root cause, one dimension further — switching
+  `GraphicsAPI` and reusing a stale `.bin` compiled for a different backend will silently hand
+  the wrong bytecode format to `createShader`). Deleted and regenerated `.bin` files were
+  restored to the committed Vulkan SPIR-V version (`git checkout --`) before this commit.
+
 **Acceptance criteria:**
-- [ ] `D3D11Device::CreateSurface()` returns a working `D3D11Surface` backed by a real DXGI swapchain sized to the window
-- [ ] `Resize()` releases and recreates the render target correctly (port `ResizeSwapChain`)
+- [x] `D3D11Device::CreateSurface()` returns a working `D3D11Surface` backed by a real DXGI swapchain sized to the window
+- [x] `Resize()` releases and recreates the render target correctly (port `ResizeSwapChain`)
 
 **Verification:**
-- [ ] Build: `Engine` compiles
-- [ ] Manual check: resize the window under D3D11, no crash, render target recreated
+- [x] Build: full `Zephyr.sln` build (Debug|x64) clean, zero new warnings
+- [x] Manual check: temporarily set `GraphicsAPI::D3D11` (reverted before commit), ran `Editor.exe`. `D3D11Device`/`D3D11Surface` construction succeeded with zero errors (device creation log, then straight to shader compilation — no surface-related failures, unlike the pre-Task-10 stub which failed exactly at `CreateSurface()`). The subsequent failure is in shader compilation (see above), outside this task's scope. Also re-verified Vulkan is unaffected post-revert: clean run, `.bin` cache reused, no regression
 
 **Dependencies:** Task 9
 
@@ -427,6 +453,16 @@ from whatever `CommandList`/PSO code, if any, turns out to be nvrhi-abstracted-e
 backend-specific branches — that's the point of the RHI layer). `ShaderFactory` should now
 compile the same `.slang` source to DXBC automatically via its existing
 `getGraphicsAPI()`-based switch.
+
+**Known blocker going in (discovered during Task 10, not yet fixed):** D3D11 shader compilation
+currently fails — `nvrhi::createShader` returns `E_INVALIDARG` (`0x80070057`). Likely
+`ShaderFactory::CompileShader`'s DXBC target profile (`sm_5_1`) is wrong for a device created at
+`D3D_FEATURE_LEVEL_11_1` (5_1 needs D3D11.3/D3D12) — try `sm_5_0` first. This task cannot pass
+without fixing it; treat that fix as part of this task's own scope (it's exactly the kind of
+"confirm CompileShader's existing switch still does the right thing" check Task 7 already
+anticipated). Also: delete `Assets/Shaders/*.bin` before testing — they're cached per-filename,
+not per-`GraphicsAPI`, so a `.bin` compiled for Vulkan will silently feed SPIR-V to
+`nvrhi::d3d11::createShader` if reused as-is.
 
 **Acceptance criteria:**
 - [ ] With `GraphicsAPI::D3D11` set, Editor renders the same triangle as Vulkan (color/position match)

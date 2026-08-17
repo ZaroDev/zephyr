@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "D3D11Device.h"
+#include "D3D11Surface.h"
 
 #include <nvrhi/validation.h>
 
@@ -42,8 +43,7 @@ namespace Zephyr
 
 	Ref<Surface> D3D11Device::CreateSurface(const Ref<Window>& window)
 	{
-		// See tasks/plan.md Task 10 - RHI::D3D11Surface is not implemented yet.
-		return Ref<Surface>();
+		return CreateRef<D3D11Surface>(this, window);
 	}
 
 	bool D3D11Device::CreateFactory()
