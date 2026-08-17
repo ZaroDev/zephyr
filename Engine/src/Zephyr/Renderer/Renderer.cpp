@@ -28,10 +28,13 @@ namespace Zephyr
 
         m_CommandList = CreateScope<CommandList>(m_DeviceHandle->GetNvrhiDevice());
 
+        m_ShaderFactory = CreateScope<ShaderFactory>(m_DeviceHandle->GetNvrhiDevice(), CreateRef<DefaultFileSystem>(), Path("Assets/Shaders"));
+
         return true;
     }
     void Renderer::Shutdown()
     {
+        m_ShaderFactory.reset();
         m_CommandList.reset();
         m_Surface.reset();
         m_DeviceHandle.reset();

@@ -95,7 +95,7 @@ nvrhi's `d3d12.h` API surface.
 - [ ] Human review before starting the shader pipeline
 
 ### Phase 2: Slang → NVRHI shader pipeline
-- [ ] Task 7: Adapt `ShaderFactory` construction to a `Ref<RHI::Device>`-based entry point
+- [x] Task 7: Adapt `ShaderFactory` construction to a `Ref<RHI::Device>`-based entry point
 - [ ] Task 8: Add a minimal vertex+pixel `.slang` shader pair and PSO creation in `Renderer`, render a triangle
 
 ### Checkpoint: Shader pipeline proven

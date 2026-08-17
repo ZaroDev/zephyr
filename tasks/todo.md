@@ -235,7 +235,7 @@ acquire the next image, record a clear-to-color command, submit, and present.
 
 ## Phase 2: Slang → NVRHI shader pipeline
 
-### Task 7: Adapt ShaderFactory to RHI::Device
+### Task 7: Adapt ShaderFactory to RHI::Device [DONE]
 **Description:** `ShaderFactory` already does the real work (slang compilation to
 DXBC/DXIL/SPIR-V based on `nvrhi::GraphicsAPI`, `.bin` caching, `nvrhi::ShaderHandle` creation)
 but its constructor takes a raw `nvrhi::DeviceHandle`, not a `Ref<RHI::Device>`. Add a
@@ -245,13 +245,33 @@ Use `ToNVRHI()` (Task 2) anywhere `RHI::GraphicsAPI` needs converting for shader
 selection — confirm `ShaderFactory::CompileShader`'s existing `switch (m_Device->getGraphicsAPI())`
 still does the right thing given a real nvrhi Vulkan device from Task 4.
 
+**Adaptation notes:**
+- `ToNVRHI()` turned out to have no call site here: `ShaderFactory` never needs to convert
+  `Zephyr::GraphicsAPI` at all — it calls `m_Device->getGraphicsAPI()` directly on the nvrhi
+  device it's holding, which is intrinsic to that device object (set when
+  `nvrhi::vulkan::createDevice()`/etc. constructed it). `ToNVRHI()` remains unused until a task
+  that needs to go the other direction (`Zephyr::GraphicsAPI` → nvrhi, before an nvrhi device
+  exists) — likely D3D11/D3D12 device creation (Tasks 9/12), not shader compilation.
+- `Renderer` now owns a `Scope<ShaderFactory>`, constructed from
+  `m_DeviceHandle->GetNvrhiDevice()` + a fresh `DefaultFileSystem` + `"Assets/Shaders"` as the
+  base path (matching the existing `Assets/` runtime-asset convention; not yet validated end to
+  end — that's Task 8).
+- **Found and fixed a real coupling bug**, in scope for "adapt ShaderFactory": `ShaderFactory.h`
+  included the legacy `Renderer/DeviceManager.h` (`#include "DeviceManager.h"`) purely to get
+  `nvrhi/nvrhi.h` transitively — meaning `Renderer.h` including `ShaderFactory.h` would have
+  pulled the entire orphaned `DeviceManager` stack into every file that includes `Renderer.h`.
+  Worse, it would have made `ShaderFactory.h` uncompilable the moment Task 15 deletes
+  `DeviceManager.h`. Replaced with a direct `#include <nvrhi/nvrhi.h>`. Verified no other file
+  relied on this transitive include (`ImGuiRenderPass.h` already includes `IRenderPass.h`
+  directly, which is where its `DeviceManager` dependency actually comes from).
+
 **Acceptance criteria:**
-- [ ] `Renderer` (or a new small owner) can construct a `ShaderFactory` directly from its `Ref<RHI::Device>` with no manual unwrapping at each call site beyond one `GetNvrhiDevice()` call
-- [ ] `ShaderFactory::CompileShader` targets SPIR-V correctly when given the Vulkan `RHI::Device`'s nvrhi device (`m_Device->getGraphicsAPI() == nvrhi::GraphicsAPI::VULKAN`)
+- [x] `Renderer` (or a new small owner) can construct a `ShaderFactory` directly from its `Ref<RHI::Device>` with no manual unwrapping at each call site beyond one `GetNvrhiDevice()` call
+- [x] `ShaderFactory::CompileShader` targets SPIR-V correctly when given the Vulkan `RHI::Device`'s nvrhi device (`m_Device->getGraphicsAPI() == nvrhi::GraphicsAPI::VULKAN`) — guaranteed by nvrhi's Vulkan backend itself (`nvrhi::vulkan::createDevice()` always reports `GraphicsAPI::VULKAN`), not independently re-verifiable at this layer
 
 **Verification:**
-- [ ] Build: `Engine` compiles
-- [ ] Unit/manual check: construct a `ShaderFactory` in a throwaway call site, confirm `getGraphicsAPI()` reports `VULKAN`
+- [x] Build: full `Zephyr.sln` build (Debug|x64) clean, zero new warnings; confirmed `ImGuiRenderPass.cpp`/`App.cpp` (transitive includers of `ShaderFactory.h`) still compile after removing the `DeviceManager.h` include
+- [x] Manual check: ran `Editor.exe` — `ShaderFactory`'s constructor (creates the slang global session) completes with no `CORE_ERROR`/crash
 
 **Dependencies:** Task 4 (needs a real nvrhi device to report a real `getGraphicsAPI()`)
 

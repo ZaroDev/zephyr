@@ -3,6 +3,7 @@
 #include <Zephyr/RHI/Device.h>
 #include <Zephyr/RHI/Surface.h>
 #include <Zephyr/RHI/CommandBuffer.h>
+#include <Zephyr/Renderer/ShaderFactory.h>
 #include <Zephyr/Window/Window.h>
 
 namespace Zephyr
@@ -39,6 +40,7 @@ namespace Zephyr
 
 		Ref<Device> GetDevice() const { return m_DeviceHandle; }
 		Ref<Surface> GetSurface() const { return m_Surface; }
+		ShaderFactory* GetShaderFactory() const { return m_ShaderFactory.get(); }
 
 	private:
 		RendererData m_Data = {};
@@ -46,5 +48,6 @@ namespace Zephyr
 		Ref<Device> m_DeviceHandle;
 		Ref<Surface> m_Surface;
 		Scope<CommandList> m_CommandList;
+		Scope<ShaderFactory> m_ShaderFactory;
 	};
 }
