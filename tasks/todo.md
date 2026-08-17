@@ -62,7 +62,7 @@ Fix `Device::Create()`'s `D3D11`/`D3D12` switch cases, which currently `break` w
 
 ---
 
-### Task 3: Rename CommadBuffer.h → CommandBuffer.h, implement RHI::CommandList
+### Task 3: Rename CommadBuffer.h → CommandBuffer.h, implement RHI::CommandList [DONE]
 **Description:** `RHI/CommadBuffer.h` is an empty, typo'd placeholder with zero references
 anywhere. Rename to `CommandBuffer.h` and implement `Zephyr::CommandList`: a thin wrapper over
 `nvrhi::ICommandList` with `Open()`/`Close()`, and accessors needed by Task 6's render loop
@@ -71,13 +71,13 @@ anywhere. Rename to `CommandBuffer.h` and implement `Zephyr::CommandList`: a thi
 `device->createCommandList()`.
 
 **Acceptance criteria:**
-- [ ] `Engine/src/Zephyr/RHI/CommadBuffer.h` no longer exists; `Engine/src/Zephyr/RHI/CommandBuffer.h`/`.cpp` exist
-- [ ] `Zephyr::CommandList` wraps `nvrhi::CommandListHandle`, exposes `Open()`, `Close()`, `GetNvrhiCommandList()`
-- [ ] No other file references the old `CommadBuffer.h` path (should already be zero per docs, confirm with grep)
+- [x] `Engine/src/Zephyr/RHI/CommadBuffer.h` no longer exists; `Engine/src/Zephyr/RHI/CommandBuffer.h`/`.cpp` exist
+- [x] `Zephyr::CommandList` wraps `nvrhi::CommandListHandle`, exposes `Open()`, `Close()`, `GetNvrhiCommandList()`
+- [x] No other file references the old `CommadBuffer.h` path (confirmed zero matches under `Engine/` via grep; the only remaining mentions are in `docs/rhi.md` describing the pre-Task-3 state, and this plan's own task text)
 
 **Verification:**
-- [ ] Build: `Engine` compiles
-- [ ] Manual check: grep for `CommadBuffer` returns no results after the change
+- [x] Build: regenerated `Engine.vcxproj` via premake (new files aren't picked up by an already-generated `.vcxproj` — premake's glob is baked in at generation time, not live), then clean-rebuilt `Engine.vcxproj`; `CommandBuffer.cpp` compiles and `Engine.lib` links cleanly (same pre-existing, unrelated `assimp.dll` postbuild `MSB3073` noted in Task 1/2 remains)
+- [x] Manual check: `grep -r CommadBuffer Engine/` returns no results
 
 **Dependencies:** Task 2 (needs `Device::GetNvrhiDevice()`)
 

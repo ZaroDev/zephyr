@@ -78,7 +78,7 @@ nvrhi's `d3d12.h` API surface.
 ### Phase 0: Foundation fixes (unblocks everything else)
 - [x] Task 1: Fix `Build.lua` NVRHI directory casing (`Engine/Vendor/NVRHI` → `Engine/Vendor/nvrhi`)
 - [x] Task 2: Restore `ToNVRHI()`, fix `Device::Create` fallthrough bug, add `Device::GetNvrhiDevice()`
-- [ ] Task 3: Rename `CommadBuffer.h` → `CommandBuffer.h`, implement `RHI::CommandList`
+- [x] Task 3: Rename `CommadBuffer.h` → `CommandBuffer.h`, implement `RHI::CommandList`
 
 ### Checkpoint: Foundation
 - [ ] `Engine`/`Editor` build clean on `Build.lua`'s current state (Vulkan-only, still non-functional) with no new warnings from Task 1–3 changes
