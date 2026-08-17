@@ -45,7 +45,7 @@ Fix `Device::Create()`'s `D3D11`/`D3D12` switch cases, which currently `break` w
 - [x] `Device::GetNvrhiDevice() const` pure virtual added; `VulkanDevice` overrides it (returns `m_ValidationLayer` if present, else `m_NvrhiDevice` — both still null until Task 4, which is a defined value, not UB)
 
 **Verification:**
-- [x] Build: `Engine.vcxproj` compiles and links to `Engine.lib` cleanly; grepped the build log for `C4715` — zero matches (previously present). No new warnings from the changed files. (A pre-existing, unrelated `MSB3073` postbuild failure copying `assimp.dll` — a duplicated-`Engine\Engine\` path bug in `Build-Engine.lua`'s postbuildcommands, present before this task and untouched by it — still fails the *link-then-postbuild* step; flagged to the user below, not fixed here per scope discipline)
+- [x] Build: `Engine.vcxproj` compiles and links to `Engine.lib` cleanly; grepped the build log for `C4715` — zero matches (previously present). No new warnings from the changed files. (Correction: an `MSB3073` postbuild failure copying `assimp.dll` was observed here and initially misdiagnosed as a repo bug in `Build-Engine.lua`'s path construction — it was actually an artifact of building `Engine.vcxproj` directly instead of through `Zephyr.sln`, which leaves `$(SolutionDir)` unresolved/misresolved. Building via `Zephyr.sln` resolves it correctly and the postbuild step succeeds; see Task 3's verification, which re-confirms this with a full solution build)
 - [x] Manual check: `ToNVRHI` has no call site yet (expected — Task 7 is its first consumer); confirmed via grep it compiles and is reachable
 
 **Dependencies:** None (parallel-safe with Task 1)
@@ -76,7 +76,7 @@ anywhere. Rename to `CommandBuffer.h` and implement `Zephyr::CommandList`: a thi
 - [x] No other file references the old `CommadBuffer.h` path (confirmed zero matches under `Engine/` via grep; the only remaining mentions are in `docs/rhi.md` describing the pre-Task-3 state, and this plan's own task text)
 
 **Verification:**
-- [x] Build: regenerated `Engine.vcxproj` via premake (new files aren't picked up by an already-generated `.vcxproj` — premake's glob is baked in at generation time, not live), then clean-rebuilt `Engine.vcxproj`; `CommandBuffer.cpp` compiles and `Engine.lib` links cleanly (same pre-existing, unrelated `assimp.dll` postbuild `MSB3073` noted in Task 1/2 remains)
+- [x] Build: regenerated `Engine.vcxproj` via premake (new files aren't picked up by an already-generated `.vcxproj` — premake's glob is baked in at generation time, not live), then built the full `Zephyr.sln` (Debug|x64) end to end: `CommandBuffer.cpp` compiles, `Engine.lib` links, `assimp.dll` postbuild copy succeeds (confirms Task 1/2's `MSB3073` was a build-invocation artifact, not a repo bug — see corrected note on Task 2), and `Editor.exe` itself builds and links with zero errors
 - [x] Manual check: `grep -r CommadBuffer Engine/` returns no results
 
 **Dependencies:** Task 2 (needs `Device::GetNvrhiDevice()`)
