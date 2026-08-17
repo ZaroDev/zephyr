@@ -25,7 +25,7 @@ namespace Zephyr
 	{
 		bool moved = false;
 
-		V2 mousePos = Input::GetMousePosition();
+		/*V2 mousePos = Input::GetMousePosition();
 		V2 delta = (mousePos - m_LastMousePosition) * 0.002f;
 		m_LastMousePosition = mousePos;
 
@@ -51,7 +51,7 @@ namespace Zephyr
 			orbiting = false;
 
 			moved = NormalCameraControls(delta, ts);
-		}
+		}*/
 
 
 		if (moved)
@@ -118,7 +118,7 @@ namespace Zephyr
 		float speed = 0.005f;
 
 		// Movement
-		if (Input::IsKeyDown(KeyCode::W))
+		/*if (Input::IsKeyDown(KeyCode::W))
 		{
 			m_Position += m_ForwardDirection * speed * ts;
 			moved = true;
@@ -147,7 +147,7 @@ namespace Zephyr
 		{
 			m_Position += upDirection * speed * ts;
 			moved = true;
-		}
+		}*/
 
 		// Rotation
 		if (delta.x != 0.0f || delta.y != 0.0f)

@@ -21,8 +21,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
 #pragma once
-#include <Zephyr/Renderer/DeviceManager.h>
+
+#include <Zephyr/Core/Assert.h>
+#include <Zephyr/Modules/ModuleManager.h>
 
 namespace Zephyr
 {
@@ -37,6 +40,7 @@ namespace Zephyr
 
 		const char* operator[](const int index) const
 		{
+			CORE_ASSERT(index < Count);
 			return Args[index];
 		}
 	};
@@ -46,8 +50,6 @@ namespace Zephyr
 		ApplicationCommandLineArgs Args = {};
 		String Name = {};
 		Path WorkingDir = {};
-		GraphicsAPI GraphicsBackend = GraphicsAPI::VULKAN;
-		DeviceCreationParameters DeviceParams = {};
 	};
 
 	
@@ -63,29 +65,54 @@ namespace Zephyr
 		void Close();
 		void RequestClose() { m_Running = false; }
 
-		virtual void OnResize(u32 width, u32 height) ;
+		static Application& Get() { return *s_Instance; }
+		
+		template<typename T>
+		Ref<T> GetModule()
+		{
+			return Get().m_ModuleManager.GetModule<T>();
+		}
 
-		NODISCARD static Application& Get() { return *s_Instance; }
-		NODISCARD const ApplicationSpecification& Specification() const { return m_Specification; }
-		NODISCARD virtual Ref<ECS::Scene> GetActiveScene() const = 0;
+		virtual Ref<ECS::Scene> GetActiveScene() = 0;
 
-		NODISCARD DeviceManager& GetDeviceManager() const { return *m_DeviceManager; }
-
+		const ApplicationSpecification& GetSpecification() const { return m_Specification; }
 	protected:
-		virtual void OnInit() = 0;
-		virtual void OnUpdate() = 0;
-		virtual void OnImGuiUpdate() = 0;
-		virtual void OnShutdown() = 0;
+		virtual bool OnInit() { return true; }
+		virtual void OnShutdown() {}
 
-		void LoadConfig();
-		void SaveConfig();
+		virtual void OnPreUpdate(float deltaTime) {}
+		virtual void OnUpdate(float deltaTime) {}
+		virtual void OnPostUpdate(float deltaTime) {}
+					 
+		virtual void OnPrePhysicsUpdate(float deltaTime) {}
+		virtual void OnPhysicsUpdate(float deltaTime) {}
+		virtual void OnPostPhysicsUpdate(float deltaTime) {}
+					 
+		virtual void OnPreRender(float deltaTime) {}
+		virtual void OnRender(float deltaTime) {}
+		virtual void OnImGui(float deltaTime){}
+		virtual void OnPostRenderer(float deltaTime) {}
 
 		ApplicationSpecification m_Specification;
 		bool m_Running = false;
 
-		DeviceManager* m_DeviceManager = nullptr;
-
 		static Application* s_Instance;
+
+		ModuleManager m_ModuleManager;
+
+	private:
+		void PreUpdate(float deltaTime);
+		void Update(float deltaTime);
+		void PostUpdate(float deltaTime);
+
+		void PrePhysics(float deltaTime);
+		void Physics(float deltaTime);
+		void PostPhysics(float deltaTime);
+
+		void PreRender(float deltaTime);
+		void Render(float deltaTime);
+		void PostRenderer(float deltaTime);
+
 	};
 
 	Application* CreateApplication(const ApplicationCommandLineArgs& args);

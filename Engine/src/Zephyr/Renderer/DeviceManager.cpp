@@ -595,32 +595,4 @@ namespace Zephyr
 
 		m_InstanceCreated = false;
 	}
-
-	DefaultMessageCallback& DefaultMessageCallback::GetInstance()
-	{
-		static DefaultMessageCallback Instance;
-		return Instance;
-	}
-
-	void DefaultMessageCallback::message(nvrhi::MessageSeverity severity, const char* messageText)
-	{
-		
-		switch (severity)
-		{
-		case nvrhi::MessageSeverity::Info:
-			CORE_INFO("[NVRHI]: {}", messageText);
-			break;
-		case nvrhi::MessageSeverity::Warning:
-			CORE_WARN("[NVRHI]: {}", messageText);
-			break;
-		case nvrhi::MessageSeverity::Error:
-			CORE_ERROR("[NVRHI]: {}", messageText);
-			break;
-		case nvrhi::MessageSeverity::Fatal:
-			CORE_CRITICAL("[NVRHI]: {}", messageText);
-			break;
-		}
-
-	}
-
 }

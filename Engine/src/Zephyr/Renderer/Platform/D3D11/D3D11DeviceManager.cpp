@@ -1,8 +1,6 @@
 #include <pch.h>
 #include "D3D11DeviceManager.h"
-
-#pragma lib()
-
+ 
 #include <Windows.h>
 #include <dxgi1_3.h>
 #include <dxgidebug.h>

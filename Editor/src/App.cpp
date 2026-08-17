@@ -9,7 +9,7 @@
 
 namespace Editor
 {
-	void Application::OnInit()
+	bool Application::OnInit()
 	{
 		SetImGuiTheme();
 		m_Scene = Zephyr::CreateRef<Zephyr::ECS::Scene>();
@@ -19,15 +19,17 @@ namespace Editor
 		m_Panels.emplace_back(Zephyr::CreateScope<HierarchyPanel>());
 		m_Panels.emplace_back(Zephyr::CreateScope<AssetBrowserPanel>());
 		m_Panels.emplace_back(Zephyr::CreateScope<ScenePanel>());
+
+		return true;
 	}
-	void Application::OnUpdate()
+	void Application::OnUpdate(float deltaTime)
 	{
 		for (auto& panel : m_Panels)
 		{
 			panel->OnUpdate();
 		}
 	}
-	void Application::OnImGuiUpdate()
+	void Application::OnImGui(float deltaTime)
 	{
 		MainMenuBar();
 		DockSpace();
@@ -201,16 +203,7 @@ namespace Zephyr
 	{
 		ApplicationSpecification spec;
 		spec.Args = args;
-		spec.GraphicsBackend = GraphicsAPI::D3D11;
 		spec.Name = "Zephyr Editor";
-		spec.DeviceParams.BackBufferWidth = 1920;
-		spec.DeviceParams.BackBufferHeight = 1080;
-		spec.DeviceParams.SwapChainSampleCount = 1;
-		spec.DeviceParams.SwapChainBufferCount = 3;
-		spec.DeviceParams.StartFullscreen = false;
-		spec.DeviceParams.VsyncEnabled = true;
-		spec.DeviceParams.EnablePerMonitorDPI = true;
-		spec.DeviceParams.SupportExplicitDisplayScaling = true;
 
 		return new Editor::Application(spec);
 	}

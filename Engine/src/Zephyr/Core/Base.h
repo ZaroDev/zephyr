@@ -43,6 +43,46 @@ SOFTWARE.
 #define DEBUGBREAK()
 #endif
 
+#define ENUM_CLASS_FLAG_OPERATORS(EnumType)                                 \
+    inline EnumType operator|(EnumType a, EnumType b)                      \
+    {                                                                     \
+        return static_cast<EnumType>(                                     \
+            static_cast<std::underlying_type<EnumType>::type>(a) |       \
+            static_cast<std::underlying_type<EnumType>::type>(b));       \
+    }                                                                     \
+                                                                          \
+    inline EnumType &operator|=(EnumType &a, EnumType b)                 \
+    {                                                                     \
+        a = a | b;                                                       \
+        return a;                                                        \
+    }                                                                     \
+                                                                          \
+    inline EnumType operator&(EnumType a, EnumType b)                    \
+    {                                                                     \
+        return static_cast<EnumType>(                                     \
+            static_cast<std::underlying_type<EnumType>::type>(a) &       \
+            static_cast<std::underlying_type<EnumType>::type>(b));       \
+    }                                                                     \
+                                                                          \
+    inline EnumType &operator&=(EnumType &a, EnumType b)                 \
+    {                                                                     \
+        a = a & b;                                                       \
+        return a;                                                        \
+    }                                                                     \
+                                                                          \
+    inline EnumType operator~(EnumType a)                                \
+    {                                                                     \
+        return static_cast<EnumType>(                                     \
+            ~static_cast<std::underlying_type<EnumType>::type>(a));      \
+    }                                                                     \
+                                                                            \
+    inline bool Any(EnumType value, EnumType flag)                          \
+    {                                                                     \
+        using UnderlyingType = std::underlying_type<EnumType>::type;     \
+        return (static_cast<UnderlyingType>(value) &                    \
+                static_cast<UnderlyingType>(flag)) != 0;                 \
+    }
+
 #if _HAS_NODISCARD
 #define NODISCARD [[nodiscard]]
 #else // ^^^ CAN HAZ [[nodiscard]] / NO CAN HAZ [[nodiscard]] vvv

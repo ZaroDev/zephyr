@@ -7,34 +7,35 @@
 
 #include "Core/Application.h"
 
-namespace Zephyr::Input
+namespace Zephyr
 {
+
+	Input::Input(GLFWwindow* windowHandle)
+		: m_WindowHandle(windowHandle)
+	{
+		CORE_ASSERT(m_WindowHandle);
+	}
 	bool Input::IsKeyDown(KeyCode keycode)
 	{
-		GLFWwindow* windowHandle = Application::Get().GetDeviceManager().GetWindow();
-		int state = glfwGetKey(windowHandle, (int)keycode);
+		int state = glfwGetKey(m_WindowHandle, (int)keycode);
 		return state == GLFW_PRESS || state == GLFW_REPEAT;
 	}
 
 	bool Input::IsMouseButtonDown(MouseButton button)
 	{
-		GLFWwindow* windowHandle = Application::Get().GetDeviceManager().GetWindow();
-		int state = glfwGetMouseButton(windowHandle, (int)button);
+		int state = glfwGetMouseButton(m_WindowHandle, (int)button);
 		return state == GLFW_PRESS;
 	}
 
 	V2 Input::GetMousePosition()
 	{
-		GLFWwindow* windowHandle = Application::Get().GetDeviceManager().GetWindow();
-
 		double x, y;
-		glfwGetCursorPos(windowHandle, &x, &y);
+		glfwGetCursorPos(m_WindowHandle, &x, &y);
 		return { (float)x, (float)y };
 	}
 
 	void Input::SetCursorMode(CursorMode mode)
 	{
-		GLFWwindow* windowHandle = Application::Get().GetDeviceManager().GetWindow();
-		glfwSetInputMode(windowHandle, GLFW_CURSOR, GLFW_CURSOR_NORMAL + (int)mode);
+		glfwSetInputMode(m_WindowHandle, GLFW_CURSOR, GLFW_CURSOR_NORMAL + (int)mode);
 	}
 }

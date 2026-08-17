@@ -192,9 +192,9 @@ namespace Editor
 		{
 			ImGuizmo::SetOrthographic(false);
 
-			auto& deviceParams = Zephyr::Application::Get().GetDeviceManager().GetDeviceParams();
+			/*auto& deviceParams = Zephyr::Application::Get().GetDeviceParams();
 
-			ImGuizmo::SetRect(0, 0, deviceParams.BackBufferWidth, deviceParams.BackBufferHeight);
+			ImGuizmo::SetRect(0, 0, deviceParams.BackBufferWidth, deviceParams.BackBufferHeight);*/
 
 			/*const auto& camera = Zephyr::Application::Get().GetRenderer().GetMainCamera();
 			const Zephyr::Mat4 view = camera.GetView();

@@ -27,7 +27,7 @@ namespace Editor
 	{
 		{
 			ImGui::Begin(m_Name.c_str(), &m_Open);
-			ImGui::Text("Application name: %s", Zephyr::Application::Get().Specification().Name.c_str());
+			ImGui::Text("Application name: %s", Zephyr::Application::Get().GetSpecification().Name.c_str());
 			if (ImGui::CollapsingHeader("Renderer"))
 			{
 			/*	Zephyr::RenderDevice device = Zephyr::Application::Get().GetRenderer().GetRenderHardwareInterface().GetRenderDevice();

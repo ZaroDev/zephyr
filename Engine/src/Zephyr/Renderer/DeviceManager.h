@@ -23,7 +23,7 @@ SOFTWARE.
 */
 #pragma once
 #include <functional>
-#include <Zephyr/Renderer/GraphicsAPI.h>
+#include <Zephyr/RHI/GraphicsAPI.h>
 #include <nvrhi/nvrhi.h>
 
 #include <nvrhi/vulkan.h>

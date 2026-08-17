@@ -24,15 +24,33 @@ SOFTWARE.
 #pragma once
 
 #include "KeyCodes.h"
+#include <Zephyr/Modules/IModule.h>
+#include <Zephyr/Math/MathTypes.h>
 
-#include "Zephyr/Math/MathTypes.h"
 
-namespace Zephyr::Input
+struct GLFWwindow;
+namespace Zephyr
 {
-	bool IsKeyDown(KeyCode keycode);
-	bool IsMouseButtonDown(MouseButton button);
+	class Input final : public IModule
+	{
+	public:
+		Input(GLFWwindow* windowHandle);
+		~Input() = default;
 
-	V2 GetMousePosition();
+		DEFAULT_MOVE_AND_COPY(Input);
 
-	void SetCursorMode(CursorMode mode);
+		virtual bool Initialize() override { return true; }
+		virtual void Shutdown() override{}
+		virtual String GetName() const override { return "Input"; }
+		virtual int GetPriority() const override { return 0; }
+		virtual UpdateFlags GetUpdateFlags() const override { return UpdateFlags::None; }
+		virtual bool IsCoreModule() const override { return true; }
+
+		bool IsKeyDown(KeyCode keycode);
+		bool IsMouseButtonDown(MouseButton button);
+		V2	GetMousePosition();
+		void SetCursorMode(CursorMode mode);
+	private:
+		GLFWwindow* m_WindowHandle = nullptr;
+	};
 };

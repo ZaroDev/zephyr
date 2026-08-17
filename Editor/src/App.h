@@ -13,13 +13,12 @@ namespace Editor
 	public:
 		Application(const Zephyr::ApplicationSpecification& spec) : Zephyr::Application(spec) {}
 
-
-		NODISCARD Zephyr::Ref<Zephyr::ECS::Scene> GetActiveScene() const override { return m_Scene; }
+		virtual Ref<ECS::Scene> GetActiveScene() override { return m_Scene; }
 	protected:
-		void OnInit() override;
-		void OnUpdate() override;
-		void OnImGuiUpdate() override;
-		void OnShutdown() override;
+		virtual bool OnInit() override;
+		virtual void OnUpdate(float deltaTime) override;
+		virtual void OnImGui(float deltaTime) override;
+		virtual void OnShutdown() override;
 
 	private:
 		void DockSpace();
