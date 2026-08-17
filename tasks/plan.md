@@ -87,7 +87,7 @@ nvrhi's `d3d12.h` API surface.
 ### Phase 1: Vulkan vertical slice
 - [x] Task 4: Port Vulkan instance/physical-device/logical-device creation into `RHI::VulkanDevice`
 - [x] Task 5: Implement `RHI::VulkanSurface` (window surface, swapchain, resize, acquire/present)
-- [ ] Task 6: Wire `Renderer` to create a `Surface` from `Window`, record a clear-color command list per frame, present
+- [x] Task 6: Wire `Renderer` to create a `Surface` from `Window`, record a clear-color command list per frame, present
 
 ### Checkpoint: Vulkan renders
 - [ ] Editor opens a window and shows a solid clear color via Vulkan

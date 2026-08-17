@@ -1,6 +1,8 @@
 #pragma once
 #include <Zephyr/Modules/IModule.h>
 #include <Zephyr/RHI/Device.h>
+#include <Zephyr/RHI/Surface.h>
+#include <Zephyr/RHI/CommandBuffer.h>
 #include <Zephyr/Window/Window.h>
 
 namespace Zephyr
@@ -36,10 +38,13 @@ namespace Zephyr
 		virtual void PostRenderer(float deltaTime) override;
 
 		Ref<Device> GetDevice() const { return m_DeviceHandle; }
+		Ref<Surface> GetSurface() const { return m_Surface; }
 
 	private:
 		RendererData m_Data = {};
 
 		Ref<Device> m_DeviceHandle;
+		Ref<Surface> m_Surface;
+		Scope<CommandList> m_CommandList;
 	};
 }
