@@ -5,8 +5,19 @@ struct VSOutput
     float2 uv : TEXCOORD;
 };
 
-// Matches nvrhi::BindingLayoutItem::Texture_SRV(0) / Sampler(0).
+// Matches nvrhi::BindingLayoutItem::Texture_SRV(0) / Sampler(0). register(tN)/register(sN) alone
+// is enough for the D3D targets, but on Vulkan, without compiler-level -fvk-t-shift/-fvk-s-shift
+// flags (which ShaderFactory doesn't pass to Slang), both would naively land on descriptor
+// binding 0 in the same set - a real binding collision (SAMPLED_IMAGE where a SAMPLER/
+// COMBINED_IMAGE_SAMPLER was expected), not just a validation nag. nvrhi's own Vulkan backend
+// resolves this by offsetting each D3D register type into its own range of the flat Vulkan
+// binding space (nvrhi::VulkanBindingOffsets, nvrhi.h: shaderResource=0, sampler=128 by default -
+// ImGuiRenderer's BindingLayoutDesc never overrides them). The two [[vk::binding(binding, set)]]
+// decorations below reproduce that exact mapping so the SPIR-V matches what nvrhi's descriptor
+// set layout actually expects; D3D targets ignore the attribute and use the register() as before.
+[[vk::binding(0, 0)]]
 Texture2D fontTexture : register(t0);
+[[vk::binding(128, 0)]]
 SamplerState fontSampler : register(s0);
 
 // c_SwapChainFormat (RHI/*/Surface.cpp, all three backends) is nvrhi::Format::SBGRA8_UNORM - an
