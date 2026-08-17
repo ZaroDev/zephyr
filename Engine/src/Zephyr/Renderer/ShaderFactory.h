@@ -99,6 +99,13 @@ namespace Zephyr
         
     private:
         bool IsShaderExtension(const char* fileName) const;
+
+        // Compiled bytecode is cached under a per-GraphicsAPI subdirectory (e.g.
+        // <base>/Cache/D3D12/<fileName>.bin) instead of directly under the .slang source's
+        // directory - DXBC/DXIL/SPIR-V are not interchangeable, so switching the active
+        // GraphicsAPI (RHI::Device::Create, or the --api command-line switch) must not read a
+        // stale binary compiled for a different backend.
+        Path GetCachedBinaryPath(const char* fileName) const;
     private:
         nvrhi::DeviceHandle m_Device;
         Ref<IFileSystem> m_FileSystem;

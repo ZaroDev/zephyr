@@ -1,10 +1,26 @@
 ﻿#include "pch.h"
 #include "ShaderFactory.h"
 
-
-
 namespace Zephyr
 {
+    static const char* GetCacheSubdirName(nvrhi::GraphicsAPI api)
+    {
+        switch (api)
+        {
+        case nvrhi::GraphicsAPI::D3D11: return "D3D11";
+        case nvrhi::GraphicsAPI::D3D12: return "D3D12";
+        case nvrhi::GraphicsAPI::VULKAN: return "Vulkan";
+        }
+
+        CORE_ASSERT(false, "Unknown nvrhi::GraphicsAPI");
+        return "Unknown";
+    }
+
+    Path ShaderFactory::GetCachedBinaryPath(const char* fileName) const
+    {
+        return m_BasePath / "Cache" / GetCacheSubdirName(m_Device->getGraphicsAPI()) / (String(fileName) + ".bin");
+    }
+
     ShaderFactory::ShaderFactory(nvrhi::DeviceHandle device, Ref<IFileSystem> fs, const Path& path)
         : m_Device(device), m_FileSystem(fs), m_BasePath(path)
     {
@@ -27,8 +43,7 @@ namespace Zephyr
             entryName = "main";
         }
 
-        String ajustedName = fileName;
-        Path shaderFilePath = m_BasePath / (ajustedName + ".bin");
+        Path shaderFilePath = GetCachedBinaryPath(fileName);
         Ref<IBlob>& data = m_ByteCodeCache[shaderFilePath.generic_string()];
         
         if (data)
@@ -149,9 +164,15 @@ namespace Zephyr
             }
         }
 
-        const Path outputPath = m_BasePath / (String(fileName) + ".bin");
+        const Path outputPath = GetCachedBinaryPath(fileName);
+        // IFileSystem::WriteFile doesn't create missing parent directories (DefaultFileSystem
+        // opens a plain std::ofstream) - the per-API Cache/<API>/ subdirectory needs to exist
+        // before the first shader is ever compiled for that API.
+        std::error_code ec;
+        std::filesystem::create_directories(outputPath.parent_path(), ec);
+
         m_FileSystem->WriteFile(outputPath, byteCode->getBufferPointer(), byteCode->getBufferSize());
-        Ref<IBlob>& data = m_ByteCodeCache[shaderFilePath.generic_string()];
+        Ref<IBlob>& data = m_ByteCodeCache[outputPath.generic_string()];
         data = m_FileSystem->ReadFile(outputPath);
         if (!data)
         {
