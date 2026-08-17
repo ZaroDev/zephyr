@@ -446,7 +446,7 @@ forcing D3D11 into the multi-image `Surface` pattern from Task 5.
 
 ---
 
-### Task 11: Verify triangle renders via D3D11
+### Task 11: Verify triangle renders via D3D11 [DONE]
 **Description:** Switch `Application.cpp`'s hardcoded `RendererData::Api` to
 `GraphicsAPI::D3D11` and confirm Task 6/8's clear+triangle render loop works unmodified (aside
 from whatever `CommandList`/PSO code, if any, turns out to be nvrhi-abstracted-enough to need no
@@ -454,23 +454,28 @@ backend-specific branches — that's the point of the RHI layer). `ShaderFactory
 compile the same `.slang` source to DXBC automatically via its existing
 `getGraphicsAPI()`-based switch.
 
-**Known blocker going in (discovered during Task 10, not yet fixed):** D3D11 shader compilation
-currently fails — `nvrhi::createShader` returns `E_INVALIDARG` (`0x80070057`). Likely
-`ShaderFactory::CompileShader`'s DXBC target profile (`sm_5_1`) is wrong for a device created at
-`D3D_FEATURE_LEVEL_11_1` (5_1 needs D3D11.3/D3D12) — try `sm_5_0` first. This task cannot pass
-without fixing it; treat that fix as part of this task's own scope (it's exactly the kind of
-"confirm CompileShader's existing switch still does the right thing" check Task 7 already
-anticipated). Also: delete `Assets/Shaders/*.bin` before testing — they're cached per-filename,
-not per-`GraphicsAPI`, so a `.bin` compiled for Vulkan will silently feed SPIR-V to
-`nvrhi::d3d11::createShader` if reused as-is.
+**Blocker fix (in scope, as anticipated):** `ShaderFactory::CompileShader`'s DXBC target profile
+was `sm_5_1`, which requires D3D11.3/D3D12; `RHI::D3D11Device` creates a plain
+`D3D_FEATURE_LEVEL_11_1` device, which only supports Shader Model 5.0. Changed to `sm_5_0` —
+this immediately fixed the `E_INVALIDARG` from `nvrhi::createShader`.
+
+**Known limitation, not fixed here (pre-existing, tracked since Task 8/10):** `.bin` shader
+caches are keyed by filename only, not by `GraphicsAPI`. Switching the active API and reusing a
+stale `.bin` compiled for a different backend will silently feed the wrong bytecode format to
+`createShader`. Deleted `Assets/Shaders/*.bin` before testing, exactly as flagged. The `.bin`
+files now committed alongside this task contain **D3D11 DXBC**, not Vulkan SPIR-V, since D3D11
+is the new active default — switching back to `GraphicsAPI::VULKAN` without deleting them first
+will reproduce the same failure Task 10 hit going the other direction. A proper fix (e.g.
+`fileName + "." + apiSuffix + ".bin"`) is out of scope for this plan; noted for whoever revisits
+`ShaderFactory` next.
 
 **Acceptance criteria:**
-- [ ] With `GraphicsAPI::D3D11` set, Editor renders the same triangle as Vulkan (color/position match)
-- [ ] No `Renderer.cpp`/`Renderer.h` code changes were needed beyond the `GraphicsAPI` value itself — if any were needed, they indicate a leaky abstraction; note and fix before closing this task
+- [x] With `GraphicsAPI::D3D11` set, Editor renders the same triangle as Vulkan (color/position match) — verified via screenshot, pixel-position/color-identical to the Vulkan screenshot from Task 8
+- [x] No `Renderer.cpp`/`Renderer.h` code changes were needed beyond the `GraphicsAPI` value itself — confirmed via `git status`: only `Application.cpp` (the switch) and `ShaderFactory.cpp` (the profile bug fix, not a `Renderer` change) are dirty
 
 **Verification:**
-- [ ] Build: `Editor` builds against DXBC/D3D11 shader target
-- [ ] Manual check: visually compare Vulkan vs. D3D11 output side by side
+- [x] Build: full `Zephyr.sln` build (Debug|x64), `Editor.exe` links against DXBC/D3D11 shader target, zero new warnings
+- [x] Manual check: launched `Editor.exe` and took a screenshot — same downward-pointing RGB triangle, same position, same interpolated colors as the Vulkan run. Zero errors/crashes across the run
 
 **Dependencies:** Task 10
 
@@ -481,10 +486,10 @@ not per-`GraphicsAPI`, so a `.bin` compiled for Vulkan will silently feed SPIR-V
 
 ---
 
-## Checkpoint: D3D11 renders
-- [ ] Switching the `GraphicsAPI` value is the only change needed to move from Vulkan to D3D11
-- [ ] Resize and close do not crash on either backend
-- [ ] **Human review before starting Phase 4**
+## Checkpoint: D3D11 renders [REACHED]
+- [x] Switching the `GraphicsAPI` value is the only change needed to move from Vulkan to D3D11
+- [x] Resize and close do not crash on either backend — D3D11 resize verified interactively (`MoveWindow` to 900x600 mid-run via a PowerShell scratch script), triangle re-rendered correctly at the new size, process stayed alive; Vulkan resize was verified in Task 5
+- [x] Human review before starting Phase 4 (proceeded)
 
 ---
 

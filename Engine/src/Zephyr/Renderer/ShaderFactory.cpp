@@ -67,7 +67,9 @@ namespace Zephyr
         {
         case nvrhi::GraphicsAPI::D3D11:
             targetDesc.format = SLANG_DXBC;
-            targetDesc.profile = m_SlangGlobalSession->findProfile("sm_5_1");
+            // sm_5_1 requires D3D11.3/D3D12; RHI::D3D11Device creates a plain
+            // D3D_FEATURE_LEVEL_11_1 device, which only supports Shader Model 5.0.
+            targetDesc.profile = m_SlangGlobalSession->findProfile("sm_5_0");
 	        break;
         case nvrhi::GraphicsAPI::D3D12:
             targetDesc.format = SLANG_DXIL;

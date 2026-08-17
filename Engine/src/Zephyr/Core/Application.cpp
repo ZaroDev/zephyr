@@ -32,7 +32,7 @@ namespace Zephyr
 
 		RendererData renderData
 		{
-			.Api = GraphicsAPI::VULKAN,
+			.Api = GraphicsAPI::D3D11,
 			.Window = window,
 		};
 

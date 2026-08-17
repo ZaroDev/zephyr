@@ -106,7 +106,7 @@ nvrhi's `d3d12.h` API surface.
 ### Phase 3: D3D11 vertical slice
 - [x] Task 9: Port D3D11 device/adapter creation into `RHI::D3D11Device`
 - [x] Task 10: Implement `RHI::D3D11Surface` (DXGI swapchain, render target, resize, present)
-- [ ] Task 11: Verify the same triangle renders via D3D11 (DXBC path)
+- [x] Task 11: Verify the same triangle renders via D3D11 (DXBC path)
 
 ### Checkpoint: D3D11 renders
 - [ ] Switching `GraphicsAPI::VULKAN` → `GraphicsAPI::D3D11` in `Application.cpp` is the only code change needed to render the same triangle
