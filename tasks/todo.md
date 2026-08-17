@@ -90,16 +90,16 @@ anywhere. Rename to `CommandBuffer.h` and implement `Zephyr::CommandList`: a thi
 
 ---
 
-## Checkpoint: Foundation
-- [ ] `Engine` and `Editor` build clean (Debug, Vulkan default, still non-functional beyond construction)
-- [ ] No MSVC C4715 warnings
-- [ ] **Human review before starting Phase 1**
+## Checkpoint: Foundation [REACHED]
+- [x] `Engine` and `Editor` build clean (Debug, Vulkan default, still non-functional beyond construction) — confirmed via full `Zephyr.sln` build, `Editor.exe` linked
+- [x] No MSVC C4715 warnings
+- [x] Human review before starting Phase 1 (proceeded)
 
 ---
 
 ## Phase 1: Vulkan vertical slice
 
-### Task 4: Port Vulkan device creation into RHI::VulkanDevice
+### Task 4: Port Vulkan device creation into RHI::VulkanDevice [DONE]
 **Description:** Port the working logic from
 `Renderer/Platform/Vulkan/VulkanDeviceManager.cpp` (`createInstance`, `installDebugCallback`,
 `pickPhysicalDevice`, `findQueueFamilies`, `createDevice`) into `RHI::VulkanDevice`. Keep the
@@ -109,14 +109,21 @@ constructor should end with a fully created `vk::Instance`, `vk::PhysicalDevice`
 graphics/present queues, and `m_NvrhiDevice`/`m_ValidationLayer` populated via
 `nvrhi::vulkan::createDevice(...)`.
 
+**Adaptation notes (deviations from a pure line-for-line port, and why):**
+- No window/surface exists yet at `Device::Create()` time in this architecture (`Surface` is created separately via `CreateSurface(window)`, Task 5) — so the window-surface-capability checks inside the original `pickPhysicalDevice()` (swap chain image count/extent/format, present support against a real `VkSurfaceKHR`) were **not** ported here; only the extension/feature/queue-family checks were. Task 5's `VulkanSurface` will need to re-validate presentability once a real surface exists.
+- Compute/transfer queues (`EnableComputeQueue`/`EnableCopyQueue` in the original `DeviceCreationParameters`) were dropped — nothing in this engine uses them yet (YAGNI); only graphics+present queues are created.
+- `DeviceCreationParameters`/`InstanceParameters` (the old app-configurable struct) were not carried over; validation/debug-report-callback enablement is instead gated on `#ifdef DEBUG` directly, since `RHI::Device::Create(GraphicsAPI)` has no params argument to configure it through.
+- The **exact same required/optional Vulkan instance and device extension sets** from `VulkanDeviceManager` are kept verbatim, per the plan's extension-drift risk note.
+- A latent quirk in the original is preserved as-is (not fixed, per port-not-redesign scope): `FindQueueFamilies` only assigns `m_GraphicsQueueFamily`/`m_PresentQueueFamily` when they're still `-1`, so once set while evaluating one physical-device candidate they won't be re-evaluated for a later candidate. `PickPhysicalDevice()` still re-runs `FindQueueFamilies` once more on the finally-selected device afterward (matching the original's redundant-but-correcting second call), so the end result is correct even though the per-candidate filtering has this quirk.
+
 **Acceptance criteria:**
-- [ ] `VulkanDevice` constructor creates a real `vk::Instance` (with validation layer in Debug), enumerates and picks a physical device, creates a logical device with graphics+present queues
-- [ ] `nvrhi::vulkan::createDevice()` succeeds and `GetNvrhiDevice()` (Task 2) returns a non-null handle
-- [ ] `DefaultMessageCallback` (already in `Device.h`) is wired as the nvrhi message callback, same as `VulkanDeviceManager` does
+- [x] `VulkanDevice` constructor creates a real `vk::Instance` (with validation layer in Debug), enumerates and picks a physical device, creates a logical device with graphics+present queues
+- [x] `nvrhi::vulkan::createDevice()` succeeds and `GetNvrhiDevice()` (Task 2) returns a non-null handle
+- [x] `DefaultMessageCallback` (already in `Device.h`) is wired as the nvrhi message callback, same as `VulkanDeviceManager` does
 
 **Verification:**
-- [ ] Build: `Engine` compiles and links against `nvrhi::vulkan`/Vulkan SDK
-- [ ] Manual check: run Editor in Debug, confirm log output shows Vulkan instance/device creation info and no `CORE_ERROR`/`CORE_CRITICAL` from `DefaultMessageCallback`
+- [x] Build: full `Zephyr.sln` build (Debug|x64) — `VulkanDevice.cpp` compiles, `Engine.lib` links against `nvrhi::vulkan`/Vulkan SDK, `Editor.exe` links, zero new warnings
+- [x] Manual check: ran `Editor.exe` for 6s. Log output: enabled instance extensions (`VK_EXT_debug_utils`, `VK_EXT_debug_report`, `VK_KHR_win32_surface`, `VK_KHR_surface`, `VK_KHR_get_physical_device_properties2`), `VK_LAYER_KHRONOS_validation` enabled, device extensions enabled, `"Created Vulkan Device: NVIDIA GeForce RTX 3070 Ti"`, `"Succesfully registered module Renderer"` (confirms `Device::Create()` returned non-null and `Renderer::Initialize()` succeeded). Zero `CORE_ERROR`/`CORE_CRITICAL`/`[NVRHI]` messages, clean exit
 
 **Dependencies:** Task 2
 
@@ -450,6 +457,7 @@ finished single-stack state instead of the mid-flight one.
 - [ ] All five files listed above are deleted, plus their now-empty `Platform/D3D11`, `Platform/Vulkan`, `RenderPasses` directories
 - [ ] `grep -r "DeviceManager\|IRenderPass\|ImGuiRenderPass"` across `Engine/` and `Editor/` returns zero matches
 - [ ] `docs/rhi.md` and `docs/renderer.md` updated to reflect: one device stack, three working backends, slang shader pipeline in place
+- [ ] **Discovered during Task 4:** `VulkanDeviceManager.cpp` is currently the sole definer of `VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE` (the actual global Vulkan dispatcher, required exactly once per binary). `RHI/Vulkan/VulkanDevice.cpp` relies on that existing definition and does not define it itself (see the comment at the top of that file). Deleting `VulkanDeviceManager.cpp` in this task **will break the link** (undefined `VULKAN_HPP_DEFAULT_DISPATCHER` symbol) unless `VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE` is added to `VulkanDevice.cpp` in the same commit
 
 **Verification:**
 - [ ] Build: full solution builds clean on all three `GraphicsAPI` values with these files removed

@@ -85,7 +85,7 @@ nvrhi's `d3d12.h` API surface.
 - [ ] Confirm `Device::Create(GraphicsAPI::D3D11)` / `Create(D3D12)` no longer silently fall off the end (still fine to return `nullptr` until Phase 3/4 land, but must not be UB)
 
 ### Phase 1: Vulkan vertical slice
-- [ ] Task 4: Port Vulkan instance/physical-device/logical-device creation into `RHI::VulkanDevice`
+- [x] Task 4: Port Vulkan instance/physical-device/logical-device creation into `RHI::VulkanDevice`
 - [ ] Task 5: Implement `RHI::VulkanSurface` (window surface, swapchain, resize, acquire/present)
 - [ ] Task 6: Wire `Renderer` to create a `Surface` from `Window`, record a clear-color command list per frame, present
 
