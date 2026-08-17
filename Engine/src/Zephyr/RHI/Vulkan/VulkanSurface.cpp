@@ -272,6 +272,35 @@ namespace Zephyr
 
 		m_PresentSemaphoreIndex = (m_PresentSemaphoreIndex + 1) % u32(m_PresentSemaphores.size());
 
+		// Throttle: don't let the CPU submit more frames than the ring buffer can hold. Without
+		// vsync, nothing else paces the loop, and reusing a semaphore whose previous wait/signal
+		// hasn't completed on the GPU yet is a validation error (and a correctness bug).
+		constexpr u32 maxFramesInFlight = c_FramesInFlight;
+		while (m_FramesInFlight.size() >= maxFramesInFlight)
+		{
+			nvrhi::EventQueryHandle query = m_FramesInFlight.front();
+			m_FramesInFlight.pop();
+
+			rawNvrhiDevice->waitEventQuery(query);
+
+			m_QueryPool.push_back(query);
+		}
+
+		nvrhi::EventQueryHandle query;
+		if (!m_QueryPool.empty())
+		{
+			query = m_QueryPool.back();
+			m_QueryPool.pop_back();
+		}
+		else
+		{
+			query = rawNvrhiDevice->createEventQuery();
+		}
+
+		rawNvrhiDevice->resetEventQuery(query);
+		rawNvrhiDevice->setEventQuery(query, nvrhi::CommandQueue::Graphics);
+		m_FramesInFlight.push(query);
+
 		return true;
 	}
 }

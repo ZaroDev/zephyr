@@ -3,6 +3,7 @@
 #ifndef VULKAN_HPP_DISPATCH_LOADER_DYNAMIC
 #define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
 #endif
+#include <queue>
 #include <vulkan/vulkan.hpp>
 #include "nvrhi/vulkan.h"
 
@@ -58,5 +59,12 @@ namespace Zephyr
 		std::vector<vk::Semaphore> m_PresentSemaphores;
 		u32 m_AcquireSemaphoreIndex = 0;
 		u32 m_PresentSemaphoreIndex = 0;
+
+		// CPU-side throttle so the app can't submit more frames than the swapchain/semaphore
+		// ring buffer can hold (there's no vsync to pace it otherwise). Without this, acquiring
+		// far ahead of what the GPU has presented reuses a semaphore that still has a pending
+		// wait/signal, which Vulkan validation rejects.
+		std::queue<nvrhi::EventQueryHandle> m_FramesInFlight;
+		std::vector<nvrhi::EventQueryHandle> m_QueryPool;
 	};
 }

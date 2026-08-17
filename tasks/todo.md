@@ -160,6 +160,13 @@ methods at all).
   the mutable-format image-view list): the alias format must be the UNORM counterpart of
   `SBGRA8_UNORM`'s underlying `VK_FORMAT_B8G8R8A8_SRGB`, i.e. `vk::Format::eB8G8R8A8Unorm` — an
   earlier draft duplicated the primary format instead.
+- **Follow-up fix (found while verifying Task 6, separate commit):** the original
+  `VulkanDeviceManager::Present()`'s `EventQuery`-based frame-in-flight throttle was dropped
+  during this port. Without it, a real continuous render loop (no vsync) submits far more frames
+  than the 3-image/4-semaphore ring buffer can hold, and Vulkan validation correctly rejects
+  reusing a semaphore with a still-pending wait/signal (`vkAcquireNextImageKHR(): Semaphore must
+  not have any pending operations`). Re-added `m_FramesInFlight`/`m_QueryPool` and the
+  wait-then-recycle logic in `Present()`, capped at `c_FramesInFlight`.
 
 **Acceptance criteria:**
 - [x] `VulkanDevice::CreateSurface()` returns a working `VulkanSurface`, not `Ref<Surface>()`
