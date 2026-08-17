@@ -49,5 +49,9 @@ namespace Zephyr
 		Ref<Surface> m_Surface;
 		Scope<CommandList> m_CommandList;
 		Scope<ShaderFactory> m_ShaderFactory;
+
+		nvrhi::ShaderHandle m_VertexShader;
+		nvrhi::ShaderHandle m_PixelShader;
+		nvrhi::GraphicsPipelineHandle m_Pipeline;
 	};
 }

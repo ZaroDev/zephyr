@@ -28,12 +28,23 @@ namespace Zephyr
 
         m_CommandList = CreateScope<CommandList>(m_DeviceHandle->GetNvrhiDevice());
 
-        m_ShaderFactory = CreateScope<ShaderFactory>(m_DeviceHandle->GetNvrhiDevice(), CreateRef<DefaultFileSystem>(), Path("Assets/Shaders"));
+        m_ShaderFactory = CreateScope<ShaderFactory>(m_DeviceHandle->GetNvrhiDevice(), CreateRef<DefaultFileSystem>(), Path("Shaders"));
+
+        m_VertexShader = m_ShaderFactory->CreateShader("Triangle.vs.slang", "main", nullptr, nvrhi::ShaderType::Vertex);
+        m_PixelShader = m_ShaderFactory->CreateShader("Triangle.ps.slang", "main", nullptr, nvrhi::ShaderType::Pixel);
+        if (!m_VertexShader || !m_PixelShader)
+        {
+            CORE_ERROR("Failed to compile the triangle shaders");
+            return false;
+        }
 
         return true;
     }
     void Renderer::Shutdown()
     {
+        m_Pipeline = nullptr;
+        m_PixelShader = nullptr;
+        m_VertexShader = nullptr;
         m_ShaderFactory.reset();
         m_CommandList.reset();
         m_Surface.reset();
@@ -70,8 +81,39 @@ namespace Zephyr
         if (!framebuffer)
             return;
 
+        if (!m_Pipeline)
+        {
+            nvrhi::RenderState renderState;
+            renderState.rasterState.setCullNone();
+            renderState.depthStencilState.disableDepthTest().disableDepthWrite();
+
+            auto psoDesc = nvrhi::GraphicsPipelineDesc()
+                .setVertexShader(m_VertexShader)
+                .setPixelShader(m_PixelShader)
+                .setRenderState(renderState)
+                .setPrimType(nvrhi::PrimitiveType::TriangleList);
+
+            m_Pipeline = m_DeviceHandle->GetNvrhiDevice()->createGraphicsPipeline(psoDesc, framebuffer);
+            if (!m_Pipeline)
+            {
+                CORE_ERROR("Failed to create the triangle graphics pipeline");
+                return;
+            }
+        }
+
         m_CommandList->Open();
         nvrhi::utils::ClearColorAttachment(m_CommandList->GetNvrhiCommandList(), framebuffer, 0, nvrhi::Color(0.1f, 0.1f, 0.15f, 1.0f));
+
+        nvrhi::GraphicsState state;
+        state.pipeline = m_Pipeline;
+        state.framebuffer = framebuffer;
+        state.viewport.addViewportAndScissorRect(nvrhi::Viewport(float(m_Surface->GetWidth()), float(m_Surface->GetHeight())));
+        m_CommandList->GetNvrhiCommandList()->setGraphicsState(state);
+
+        nvrhi::DrawArguments drawArgs;
+        drawArgs.vertexCount = 3;
+        m_CommandList->GetNvrhiCommandList()->draw(drawArgs);
+
         m_CommandList->Close();
 
         m_DeviceHandle->GetNvrhiDevice()->executeCommandList(m_CommandList->GetNvrhiCommandList());

@@ -283,7 +283,7 @@ still does the right thing given a real nvrhi Vulkan device from Task 4.
 
 ---
 
-### Task 8: Minimal slang shader pair + triangle PSO
+### Task 8: Minimal slang shader pair + triangle PSO [DONE]
 **Description:** Add a minimal `.slang` vertex+pixel shader pair (e.g. hardcoded fullscreen or
 3-vertex triangle, no vertex buffer needed if using `SV_VertexID` tricks — match whatever's
 simplest given `ShaderFactory`'s existing API) under a shader assets path the `IFileSystem`
@@ -291,17 +291,50 @@ base path can resolve. Wire `Renderer` to compile it via `ShaderFactory::CreateA
 `CreateShader`), build a minimal `nvrhi::GraphicsPipelineHandle`, and replace Task 6's plain
 clear with clear+draw of the triangle.
 
+**Adaptation notes:**
+- Two separate files (`Triangle.vs.slang` / `Triangle.ps.slang`, entry point `main` in both)
+  instead of one file with two entry points. **Discovered why this matters, not just style:**
+  `ShaderFactory::CompileShader`'s `.bin` output path and `GetByteCode`'s cache key are both
+  derived from `fileName` alone, ignoring `entryName` — compiling two entry points from the same
+  source file would silently overwrite one's `.bin` with the other's and collide in the
+  in-memory cache. Noted as a pre-existing `ShaderFactory` bug, not fixed (out of scope; the
+  two-file split sidesteps it entirely for this task).
+- Base shader path is `"Shaders"`, not `"Assets/Shaders"` as Task 7 assumed — the Editor's actual
+  working directory (`Editor/Build-Editor.lua`'s `debugdir`, and `LocalDebuggerWorkingDirectory`
+  in the generated `.vcxproj.user`) is `$(SolutionDir)/Assets`, so paths are relative to that,
+  not the repo root. Corrected in this task; Task 7's commit had it wrong.
+- Culling disabled (`RasterState::setCullNone()`) and depth test/write disabled
+  (`DepthStencilState::disableDepthTest/disableDepthWrite()`, since the framebuffer has no depth
+  attachment) — the minimal, unambiguous choice for a single unindexed triangle with no
+  established winding-order/Y-convention contract yet.
+- **Found and fixed two real, blocking bugs while making this task actually run** (both outside
+  this task's own files, in code Task 7 already touched/adjacent to):
+  1. `Engine/src/Zephyr/FileSystem/FileSystem.cpp`'s `DefaultFileSystem::ReadFile` called
+     `CORE_ASSERT(false, ...)` on a routine "file doesn't exist" condition — which is exactly
+     what `ShaderFactory::GetByteCode`'s normal first-compile cache-miss path hits every time.
+     `DEBUGBREAK()` with no debugger attached crashed the process outright. Removed the assert;
+     kept the existing `CORE_ERROR` + `return nullptr`, which the caller already handled correctly.
+  2. `ShaderFactory::CompileShader` wrote the compiled bytecode to disk via
+     `byteCode.readRef()` — for Slang's `ComPtr<T>`, `readRef()` returns `T* const*` (the address
+     of the internal pointer, for APIs like `QueryInterface` to write into), not the buffer data.
+     This wrote garbage stack memory into every `.bin` file instead of the actual SPIR-V bytes,
+     which `vkCreateShaderModule`/pipeline creation then correctly rejected as invalid SPIR-V.
+     Fixed to `byteCode->getBufferPointer()`. This is a hard blocker for *any* shader ever
+     compiling from source in this engine, not something specific to this task's shaders.
+  See the separate "Fix FileSystem/ShaderFactory: file-not-found assert and corrupt shader
+  bytecode write" commit for both.
+
 **Acceptance criteria:**
-- [ ] A `.slang` file with a vertex and pixel entry point exists in the repo's shader asset path
-- [ ] `ShaderFactory::CompileShader` successfully compiles it to SPIR-V and writes a `.bin` cache file next to the source
-- [ ] `Renderer` creates a graphics PSO from the compiled shaders and draws a visible triangle each frame
+- [x] A `.slang` file with a vertex and pixel entry point exists in the repo's shader asset path
+- [x] `ShaderFactory::CompileShader` successfully compiles it to SPIR-V and writes a `.bin` cache file next to the source
+- [x] `Renderer` creates a graphics PSO from the compiled shaders and draws a visible triangle each frame
 
 **Acceptance criteria (cache verification):**
-- [ ] Deleting the `.bin` and re-running recompiles it; running a second time without deleting reuses the cache (add a log line or breakpoint to confirm `GetByteCode` hits the cache, not `CompileShader`)
+- [x] Deleting the `.bin` and re-running recompiles it; running a second time without deleting reuses the cache (verified via log output — first run logs `GetByteCode` misses/`CompileShader` fallback for both shaders, second run logs neither)
 
 **Verification:**
-- [ ] Build: `Editor` builds and links against `slang.lib`
-- [ ] Manual check: launch Editor, see a colored triangle on screen via Vulkan
+- [x] Build: full `Zephyr.sln` build (Debug|x64), `Editor.exe` links against `slang.lib`, zero new warnings
+- [x] Manual check: launched `Editor.exe` and took an actual screenshot (PowerShell `CopyFromScreen`, not just log inspection) — a smoothly-interpolated RGB triangle renders correctly in the "Zephyr Editor" window, vertex colors matching the shader source (red/green/blue at the three assigned positions). Zero Vulkan validation warnings on a fresh compile or a cached second run
 
 **Dependencies:** Task 7
 
@@ -314,10 +347,10 @@ clear with clear+draw of the triangle.
 
 ---
 
-## Checkpoint: Shader pipeline proven
-- [ ] Editor renders a colored triangle on Vulkan via a `.slang` source compiled through `ShaderFactory` to SPIR-V
-- [ ] `.bin` cache correctly reused on second run
-- [ ] **Human review before starting Phase 3**
+## Checkpoint: Shader pipeline proven [REACHED]
+- [x] Editor renders a colored triangle on Vulkan via a `.slang` source compiled through `ShaderFactory` to SPIR-V
+- [x] `.bin` cache correctly reused on second run
+- [x] Human review before starting Phase 3 (proceeded)
 
 ---
 

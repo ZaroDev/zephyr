@@ -96,7 +96,7 @@ nvrhi's `d3d12.h` API surface.
 
 ### Phase 2: Slang → NVRHI shader pipeline
 - [x] Task 7: Adapt `ShaderFactory` construction to a `Ref<RHI::Device>`-based entry point
-- [ ] Task 8: Add a minimal vertex+pixel `.slang` shader pair and PSO creation in `Renderer`, render a triangle
+- [x] Task 8: Add a minimal vertex+pixel `.slang` shader pair and PSO creation in `Renderer`, render a triangle
 
 ### Checkpoint: Shader pipeline proven
 - [ ] Editor renders a colored triangle on Vulkan via a `.slang` source compiled through `ShaderFactory` to SPIR-V
