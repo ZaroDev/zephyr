@@ -12,7 +12,8 @@ files {"src/**.h", "src/**.hpp", "src/**.c", "src/**.cpp", "src/**.cc"}
 
 includedirs {"src", "src/Zephyr", "%{IncludeDir.GLFW}", "%{IncludeDir.spdlog}",
              "%{IncludeDir.glad}", "%{IncludeDir.glm}", "%{IncludeDir.ImGui}",
-            "%{IncludeDir.meshoptimizer}", "%{IncludeDir.VulkanSDK}", "%{IncludeDir.nvrhi}"}
+            "%{IncludeDir.meshoptimizer}", "%{IncludeDir.VulkanSDK}", "%{IncludeDir.nvrhi}",
+            "%{IncludeDir.DirectXHeaders}"}
 
 links {"GLFW", "glad", "ImGui", "%{Library.assimp}", "%{Library.meshoptimizer}", "%{Library.VulkanSDK}", "nvrhi", "%{Library.slang}"}
 

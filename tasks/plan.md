@@ -113,7 +113,7 @@ nvrhi's `d3d12.h` API surface.
 - [ ] Resize and close do not crash
 
 ### Phase 4: D3D12 vertical slice (new code, no in-tree reference)
-- [ ] Task 12: Implement `RHI::D3D12Device` (DXGI factory/adapter, `ID3D12Device`, command queue, `nvrhi::d3d12::createDevice`)
+- [x] Task 12: Implement `RHI::D3D12Device` (DXGI factory/adapter, `ID3D12Device`, command queue, `nvrhi::d3d12::createDevice`)
 - [ ] Task 13: Implement `RHI::D3D12Surface` (flip-model swapchain, per-frame fence sync, present)
 - [ ] Task 14: Verify the same triangle renders via D3D12 (DXIL path)
 

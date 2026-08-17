@@ -3,6 +3,7 @@
 
 #include <Zephyr/RHI/Vulkan/VulkanDevice.h>
 #include <Zephyr/RHI/D3D11/D3D11Device.h>
+#include <Zephyr/RHI/D3D12/D3D12Device.h>
 
 namespace Zephyr
 {
@@ -36,9 +37,7 @@ namespace Zephyr
 		switch (api)
 		{
 		case Zephyr::GraphicsAPI::D3D11: return CreateRef<D3D11Device>();
-		case Zephyr::GraphicsAPI::D3D12:
-			// No RHI::D3D12Device implementation yet - see tasks/plan.md Phase 4.
-			return nullptr;
+		case Zephyr::GraphicsAPI::D3D12: return CreateRef<D3D12Device>();
 		case Zephyr::GraphicsAPI::VULKAN: return CreateRef<VulkanDevice>();
 		}
 

@@ -495,7 +495,7 @@ will reproduce the same failure Task 10 hit going the other direction. A proper 
 
 ## Phase 4: D3D12 vertical slice (new code — no in-tree or vendored reference)
 
-### Task 12: Implement RHI::D3D12Device
+### Task 12: Implement RHI::D3D12Device [DONE]
 **Description:** No `D3D12DeviceManager` exists anywhere in this repo or the vendored nvrhi to
 port from (confirmed via search — see plan.md risks). Build `RHI::D3D12Device : Device` from
 scratch: DXGI 1.4+ factory, adapter enumeration (same `IDXGIAdapter`/`DXGI_ADAPTER_DESC` pattern
@@ -504,14 +504,38 @@ as `D3D11Device`, Task 9), `D3D12CreateDevice`, a direct command queue, and
 `ID3D12Device*` and the command queue at minimum). Model the class shape on `D3D11Device`, not
 on any external reference.
 
+**Adaptation notes:**
+- Structurally identical to `D3D11Device`: `CreateFactory()`/`CreateDeviceAndQueue()` split,
+  same `GetAdapterName`/adapter-index-0 selection, single `nvrhi::DeviceHandle m_NvrhiDevice`
+  wrapped in `nvrhi::validation::createValidationLayer` under `#ifdef DEBUG`.
+- `CreateSurface()` is a stub (`return Ref<Surface>()`) pending Task 13, mirroring exactly how
+  `D3D11Device::CreateSurface()` looked before Task 10.
+- D3D12 debug layer (`D3D12GetDebugInterface`/`ID3D12Debug::EnableDebugLayer`) is enabled under
+  `#ifdef DEBUG` *before* device creation — required by D3D12 (unlike D3D11's
+  `D3D11_CREATE_DEVICE_DEBUG` flag, D3D12's debug layer must be turned on before
+  `D3D12CreateDevice` is called or it has no effect).
+- **Found and fixed, in scope:** two real build-system gaps, not part of the class itself:
+  1. `NVRHI-D3D12`'s premake project had no `links` block at all (unlike `NVRHI-D3D11`, which
+     explicitly links `d3d11.lib`/`dxgi.lib`/`d3dcompiler.lib`/`dxguid.lib`) — added
+     `d3d12.lib`/`dxgi.lib`/`dxguid.lib` to `Engine/Vendor/nvrhi/premake5.lua`'s `NVRHI-D3D12`
+     project, matching the D3D11 project's pattern.
+  2. `nvrhi/d3d12.h` transitively includes `<directx/d3d12.h>` from nvrhi's vendored
+     `thirdparty/DirectX-Headers` submodule. `NVRHI-D3D12`'s own project has that on its include
+     path, but `Engine` (which now includes `nvrhi/d3d12.h` directly from `D3D12Device.h`/
+     `Device.cpp`) didn't. Added `IncludeDir["DirectXHeaders"]` to `Dependencies.lua` and wired
+     it into `Engine/Build-Engine.lua`'s `includedirs`.
+- Both fixes are in `Engine/Vendor/nvrhi` (a git submodule pointing at a fork, so freely
+  editable) and the top-level premake scripts — no engine `.cpp`/`.h` logic changes beyond the
+  new `D3D12Device` itself.
+
 **Acceptance criteria:**
-- [ ] `Device::Create(GraphicsAPI::D3D12)` returns a working `D3D12Device`
-- [ ] A `ID3D12CommandQueue` (direct queue) is created and passed into `nvrhi::d3d12::createDevice`
-- [ ] `GetNvrhiDevice()` returns non-null and `getGraphicsAPI() == nvrhi::GraphicsAPI::D3D12`
+- [x] `Device::Create(GraphicsAPI::D3D12)` returns a working `D3D12Device`
+- [x] A `ID3D12CommandQueue` (direct queue) is created and passed into `nvrhi::d3d12::createDevice`
+- [x] `GetNvrhiDevice()` returns non-null and `getGraphicsAPI() == nvrhi::GraphicsAPI::D3D12` (implied by the `nvrhi::d3d12::createDevice()` call succeeding — confirmed via the "Created D3D12 Device" log line, which only prints after `createDevice()` returns)
 
 **Verification:**
-- [ ] Build: `Engine` compiles and links `nvrhi::d3d12`/D3D12 SDK libs (confirm `NVRHI-D3D12`'s `thirdparty/DirectX-Headers` include requirement, noted in `docs/vendor.md`, is satisfied)
-- [ ] Manual check: with `GraphicsAPI::D3D12` set, launch Editor, confirm device/queue creation log output, enable the D3D12 debug layer and confirm no validation errors on startup
+- [x] Build: full `Zephyr.sln` build (Debug|x64) after the premake regen + include-dir fixes above — clean, zero new warnings
+- [x] Manual check: temporarily set `GraphicsAPI::D3D12` in `Application.cpp` (reverted before commit — the permanent switch is Task 14's job, matching Task 9/11's pattern), ran `Editor.exe`. Log: `"Created D3D12 Device: NVIDIA GeForce RTX 3070 Ti"`. Then, as expected (Task 13 not done yet), `Renderer::Initialize()` correctly fails at `CreateSurface()`'s stub ("Failed to create a rendering surface") and `ModuleManager` correctly asserts on the core-module failure — same clean, handled-failure signal Task 9 confirmed for D3D11, not a crash
 
 **Dependencies:** Task 2; Task 9 recommended first as a structural template (not a hard dependency)
 
