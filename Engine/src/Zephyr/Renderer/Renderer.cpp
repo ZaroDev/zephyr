@@ -39,12 +39,17 @@ namespace Zephyr
             return false;
         }
 
-        m_ImGuiRenderer = CreateScope<ImGuiRenderer>(m_DeviceHandle, *m_ShaderFactory);
+        m_ImGuiRenderer = CreateScope<ImGuiRenderer>(m_DeviceHandle, *m_ShaderFactory, m_Data.Window->GetGLFWHandle());
 
         return true;
     }
     void Renderer::Shutdown()
     {
+        // Must be destroyed while the GLFW window is still alive (ImGuiRenderer's dtor calls
+        // ImGui_ImplGlfw_Shutdown()) - ModuleManager::Shutdown() runs module Shutdown() calls in
+        // reverse-priority order specifically so Renderer (priority 1) tears down before Window
+        // (priority 0).
+        m_ImGuiRenderer.reset();
         m_Pipeline = nullptr;
         m_PixelShader = nullptr;
         m_VertexShader = nullptr;
@@ -124,13 +129,15 @@ namespace Zephyr
         m_DeviceHandle->GetNvrhiDevice()->executeCommandList(m_CommandList->GetNvrhiCommandList());
 
         // ImGui overlay: rendered on top of the triangle, into the same framebuffer, via its
-        // own dedicated RHI::CommandList. Building the demo window here (rather than real UI
-        // content) is a temporary placeholder pending Task 17, which wires Application::OnImGui
-        // and GLFW input into this same Animate()/Render() pair.
+        // own dedicated RHI::CommandList. m_ImGuiCallback (wired to Application::OnImGui() by
+        // Application's constructor - see Renderer::SetImGuiCallback) builds the actual UI here,
+        // between Animate()'s ImGui::NewFrame() and Render()'s ImGui::Render() - the only window
+        // in the frame where ImGui::Begin()/End() calls are valid.
         float scaleX, scaleY;
         glfwGetWindowContentScale(m_Data.Window->GetGLFWHandle(), &scaleX, &scaleY);
         m_ImGuiRenderer->Animate(deltaTime, m_Surface->GetWidth(), m_Surface->GetHeight(), scaleX, scaleY);
-        ImGui::ShowDemoWindow();
+        if (m_ImGuiCallback)
+            m_ImGuiCallback(deltaTime);
         m_ImGuiRenderer->Render(framebuffer);
 
         m_Surface->Present();

@@ -1,4 +1,6 @@
 #pragma once
+#include <functional>
+
 #include <Zephyr/Modules/IModule.h>
 #include <Zephyr/RHI/Device.h>
 #include <Zephyr/RHI/Surface.h>
@@ -43,6 +45,14 @@ namespace Zephyr
 		Ref<Surface> GetSurface() const { return m_Surface; }
 		ShaderFactory* GetShaderFactory() const { return m_ShaderFactory.get(); }
 
+		// Invoked each frame between ImGuiRenderer::Animate() (ImGui::NewFrame()) and
+		// ImGuiRenderer::Render() (ImGui::Render()) - i.e. exactly where UI-building ImGui::Begin()/
+		// End() calls are valid. Application wires this to OnImGui() at construction; Application::
+		// Render() cannot call OnImGui() itself, since by the time m_ModuleManager.Render() (which
+		// runs this Renderer's Render()) returns, ImGui::Render() has already been called for the
+		// frame and further ImGui::Begin() calls would hit ImGui's "Forgot to call NewFrame()?" assert.
+		void SetImGuiCallback(std::function<void(float)> callback) { m_ImGuiCallback = std::move(callback); }
+
 	private:
 		RendererData m_Data = {};
 
@@ -51,6 +61,7 @@ namespace Zephyr
 		Scope<CommandList> m_CommandList;
 		Scope<ShaderFactory> m_ShaderFactory;
 		Scope<ImGuiRenderer> m_ImGuiRenderer;
+		std::function<void(float)> m_ImGuiCallback;
 
 		nvrhi::ShaderHandle m_VertexShader;
 		nvrhi::ShaderHandle m_PixelShader;

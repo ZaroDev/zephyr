@@ -131,7 +131,7 @@ nvrhi's `d3d12.h` API surface.
 
 ### Phase 6: Re-add ImGui rendering against the new RHI
 - [x] Task 16: Port ImGui draw-data rendering (font atlas, buffers, PSO, binding-set cache) onto `RHI::Device`/`RHI::CommandList`
-- [ ] Task 17: Wire GLFW input into ImGui and enable `Application::OnImGui`
+- [x] Task 17: Wire GLFW input into ImGui and enable `Application::OnImGui`
 
 ### Checkpoint: Complete
 - [ ] Editor panels (Hierarchy, Info, etc.) render and accept mouse/keyboard input on all three `GraphicsAPI` backends

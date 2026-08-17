@@ -70,7 +70,14 @@ namespace Zephyr
 			.Window = window,
 		};
 
-		m_ModuleManager.RegisterModule<Renderer>(renderData);
+		auto renderer = m_ModuleManager.RegisterModule<Renderer>(renderData);
+
+		// OnImGui() can't be called from Application::Render() below - by the time
+		// m_ModuleManager.Render() returns, this Renderer has already called ImGui::Render() for
+		// the frame, and further ImGui::Begin()/End() calls would hit ImGui's "Forgot to call
+		// NewFrame()?" assert. Renderer invokes this at the correct point instead (see
+		// Renderer::SetImGuiCallback).
+		renderer->SetImGuiCallback([this](float deltaTime) { OnImGui(deltaTime); });
 
 		OnInit();
 	}
@@ -143,7 +150,8 @@ namespace Zephyr
 	{
 		m_ModuleManager.Render(deltaTime);
 		OnRender(deltaTime);
-		//OnImGui(deltaTime);
+		// OnImGui(deltaTime) is invoked from within Renderer::Render() (called above via
+		// m_ModuleManager.Render()), not here - see the SetImGuiCallback wiring in the constructor.
 	}
 	
 	void Application::PostRenderer(float deltaTime)

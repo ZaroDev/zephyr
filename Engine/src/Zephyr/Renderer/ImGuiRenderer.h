@@ -6,6 +6,7 @@
 #include <Zephyr/RHI/CommandBuffer.h>
 #include <Zephyr/Renderer/ShaderFactory.h>
 
+struct GLFWwindow;
 namespace Zephyr
 {
 	class RegisteredFont
@@ -56,7 +57,11 @@ namespace Zephyr
 	class ImGuiRenderer
 	{
 	public:
-		ImGuiRenderer(const Ref<Device>& device, ShaderFactory& shaderFactory);
+		// windowHandle wires GLFW keyboard/mouse/scroll/focus input into ImGuiIO via the vendored
+		// imgui_impl_glfw backend (Engine/src/ImGui/imgui_impl_glfw.*), initialized for a custom
+		// renderer (ImGui_ImplGlfw_InitForOther) since this class - not imgui_impl_vulkan/opengl3 -
+		// owns actual rendering. See tasks/plan.md Task 17.
+		ImGuiRenderer(const Ref<Device>& device, ShaderFactory& shaderFactory, GLFWwindow* windowHandle);
 		~ImGuiRenderer();
 
 		Ref<RegisteredFont> CreateFontFromFile(IFileSystem& fs, const Path& fontFile, float fontSize);

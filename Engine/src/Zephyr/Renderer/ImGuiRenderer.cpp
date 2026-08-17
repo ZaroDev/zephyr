@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "ImGuiRenderer.h"
 
+#include <ImGui/imgui_impl_glfw.h>
+
 namespace Zephyr
 {
 	// ImTextureID is a 64-bit integer in this ImGui version (not a raw void* like older
@@ -14,10 +16,17 @@ namespace Zephyr
 		return reinterpret_cast<nvrhi::ITexture*>(static_cast<intptr_t>(id));
 	}
 
-	ImGuiRenderer::ImGuiRenderer(const Ref<Device>& device, ShaderFactory& shaderFactory)
+	ImGuiRenderer::ImGuiRenderer(const Ref<Device>& device, ShaderFactory& shaderFactory, GLFWwindow* windowHandle)
 		: m_Device(device)
 	{
 		ImGui::CreateContext();
+
+		// InitForOther (not InitForVulkan/InitForOpenGL): this class renders via nvrhi/RHI::Device
+		// itself, not the vendored imgui_impl_vulkan/opengl3 backends the Init*For* variants
+		// otherwise imply - install_callbacks=true registers GLFW's key/char/mouse/scroll/focus
+		// callbacks (chaining any pre-existing ones, e.g. Window's WindowCloseCallback, which use a
+		// different callback slot) and feeds them into ImGuiIO for us.
+		ImGui_ImplGlfw_InitForOther(windowHandle, true);
 
 		m_DefaultFont = CreateRef<RegisteredFont>(13.f);
 		m_Fonts.push_back(m_DefaultFont);
@@ -86,6 +95,11 @@ namespace Zephyr
 
 	ImGuiRenderer::~ImGuiRenderer()
 	{
+		// Must run before DestroyContext() (ImGui_ImplGlfw_Shutdown() touches ImGui::GetIO()/
+		// GetMainViewport()) and while the GLFW window is still valid (ModuleManager::Shutdown()
+		// runs Renderer::Shutdown(), which destroys this, before Window::Shutdown() - see the
+		// priority-reverse-order fix in ModuleManager::Shutdown()).
+		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 	}
 

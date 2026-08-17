@@ -15,14 +15,18 @@ namespace Zephyr
 
 	void ModuleManager::Shutdown()
 	{
-		for (auto [_, module] : m_Modules)
+		// Explicit Shutdown() calls must run in reverse-priority order (highest priority first),
+		// not m_Modules' unordered_map order - e.g. Renderer (priority 1) owns an ImGuiRenderer
+		// whose destruction path touches the GLFW window via imgui_impl_glfw, which must happen
+		// before Window (priority 0) calls glfwDestroyWindow()/glfwTerminate() in its own
+		// Shutdown(). SortModules() is re-run here in case Shutdown() is called before any Run()
+		// loop iteration has populated m_UpdateList.
+		SortModules();
+		for (auto it = m_UpdateList.rbegin(); it != m_UpdateList.rend(); ++it)
 		{
-			module->Shutdown();
+			(*it)->Shutdown();
 		}
-		for (auto [_, module] : m_Modules)
-		{
-			module.reset();
-		}
+		m_UpdateList.clear();
 		m_Modules.clear();
 	}
 
