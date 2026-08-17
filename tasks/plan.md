@@ -104,7 +104,7 @@ nvrhi's `d3d12.h` API surface.
 - [ ] Human review before starting D3D11/D3D12
 
 ### Phase 3: D3D11 vertical slice
-- [ ] Task 9: Port D3D11 device/adapter creation into `RHI::D3D11Device`
+- [x] Task 9: Port D3D11 device/adapter creation into `RHI::D3D11Device`
 - [ ] Task 10: Implement `RHI::D3D11Surface` (DXGI swapchain, render target, resize, present)
 - [ ] Task 11: Verify the same triangle renders via D3D11 (DXBC path)
 

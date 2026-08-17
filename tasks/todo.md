@@ -356,20 +356,33 @@ clear with clear+draw of the triangle.
 
 ## Phase 3: D3D11 vertical slice
 
-### Task 9: Port D3D11 device creation into RHI::D3D11Device
+### Task 9: Port D3D11 device creation into RHI::D3D11Device [DONE]
 **Description:** Port `D3D11DeviceManager::CreateInstanceInternal`/`CreateDevice` (DXGI factory,
 adapter enumeration/selection, `D3D11CreateDevice`, `nvrhi::d3d11::createDevice`) into a new
 `RHI::D3D11Device : Device`, mirroring the shape `VulkanDevice` now has (Task 4). Wire
 `Device::Create(GraphicsAPI::D3D11)` (Task 2's stub) to actually construct it.
 
+**Adaptation notes:**
+- Much simpler than the Vulkan port: single `nvrhi::DeviceHandle m_NvrhiDevice` member (no
+  separate raw/validated split like `VulkanDevice` needed — D3D11 presentation has no
+  Vulkan-style semaphore extension methods that bypass the validation wrapper), matching
+  `D3D11DeviceManager.h`'s own shape.
+- Adapter selection hardcoded to index 0 (first adapter) — `D3D11DeviceManager`'s
+  `AdapterIndex`-based selection wasn't carried over, same simplification `VulkanDevice` made
+  for its own adapter/queue selection (no exposed selection mechanism yet).
+- `CreateSurface()` is a stub (`return Ref<Surface>()`) pending Task 10, mirroring exactly how
+  `VulkanDevice::CreateSurface()` looked before Task 5.
+- `EnableDebugRuntime`/`EnableNvrhiValidationLayer` gated on `#ifdef DEBUG`, matching the pattern
+  established for `VulkanDevice`.
+
 **Acceptance criteria:**
-- [ ] `Device::Create(GraphicsAPI::D3D11)` returns a working `D3D11Device`
-- [ ] `nvrhi::d3d11::createDevice()` succeeds; `GetNvrhiDevice()` returns non-null
-- [ ] Adapter selection/logging mirrors `D3D11DeviceManager::GetAdapterName`
+- [x] `Device::Create(GraphicsAPI::D3D11)` returns a working `D3D11Device`
+- [x] `nvrhi::d3d11::createDevice()` succeeds; `GetNvrhiDevice()` returns non-null
+- [x] Adapter selection/logging mirrors `D3D11DeviceManager::GetAdapterName`
 
 **Verification:**
-- [ ] Build: `Engine` compiles and links `nvrhi::d3d11`/D3D11 SDK libs
-- [ ] Manual check: with `GraphicsAPI::D3D11` set in `Application.cpp`, launch Editor, confirm device-creation log output and no D3D11 debug-layer errors
+- [x] Build: full `Zephyr.sln` build (Debug|x64), links `nvrhi::d3d11`/D3D11 SDK libs, zero new warnings
+- [x] Manual check: temporarily set `GraphicsAPI::D3D11` in `Application.cpp` (reverted before commit - the permanent switch + full verification is Task 11's job), ran `Editor.exe`. Log: `"Created D3D11 Device: NVIDIA GeForce RTX 3070 Ti"`. Then, as expected (Task 10 not done yet), `Renderer::Initialize()` correctly fails at `CreateSurface()`'s stub and `ModuleManager` correctly asserts on the core-module failure — a clean, correctly-handled failure, not a crash, and exactly the signal that device creation itself succeeded
 
 **Dependencies:** Task 2 (Phase 1/2 not required — can start once Foundation checkpoint passes; sequenced after Phase 2 here only to keep review load manageable)
 
