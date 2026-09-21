@@ -20,6 +20,14 @@
 #define DEBUGBREAK()
 #endif
 
+#if DEBUG
+#define ZEPHYR_BUILD_NAME "Debug"
+#elif DEVELOPMENT
+#define ZEPHYR_BUILD_NAME "Development"
+#elif DIST
+#define ZEPHYR_BUILD_NAME "Dist"
+#endif
+
 #if _HAS_NODISCARD
 #define NODISCARD [[nodiscard]]
 #else // ^^^ CAN HAZ [[nodiscard]] / NO CAN HAZ [[nodiscard]] vvv

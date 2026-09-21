@@ -35,7 +35,7 @@ namespace Zephyr
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		
 
-		const String title = std::format("{0} <{1}>", m_WindowData.Title, GetGraphicsName(m_WindowData.API));
+		const String title = std::format("{0} <{1}> ({2})", m_WindowData.Title, GetGraphicsName(m_WindowData.API), ZEPHYR_BUILD_NAME);
 
 		m_Window = glfwCreateWindow(m_WindowData.Width, m_WindowData.Height, title.c_str(), nullptr, nullptr);
 		CORE_ASSERT(m_Window, "Failed to create GLFW window!");
